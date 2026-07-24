@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm \"D:/Work/ForeignTrade - 副本/specsense-website/app/plugins/auth-redirect.ts\")",
+      "Bash(mkdir -p \"D:/Work/ForeignTrade - 副本/specsense-website/app/middleware\")"
+    ]
+  }
+}

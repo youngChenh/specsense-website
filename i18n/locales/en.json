@@ -1,0 +1,351 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "applications": "Applications",
+    "services": "Services",
+    "news": "News",
+    "about": "About Us",
+    "contact": "Contact",
+    "brands": "Agency Brand"
+  },
+  "admin": {
+    "title": "SpeSense Admin",
+    "dashboard": "Dashboard",
+    "categories": "Categories",
+    "products": "Products",
+    "brands": "Agency Brands",
+    "brand": "Brand",
+    "addCategory": "Add Category",
+    "news": "News",
+    "applications": "Applications",
+    "services": "Services",
+    "downloads": "Downloads",
+    "company": "Company Info",
+    "inquiries": "Inquiries",
+    "logout": "Logout",
+    "login": "Admin Login",
+    "loginTitle": "Admin Login",
+    "username": "Username",
+    "password": "Password",
+    "loginBtn": "Login",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "actions": "Actions",
+    "nameEn": "Name (EN)",
+    "nameZh": "Name (ZH)",
+    "titleEn": "Title (EN)",
+    "titleZh": "Title (ZH)",
+    "descriptionEn": "Description (EN)",
+    "descriptionZh": "Description (ZH)",
+    "key": "Key",
+    "sortOrder": "Sort Order",
+    "type": "Type",
+    "typePlaceholder": "e.g. industrial, research, medical",
+    "slug": "Slug",
+    "category": "Category",
+    "selectCategories": "Select related categories",
+    "featured": "Featured",
+    "imageUrl": "Image URL",
+    "logoUrl": "Logo URL",
+    "websiteUrl": "Website",
+    "specs": "Specifications",
+    "specKey": "Parameter Name",
+    "specValue": "Parameter Value",
+    "addSpec": "Add Parameter",
+    "uploadImage": "Upload Image",
+    "uploadImageOnly": "Only image files are allowed",
+    "uploadImageSize": "Image size must be less than 10MB",
+    "uploadSuccess": "Upload successful",
+    "uploadFailed": "Upload failed",
+    "imageUrlPlaceholder": "Image URL or upload from local",
+    "content": "Content",
+    "publishedAt": "Published Date",
+    "author": "Author",
+    "fileUrl": "File URL",
+    "fileUrlPlaceholder": "File URL or upload from server",
+    "fileSize": "File Size",
+    "uploadFile": "Upload File",
+    "currentFile": "Current File",
+    "downloadFile": "File",
+    "linkedCategories": "Linked Categories",
+    "missionEn": "Mission (EN)",
+    "missionZh": "Mission (ZH)",
+    "values": "Values JSON",
+    "timeline": "Timeline JSON",
+    "stats": "Stats JSON",
+    "message": "Message",
+    "date": "Date",
+    "yes": "Yes",
+    "no": "No",
+    "success": "Success",
+    "error": "Error",
+    "loginSuccess": "Login successful",
+    "loginFailed": "Login failed",
+    "saveSuccess": "Saved successfully",
+    "saveFailed": "Save failed",
+    "deleteSuccess": "Deleted successfully",
+    "deleteFailed": "Delete failed",
+    "fetchFailed": "Failed to fetch",
+    "pleaseEnter": "Please enter",
+    "pleaseSelect": "Please select",
+    "confirmDelete": "Are you sure to delete this item?"
+  },
+  "home": {
+    "hero": {
+      "title": "Precision Photoelectric Instruments",
+      "subtitle": "SpeSense Technologies provides professional solutions for scientific research, industrial inspection, and medical diagnostics.",
+      "cta": "Explore Products"
+    },
+    "features": {
+      "title": "Why Choose SpeSense",
+      "precision": {
+        "title": "High Precision",
+        "desc": "Sub-micron level accuracy for demanding applications"
+      },
+      "reliability": {
+        "title": "Reliability",
+        "desc": "Rugged design for industrial environments"
+      },
+      "support": {
+        "title": "Global Support",
+        "desc": "Technical support worldwide"
+      }
+    },
+    "products": {
+      "title": "Our Products",
+      "featured": "Featured Products",
+      "viewAll": "View All Products"
+    },
+    "about": {
+      "title": "About SpeSense",
+      "desc": "SpeSense Technologies Inc. is a leading manufacturer of photoelectric instruments, serving customers in over 50 countries.",
+      "learnMore": "Learn More"
+    },
+    "applicationsPreview": {
+      "title": "Application Areas",
+      "desc": "Our instruments are widely used in various industries"
+    },
+    "newsPreview": {
+      "title": "Latest News",
+      "viewAll": "View All News"
+    },
+    "cta": {
+      "title": "Ready to get started?",
+      "desc": "Contact us today for a personalized quote or technical consultation.",
+      "button": "Contact Us"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "subtitle": "Explore our comprehensive range of photoelectric instruments",
+    "allProducts": "All Products",
+    "categories": {
+      "spectrometer": "Spectrometers",
+      "analyzer": "Analyzers",
+      "sensor": "Sensors",
+      "lightsource": "Light Sources",
+      "accessory": "Accessories"
+    },
+    "subcategories": {
+      "spectrometer": {
+        "title": "Spectrometers",
+        "uv": "UV-Visible Spectrometers",
+        "nir": "NIR Spectrometers",
+        "raman": "Raman Spectrometers",
+        "mini": "Miniature Spectrometers"
+      },
+      "analyzer": {
+        "title": "Analyzers",
+        "photoelectric": "Photoelectric Analyzers",
+        "photometer": "Photometers",
+        "color": "Color Analyzers"
+      },
+      "sensor": {
+        "title": "Sensors",
+        "fiber": "Fiber Optic Sensors",
+        "photoelectric": "Photoelectric Sensors",
+        "displacement": "Displacement Sensors"
+      },
+      "lightsource": {
+        "title": "Light Sources",
+        "laser": "Lasers",
+        "led": "LED Light Sources",
+        "halogen": "Halogen Light Sources"
+      },
+      "accessory": {
+        "title": "Accessories",
+        "fiberProbe": "Fiber Optic Probes",
+        "holder": "Holders & Mounts",
+        "coupler": "Couplers"
+      }
+    },
+    "inquiry": "Send Inquiry",
+    "specifications": "Specifications",
+    "download": "Download Datasheet",
+    "downloadPdf": "Download PDF",
+    "featuredProducts": "Featured Products",
+    "filterBy": "Filter by category"
+  },
+  "applications": {
+    "title": "Application Areas",
+    "subtitle": "Our photoelectric instruments are widely used across various industries",
+    "industrial": {
+      "title": "Industrial Inspection",
+      "desc": "Quality control and process monitoring in manufacturing"
+    },
+    "research": {
+      "title": "Scientific Research",
+      "desc": "Laboratory analysis and research applications"
+    },
+    "medical": {
+      "title": "Medical Diagnostics",
+      "desc": "Healthcare and biomedical analysis equipment"
+    },
+    "environment": {
+      "title": "Environmental Monitoring",
+      "desc": "Pollution detection and environmental assessment"
+    },
+    "agriculture": {
+      "title": "Agriculture",
+      "desc": "Crop quality assessment and soil analysis"
+    },
+    "food": {
+      "title": "Food & Beverage",
+      "desc": "Quality control in food processing and safety testing"
+    }
+  },
+  "services": {
+    "title": "Services & Support",
+    "subtitle": "We provide comprehensive technical support and after-sales service",
+    "technical": {
+      "title": "Technical Support",
+      "desc": "Professional technical consultation and application support",
+      "details": "Our team of experienced engineers provides detailed product selection guidance, application consultation, and technical training to help you maximize the performance of our instruments."
+    },
+    "afterSales": {
+      "title": "After-Sales Service",
+      "desc": "Warranty, repair and maintenance services",
+      "details": "All products come with a comprehensive warranty period. We offer rapid repair services, regular maintenance, and calibration to ensure your instruments maintain optimal performance."
+    },
+    "downloads": {
+      "title": "Downloads Center",
+      "desc": "Product manuals, software and datasheets",
+      "all": "All Files",
+      "manuals": "Product Manuals",
+      "software": "Software & Drivers",
+      "datasheets": "Datasheets",
+      "catalogs": "Product Catalogs",
+      "fileName": "File Name",
+      "description": "Description",
+      "fileSize": "Size",
+      "download": "Download"
+    },
+    "training": {
+      "title": "Training",
+      "desc": "Product training and technical workshops",
+      "details": "We offer regular online and offline training sessions to help users master the operation and maintenance of our products."
+    }
+  },
+  "brands": {
+    "title": "Agency Brands",
+    "subtitle": "Explore our partner brands and manufacturers",
+    "categories": "Categories",
+    "allBrands": "All Brands",
+    "filterBy": "Filter by category",
+    "noBrands": "No brands found in this category"
+  },
+  "news": {
+    "title": "News",
+    "subtitle": "Stay updated with the latest company news and industry trends",
+    "company": "Company News",
+    "industry": "Industry Trends",
+    "technology": "Technology Articles",
+    "readMore": "Read More",
+    "publishedOn": "Published on",
+    "backToList": "Back to News"
+  },
+  "about": {
+    "title": "About Us",
+    "company": {
+      "title": "Our Company",
+      "desc": "SpeSense Technologies Inc. is a high-tech enterprise specializing in the research, development, and manufacturing of photoelectric instruments and sensors."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "desc": "To provide scientists and engineers worldwide with reliable, high-precision photoelectric measurement solutions."
+    },
+    "values": {
+      "title": "Our Values",
+      "innovation": "Innovation",
+      "quality": "Quality",
+      "integrity": "Integrity"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address"
+    },
+    "qualifications": {
+      "title": "Qualifications",
+      "desc": "ISO 9001 certified manufacturer"
+    },
+    "partners": {
+      "title": "Partners",
+      "desc": "Long-term partnerships with leading research institutions"
+    },
+    "timeline": {
+      "title": "Our History",
+      "year2008": "Founded in Shenzhen",
+      "year2012": "First export to Europe",
+      "year2016": "ISO 9001 certification",
+      "year2020": "Global service network established",
+      "year2024": "100+ countries served"
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Have questions or need a quote? Fill out the form below and we'll respond within 24 hours.",
+    "form": {
+      "name": "Your Name",
+      "email": "Email Address",
+      "company": "Company",
+      "product": "Product of Interest",
+      "message": "Your Message",
+      "submit": "Send Inquiry",
+      "sending": "Sending...",
+      "success": "Thank you! We'll be in touch soon.",
+      "error": "Something went wrong. Please try again."
+    },
+    "info": {
+      "title": "Contact Information",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address"
+    }
+  },
+  "footer": {
+    "copyright": "© 2026 SpeSense Technologies Inc. All rights reserved.",
+    "links": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    },
+    "products": "Products",
+    "applications": "Applications",
+    "services": "Services",
+    "about": "About Us",
+    "news": "News"
+  },
+  "common": {
+    "learnMore": "Learn More",
+    "viewAll": "View All",
+    "contactNow": "Contact Now",
+    "download": "Download",
+    "inquiry": "Send Inquiry",
+    "backToTop": "Back to Top"
+  }
+}

@@ -1,0 +1,351 @@
+{
+  "nav": {
+    "home": "首页",
+    "products": "产品中心",
+    "applications": "应用领域",
+    "services": "服务与支持",
+    "news": "新闻资讯",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "brands": "代理品牌"
+  },
+  "admin": {
+    "title": "思谱管理后台",
+    "dashboard": "仪表盘",
+    "categories": "分类管理",
+    "products": "产品管理",
+    "brands": "代理品牌",
+    "brand": "品牌",
+    "addCategory": "添加分类",
+    "news": "新闻管理",
+    "applications": "应用管理",
+    "services": "服务管理",
+    "downloads": "下载管理",
+    "company": "公司信息",
+    "inquiries": "询盘管理",
+    "logout": "退出登录",
+    "login": "管理员登录",
+    "loginTitle": "管理员登录",
+    "username": "用户名",
+    "password": "密码",
+    "loginBtn": "登录",
+    "add": "添加",
+    "edit": "编辑",
+    "delete": "删除",
+    "save": "保存",
+    "cancel": "取消",
+    "actions": "操作",
+    "nameEn": "名称（英文）",
+    "nameZh": "名称（中文）",
+    "titleEn": "标题（英文）",
+    "titleZh": "标题（中文）",
+    "descriptionEn": "描述（英文）",
+    "descriptionZh": "描述（中文）",
+    "key": "标识",
+    "sortOrder": "排序",
+    "type": "类型",
+    "typePlaceholder": "如：industrial, research, medical",
+    "slug": "别名",
+    "category": "分类",
+    "selectCategories": "选择关联的分类",
+    "featured": "精选",
+    "imageUrl": "图片地址",
+    "logoUrl": "Logo地址",
+    "websiteUrl": "官网地址",
+    "specs": "规格参数",
+    "specKey": "参数名称",
+    "specValue": "参数值",
+    "addSpec": "添加参数",
+    "uploadImage": "上传图片",
+    "uploadImageOnly": "只能上传图片文件",
+    "uploadImageSize": "图片大小不能超过10MB",
+    "uploadSuccess": "上传成功",
+    "uploadFailed": "上传失败",
+    "imageUrlPlaceholder": "图片URL或本地上传",
+    "content": "内容",
+    "publishedAt": "发布日期",
+    "author": "作者",
+    "fileUrl": "文件地址",
+    "fileUrlPlaceholder": "文件URL或从服务器上传",
+    "fileSize": "文件大小",
+    "uploadFile": "上传文件",
+    "currentFile": "当前文件",
+    "downloadFile": "文件",
+    "linkedCategories": "关联分类",
+    "missionEn": "使命（英文）",
+    "missionZh": "使命（中文）",
+    "values": "价值观 JSON",
+    "timeline": "时间线 JSON",
+    "stats": "统计数据 JSON",
+    "message": "留言",
+    "date": "日期",
+    "yes": "是",
+    "no": "否",
+    "success": "成功",
+    "error": "错误",
+    "loginSuccess": "登录成功",
+    "loginFailed": "登录失败",
+    "saveSuccess": "保存成功",
+    "saveFailed": "保存失败",
+    "deleteSuccess": "删除成功",
+    "deleteFailed": "删除失败",
+    "fetchFailed": "获取数据失败",
+    "pleaseEnter": "请输入",
+    "pleaseSelect": "请选择",
+    "confirmDelete": "确定要删除此项吗？"
+  },
+  "home": {
+    "hero": {
+      "title": "精密光电仪器",
+      "subtitle": "思谱传感科技为科学研究、工业检测和医疗诊断提供专业解决方案。",
+      "cta": "浏览产品"
+    },
+    "features": {
+      "title": "为什么选择思谱",
+      "precision": {
+        "title": "高精度",
+        "desc": "亚微米级精度，满足高精度应用需求"
+      },
+      "reliability": {
+        "title": "可靠性",
+        "desc": "坚固耐用，适用于工业环境"
+      },
+      "support": {
+        "title": "全球支持",
+        "desc": "提供全球技术支持和售后服务"
+      }
+    },
+    "products": {
+      "title": "我们的产品",
+      "featured": "精选产品",
+      "viewAll": "查看全部产品"
+    },
+    "about": {
+      "title": "关于思谱",
+      "desc": "思谱传感科技有限公司是全球领先的光电仪器制造商，产品远销50多个国家和地区。",
+      "learnMore": "了解更多"
+    },
+    "applicationsPreview": {
+      "title": "应用领域",
+      "desc": "我们的仪器广泛应用于各个行业"
+    },
+    "newsPreview": {
+      "title": "最新资讯",
+      "viewAll": "查看全部"
+    },
+    "cta": {
+      "title": "准备开始了吗？",
+      "desc": "立即联系我们，获取个性化报价或技术咨询。",
+      "button": "联系我们"
+    }
+  },
+  "products": {
+    "title": "产品中心",
+    "subtitle": "浏览我们全面的光电仪器产品系列",
+    "allProducts": "全部产品",
+    "categories": {
+      "spectrometer": "光谱仪",
+      "analyzer": "分析仪",
+      "sensor": "传感器",
+      "lightsource": "光源",
+      "accessory": "配件"
+    },
+    "subcategories": {
+      "spectrometer": {
+        "title": "光谱仪",
+        "uv": "紫外可见光谱仪",
+        "nir": "近红外光谱仪",
+        "raman": "拉曼光谱仪",
+        "mini": "微型光谱仪"
+      },
+      "analyzer": {
+        "title": "分析仪",
+        "photoelectric": "光电分析仪",
+        "photometer": "光度计",
+        "color": "颜色分析仪"
+      },
+      "sensor": {
+        "title": "传感器",
+        "fiber": "光纤传感器",
+        "photoelectric": "光电传感器",
+        "displacement": "位移传感器"
+      },
+      "lightsource": {
+        "title": "光源",
+        "laser": "激光器",
+        "led": "LED光源",
+        "halogen": "卤灯光源"
+      },
+      "accessory": {
+        "title": "配件",
+        "fiberProbe": "光纤探头",
+        "holder": "支架",
+        "coupler": "耦合器"
+      }
+    },
+    "inquiry": "发送询价",
+    "specifications": "规格参数",
+    "download": "下载规格书",
+    "downloadPdf": "下载PDF",
+    "featuredProducts": "精选产品",
+    "filterBy": "按分类筛选"
+  },
+  "applications": {
+    "title": "应用领域",
+    "subtitle": "我们的光电仪器广泛应用于各个行业",
+    "industrial": {
+      "title": "工业检测",
+      "desc": "制造业质量控制和过程监控"
+    },
+    "research": {
+      "title": "科学研究",
+      "desc": "实验室分析和研究应用"
+    },
+    "medical": {
+      "title": "医疗诊断",
+      "desc": "医疗和生物医学分析设备"
+    },
+    "environment": {
+      "title": "环境监测",
+      "desc": "污染检测和环境评估"
+    },
+    "agriculture": {
+      "title": "农业",
+      "desc": "作物质量评估和土壤分析"
+    },
+    "food": {
+      "title": "食品饮料",
+      "desc": "食品加工质量控制和安全性检测"
+    }
+  },
+  "brands": {
+    "title": "代理品牌",
+    "subtitle": "浏览我们的合作品牌和制造商",
+    "categories": "品牌分类",
+    "allBrands": "全部品牌",
+    "filterBy": "按分类筛选",
+    "noBrands": "该分类下暂无品牌"
+  },
+  "services": {
+    "title": "服务与支持",
+    "subtitle": "我们提供全面的技术支持和售后服务",
+    "technical": {
+      "title": "技术支持",
+      "desc": "专业技术咨询和应用支持",
+      "details": "我们经验丰富的工程师团队提供详细的产品选型指导、应用咨询和技术培训，帮助您充分发挥仪器性能。"
+    },
+    "afterSales": {
+      "title": "售后服务",
+      "desc": "保修、维修和维护服务",
+      "details": "所有产品均提供全面的保修期。我们提供快速维修服务、定期维护和校准，确保您的仪器保持最佳性能。"
+    },
+    "downloads": {
+      "title": "下载中心",
+      "desc": "产品手册、软件和规格书",
+      "all": "全部文件",
+      "manuals": "产品手册",
+      "software": "软件和驱动",
+      "datasheets": "规格书",
+      "catalogs": "产品目录",
+      "fileName": "文件名",
+      "description": "描述",
+      "fileSize": "大小",
+      "download": "下载"
+    },
+    "training": {
+      "title": "培训服务",
+      "desc": "产品培训和技术研讨会",
+      "details": "我们提供定期的线上和线下培训课程，帮助用户掌握产品的操作和维护。"
+    }
+  },
+  "news": {
+    "title": "新闻资讯",
+    "subtitle": "了解公司最新动态和行业趋势",
+    "company": "公司新闻",
+    "industry": "行业动态",
+    "technology": "技术文章",
+    "readMore": "阅读更多",
+    "publishedOn": "发布时间",
+    "backToList": "返回列表"
+  },
+  "about": {
+    "title": "关于我们",
+    "company": {
+      "title": "公司介绍",
+      "desc": "思谱传感科技有限公司（SpeSense Technologies Inc.）是一家专业从事光电仪器和传感器研发、生产的高新技术企业。"
+    },
+    "mission": {
+      "title": "企业使命",
+      "desc": "为全球科学家和工程师提供可靠、高精度的光电测量解决方案。"
+    },
+    "values": {
+      "title": "核心价值观",
+      "innovation": "创新",
+      "quality": "品质",
+      "integrity": "诚信"
+    },
+    "contact": {
+      "title": "联系我们",
+      "email": "电子邮箱",
+      "phone": "联系电话",
+      "address": "公司地址"
+    },
+    "qualifications": {
+      "title": "企业资质",
+      "desc": "ISO 9001认证制造商"
+    },
+    "partners": {
+      "title": "合作伙伴",
+      "desc": "与领先研究机构的长期合作关系"
+    },
+    "timeline": {
+      "title": "发展历程",
+      "year2008": "在深圳成立",
+      "year2012": "首次出口欧洲",
+      "year2016": "ISO 9001认证",
+      "year2020": "全球服务网络建立",
+      "year2024": "服务超过100个国家"
+    }
+  },
+  "contact": {
+    "title": "联系我们",
+    "subtitle": "有问题或需要报价？填写下方表单，我们将在24小时内回复。",
+    "form": {
+      "name": "您的姓名",
+      "email": "电子邮箱",
+      "company": "公司名称",
+      "product": "感兴趣的产品",
+      "message": "您的留言",
+      "submit": "发送询价",
+      "sending": "发送中...",
+      "success": "感谢您的留言！我们将尽快与您联系。",
+      "error": "发送失败，请重试。"
+    },
+    "info": {
+      "title": "联系方式",
+      "email": "电子邮箱",
+      "phone": "联系电话",
+      "address": "公司地址"
+    }
+  },
+  "footer": {
+    "copyright": "© 2026 思谱传感科技有限公司 版权所有。",
+    "links": {
+      "privacy": "隐私政策",
+      "terms": "服务条款"
+    },
+    "products": "产品中心",
+    "applications": "应用领域",
+    "services": "服务支持",
+    "about": "关于我们",
+    "news": "新闻资讯"
+  },
+  "common": {
+    "learnMore": "了解更多",
+    "viewAll": "查看全部",
+    "contactNow": "立即咨询",
+    "download": "下载",
+    "inquiry": "发送询价",
+    "backToTop": "返回顶部"
+  }
+}
