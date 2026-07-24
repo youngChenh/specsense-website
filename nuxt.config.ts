@@ -57,15 +57,11 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    proxy: {
-      '/specsense': {
-        target: 'http://127.0.0.1:8080/specsense',
-        changeOrigin: true,
-      },
-    },
+    preset: 'static',
     prerender: {
       failOnError: false,
       ignore: ['/terms', '/privacy'],
+      routes: ['/', '/en', '/zh'],
     },
   },
 })
