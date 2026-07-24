@@ -2,10 +2,12 @@ package com.specsense.service.impl;
 
 import com.specsense.mapper.DownloadMapper;
 import com.specsense.model.entity.Download;
+import com.specsense.service.CacheService;
 import com.specsense.service.DownloadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -14,12 +16,23 @@ public class DownloadServiceImpl implements DownloadService {
     @Autowired
     private DownloadMapper downloadMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     @Override
     public List<Download> getAll(String category, String locale) {
+        String key = CacheService.keyDownloads(locale + ":" + category);
+        @SuppressWarnings("unchecked")
+        List<Download> cached = cacheService.get(key, (Class<List<Download>>) (Class<?>) ArrayList.class);
+        if (cached != null) {
+            return cached;
+        }
+
         List<Download> downloads = downloadMapper.findAll(category);
         for (Download download : downloads) {
             convertToLocale(download, locale);
         }
+        cacheService.set(key, downloads);
         return downloads;
     }
 
@@ -30,17 +43,29 @@ public class DownloadServiceImpl implements DownloadService {
 
     @Override
     public boolean save(Download download) {
-        return downloadMapper.insert(download) > 0;
+        boolean result = downloadMapper.insert(download) > 0;
+        if (result) {
+            cacheService.deleteByPattern("downloads:*");
+        }
+        return result;
     }
 
     @Override
     public boolean update(Download download) {
-        return downloadMapper.update(download) > 0;
+        boolean result = downloadMapper.update(download) > 0;
+        if (result) {
+            cacheService.deleteByPattern("downloads:*");
+        }
+        return result;
     }
 
     @Override
     public boolean deleteById(Long id) {
-        return downloadMapper.deleteById(id) > 0;
+        boolean result = downloadMapper.deleteById(id) > 0;
+        if (result) {
+            cacheService.deleteByPattern("downloads:*");
+        }
+        return result;
     }
 
     private void convertToLocale(Download download, String locale) {

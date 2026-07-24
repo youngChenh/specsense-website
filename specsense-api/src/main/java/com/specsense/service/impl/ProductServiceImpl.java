@@ -6,6 +6,7 @@ import com.specsense.mapper.ProductMapper;
 import com.specsense.model.entity.Product;
 import com.specsense.model.dto.ProductDTO;
 import com.specsense.model.vo.PageResult;
+import com.specsense.service.CacheService;
 import com.specsense.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,8 +24,27 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     @Override
     public PageResult<List<ProductDTO>> getList(Long categoryId, String categoryKey, Boolean featured, int page, int pageSize, String locale) {
+        // 只缓存数据列表，不缓存PageResult以避免泛型反序列化问题
+        String listKey = String.format("products:list:%d:%s:%s:%d:%d:%s",
+            categoryId != null ? categoryId : 0,
+            categoryKey != null ? categoryKey : "all",
+            featured != null ? featured : "any",
+            page, pageSize, locale);
+        String totalKey = listKey + ":total";
+
+        @SuppressWarnings("unchecked")
+        List<ProductDTO> cachedList = cacheService.get(listKey, (Class<List<ProductDTO>>) (Class<?>) ArrayList.class);
+        Integer cachedTotal = cacheService.get(totalKey, Integer.class);
+
+        if (cachedList != null && cachedTotal != null) {
+            return new PageResult<>(cachedTotal.longValue(), page, pageSize, cachedList);
+        }
+
         int offset = (page - 1) * pageSize;
         long total = productMapper.count(categoryId, categoryKey, featured);
         List<Product> products = productMapper.findList(categoryId, categoryKey, featured, offset, pageSize);
@@ -34,6 +54,8 @@ public class ProductServiceImpl implements ProductService {
             dtos.add(convertToDTO(product, locale));
         }
 
+        cacheService.set(listKey, dtos);
+        cacheService.set(totalKey, total);
         return new PageResult<>(total, page, pageSize, dtos);
     }
 
@@ -48,29 +70,54 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getById(Long id) {
-        return productMapper.findById(id);
+        Product cached = cacheService.get(CacheService.keyProduct(id), Product.class);
+        if (cached != null) {
+            return cached;
+        }
+        Product product = productMapper.findById(id);
+        if (product != null) {
+            cacheService.set(CacheService.keyProduct(id), product);
+        }
+        return product;
     }
 
     @Override
     public List<ProductDTO> getFeatured(int limit, String locale) {
+        String key = CacheService.keyProductFeatured(locale);
+        @SuppressWarnings("unchecked")
+        List<ProductDTO> cached = cacheService.get(key, (Class<List<ProductDTO>>) (Class<?>) ArrayList.class);
+        if (cached != null) {
+            return cached;
+        }
+
         List<Product> products = productMapper.findFeatured(limit);
         List<ProductDTO> dtos = new ArrayList<>();
         for (Product product : products) {
             dtos.add(convertToDTO(product, locale));
         }
+        cacheService.set(key, dtos);
         return dtos;
     }
 
     @Override
     public boolean save(Product product) {
         normalizeSpecsJson(product);
-        return productMapper.insert(product) > 0;
+        boolean result = productMapper.insert(product) > 0;
+        if (result) {
+            clearProductCache(product.getCategoryId());
+        }
+        return result;
     }
 
     @Override
     public boolean update(Product product) {
         normalizeSpecsJson(product);
-        return productMapper.update(product) > 0;
+        boolean result = productMapper.update(product) > 0;
+        if (result) {
+            cacheService.delete(CacheService.keyProduct(product.getId()));
+            clearProductCache(product.getCategoryId());
+        }
+        return result;
     }
 
     private void normalizeSpecsJson(Product product) {
@@ -87,7 +134,18 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public boolean deleteById(Long id) {
-        return productMapper.deleteById(id) > 0;
+        Product product = productMapper.findById(id);
+        boolean result = productMapper.deleteById(id) > 0;
+        if (result && product != null) {
+            cacheService.delete(CacheService.keyProduct(id));
+            clearProductCache(product.getCategoryId());
+        }
+        return result;
+    }
+
+    private void clearProductCache(Long categoryId) {
+        cacheService.deleteByPattern("products:*");
+        cacheService.deleteByPattern("categories*");
     }
 
     private ProductDTO convertToDTO(Product product, String locale) {

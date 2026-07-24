@@ -3,9 +3,11 @@ package com.specsense.service.impl;
 import com.specsense.mapper.ServiceMapper;
 import com.specsense.model.entity.ServiceEntity;
 import com.specsense.service.ServiceService;
+import com.specsense.service.CacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -14,12 +16,22 @@ public class ServiceServiceImpl implements ServiceService {
     @Autowired
     private ServiceMapper serviceMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     @Override
     public List<ServiceEntity> getAll(String locale) {
+        String key = CacheService.keyServices(locale);
+        @SuppressWarnings("unchecked")
+        List<ServiceEntity> cached = cacheService.get(key, (Class<List<ServiceEntity>>) (Class<?>) ArrayList.class);
+        if (cached != null) {
+            return cached;
+        }
         List<ServiceEntity> services = serviceMapper.findAll();
         for (ServiceEntity service : services) {
             convertToLocale(service, locale);
         }
+        cacheService.set(key, services);
         return services;
     }
 
@@ -30,17 +42,29 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Override
     public boolean save(ServiceEntity service) {
-        return serviceMapper.insert(service) > 0;
+        boolean result = serviceMapper.insert(service) > 0;
+        if (result) {
+            cacheService.deleteByPattern("services:*");
+        }
+        return result;
     }
 
     @Override
     public boolean update(ServiceEntity service) {
-        return serviceMapper.update(service) > 0;
+        boolean result = serviceMapper.update(service) > 0;
+        if (result) {
+            cacheService.deleteByPattern("services:*");
+        }
+        return result;
     }
 
     @Override
     public boolean deleteById(Long id) {
-        return serviceMapper.deleteById(id) > 0;
+        boolean result = serviceMapper.deleteById(id) > 0;
+        if (result) {
+            cacheService.deleteByPattern("services:*");
+        }
+        return result;
     }
 
     private void convertToLocale(ServiceEntity service, String locale) {

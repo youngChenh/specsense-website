@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.specsense.mapper.CategoryMapper;
 import com.specsense.model.entity.Category;
 import com.specsense.model.dto.CategoryDTO;
+import com.specsense.service.CacheService;
 import com.specsense.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,18 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     @Override
     public List<CategoryDTO> getCategoryTree(String locale) {
+        String key = "categories:tree:" + locale;
+        @SuppressWarnings("unchecked")
+        List<CategoryDTO> cached = cacheService.get(key, (Class<List<CategoryDTO>>) (Class<?>) ArrayList.class);
+        if (cached != null) {
+            return cached;
+        }
+
         List<Category> rootCategories = categoryMapper.findRootCategories();
         List<CategoryDTO> result = new ArrayList<>();
 
@@ -34,6 +45,7 @@ public class CategoryServiceImpl implements CategoryService {
             result.add(dto);
         }
 
+        cacheService.set(key, result);
         return result;
     }
 
@@ -85,12 +97,20 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public boolean save(Category category) {
-        return categoryMapper.insert(category) > 0;
+        boolean result = categoryMapper.insert(category) > 0;
+        if (result) {
+            cacheService.deleteByPattern("categories:*");
+        }
+        return result;
     }
 
     @Override
     public boolean update(Category category) {
-        return categoryMapper.update(category) > 0;
+        boolean result = categoryMapper.update(category) > 0;
+        if (result) {
+            cacheService.deleteByPattern("categories:*");
+        }
+        return result;
     }
 
     @Override
@@ -98,6 +118,10 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryMapper.countByParentId(id) > 0) {
             throw new RuntimeException("Cannot delete category with children");
         }
-        return categoryMapper.deleteById(id) > 0;
+        boolean result = categoryMapper.deleteById(id) > 0;
+        if (result) {
+            cacheService.deleteByPattern("categories:*");
+        }
+        return result;
     }
 }

@@ -7,6 +7,7 @@ import com.specsense.model.entity.BrandCategory;
 import com.specsense.model.dto.BrandDTO;
 import com.specsense.model.vo.PageResult;
 import com.specsense.service.BrandService;
+import com.specsense.service.CacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +23,27 @@ public class BrandServiceImpl implements BrandService {
     @Autowired
     private BrandCategoryMapper brandCategoryMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     @Override
     public PageResult<List<BrandDTO>> getList(Long categoryId, String categoryKey, Boolean featured,
                                                int page, int pageSize, String locale) {
+        String listKey = String.format("brands:list:%d:%s:%s:%d:%d:%s",
+            categoryId != null ? categoryId : 0,
+            categoryKey != null ? categoryKey : "all",
+            featured != null ? featured : "any",
+            page, pageSize, locale);
+        String totalKey = listKey + ":total";
+
+        @SuppressWarnings("unchecked")
+        List<BrandDTO> cachedList = cacheService.get(listKey, (Class<List<BrandDTO>>) (Class<?>) ArrayList.class);
+        Integer cachedTotal = cacheService.get(totalKey, Integer.class);
+
+        if (cachedList != null && cachedTotal != null) {
+                return new PageResult<>(cachedTotal.longValue(), page, pageSize, cachedList);
+        }
+
         int offset = (page - 1) * pageSize;
         long total = brandMapper.count(categoryId, categoryKey, featured);
         List<Brand> brands = brandMapper.findList(categoryId, categoryKey, featured, offset, pageSize);
@@ -34,6 +53,8 @@ public class BrandServiceImpl implements BrandService {
             dtos.add(convertToDTO(brand, locale));
         }
 
+        cacheService.set(listKey, dtos);
+        cacheService.set(totalKey, total);
         return new PageResult<>(total, page, pageSize, dtos);
     }
 
@@ -48,21 +69,35 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public List<BrandDTO> getFeatured(int limit, String locale) {
+        String key = "brands:featured:" + locale;
+        @SuppressWarnings("unchecked")
+        List<BrandDTO> cached = cacheService.get(key, (Class<List<BrandDTO>>) (Class<?>) ArrayList.class);
+        if (cached != null) {
+            return cached;
+        }
         List<Brand> brands = brandMapper.findFeatured(limit);
         List<BrandDTO> dtos = new ArrayList<>();
         for (Brand brand : brands) {
             dtos.add(convertToDTO(brand, locale));
         }
+        cacheService.set(key, dtos);
         return dtos;
     }
 
     @Override
     public List<BrandDTO> getAll(String locale) {
+        String key = CacheService.keyBrands(locale);
+        @SuppressWarnings("unchecked")
+        List<BrandDTO> cached = cacheService.get(key, (Class<List<BrandDTO>>) (Class<?>) ArrayList.class);
+        if (cached != null) {
+            return cached;
+        }
         List<Brand> brands = brandMapper.findAll();
         List<BrandDTO> dtos = new ArrayList<>();
         for (Brand brand : brands) {
             dtos.add(convertToDTO(brand, locale));
         }
+        cacheService.set(key, dtos);
         return dtos;
     }
 
@@ -73,17 +108,29 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public boolean save(Brand brand) {
-        return brandMapper.insert(brand) > 0;
+        boolean result = brandMapper.insert(brand) > 0;
+        if (result) {
+            cacheService.deleteByPattern("brands:*");
+        }
+        return result;
     }
 
     @Override
     public boolean update(Brand brand) {
-        return brandMapper.update(brand) > 0;
+        boolean result = brandMapper.update(brand) > 0;
+        if (result) {
+            cacheService.deleteByPattern("brands:*");
+        }
+        return result;
     }
 
     @Override
     public boolean deleteById(Long id) {
-        return brandMapper.deleteById(id) > 0;
+        boolean result = brandMapper.deleteById(id) > 0;
+        if (result) {
+            cacheService.deleteByPattern("brands:*");
+        }
+        return result;
     }
 
     private BrandDTO convertToDTO(Brand brand, String locale) {

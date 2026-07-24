@@ -19,6 +19,11 @@ spring:
     url: jdbc:mysql://43.159.58.248/youthful_db?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: youthful
     password: Youthful@123456
+  redis:
+    host: 43.159.58.248
+    port: 6379
+    password: redisYouthful123
+    timeout: 5000
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai

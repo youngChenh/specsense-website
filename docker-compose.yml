@@ -1,19 +1,30 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: specsense-mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: specsense_db
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./database/specsense_db.sql:/docker-entrypoint-initdb.d/init.sql
-    command: --default-authentication-plugin=mysql_native_password
+  # MySQL和Redis服务 - 本地开发用，服务器使用外部服务
+  # mysql:
+  #   image: mysql:8.0
+  #   container_name: specsense-mysql
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: specsense_db
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #     - ./database/specsense_db.sql:/docker-entrypoint-initdb.d/init.sql
+  #   command: --default-authentication-plugin=mysql_native_password
+
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: specsense-redis
+  #   restart: always
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   command: redis-server --appendonly yes --requirepass redisYouthful123
 
   api:
     build:
@@ -22,13 +33,14 @@ services:
     container_name: specsense-api
     restart: always
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/specsense_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_URL: jdbc:mysql://43.159.58.248/youthful_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: youthful
+      SPRING_DATASOURCE_PASSWORD: Youthful@123456
+      SPRING_REDIS_HOST: 43.159.58.248
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: redisYouthful123
     ports:
       - "8080:8080"
-    depends_on:
-      - mysql
 
   frontend:
     build:
@@ -42,4 +54,5 @@ services:
       - api
 
 volumes:
-  mysql_data:
+  # mysql_data:
+  # redis_data:

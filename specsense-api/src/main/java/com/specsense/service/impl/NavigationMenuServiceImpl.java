@@ -3,6 +3,7 @@ package com.specsense.service.impl;
 import com.specsense.mapper.NavigationMenuMapper;
 import com.specsense.model.entity.NavigationMenu;
 import com.specsense.service.NavigationMenuService;
+import com.specsense.service.CacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +16,20 @@ public class NavigationMenuServiceImpl implements NavigationMenuService {
     @Autowired
     private NavigationMenuMapper navigationMenuMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     @Override
     public List<NavigationMenu> getByPosition(String position) {
-        return navigationMenuMapper.findByPosition(position);
+        String key = CacheService.keyNavigation(position);
+        @SuppressWarnings("unchecked")
+        List<NavigationMenu> cached = cacheService.get(key, (Class<List<NavigationMenu>>) (Class<?>) ArrayList.class);
+        if (cached != null) {
+            return cached;
+        }
+        List<NavigationMenu> menus = navigationMenuMapper.findByPosition(position);
+        cacheService.set(key, menus);
+        return menus;
     }
 
     @Override
@@ -32,17 +44,29 @@ public class NavigationMenuServiceImpl implements NavigationMenuService {
 
     @Override
     public boolean save(NavigationMenu menu) {
-        return navigationMenuMapper.insert(menu) > 0;
+        boolean result = navigationMenuMapper.insert(menu) > 0;
+        if (result) {
+            cacheService.deleteByPattern("navigation:*");
+        }
+        return result;
     }
 
     @Override
     public boolean update(NavigationMenu menu) {
-        return navigationMenuMapper.update(menu) > 0;
+        boolean result = navigationMenuMapper.update(menu) > 0;
+        if (result) {
+            cacheService.deleteByPattern("navigation:*");
+        }
+        return result;
     }
 
     @Override
     public boolean deleteById(Long id) {
-        return navigationMenuMapper.deleteById(id) > 0;
+        boolean result = navigationMenuMapper.deleteById(id) > 0;
+        if (result) {
+            cacheService.deleteByPattern("navigation:*");
+        }
+        return result;
     }
 
     @Override

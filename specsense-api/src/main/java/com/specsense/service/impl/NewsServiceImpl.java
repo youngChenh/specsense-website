@@ -3,6 +3,7 @@ package com.specsense.service.impl;
 import com.specsense.mapper.NewsMapper;
 import com.specsense.model.entity.News;
 import com.specsense.model.vo.PageResult;
+import com.specsense.service.CacheService;
 import com.specsense.service.NewsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,22 @@ public class NewsServiceImpl implements NewsService {
     @Autowired
     private NewsMapper newsMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     @Override
     public PageResult<List<News>> getList(String category, int page, int pageSize, String locale) {
+        String listKey = String.format("news:list:%s:%d:%d:%s", category != null ? category : "all", page, pageSize, locale);
+        String totalKey = listKey + ":total";
+
+        @SuppressWarnings("unchecked")
+        List<News> cachedList = cacheService.get(listKey, (Class<List<News>>) (Class<?>) ArrayList.class);
+        Integer cachedTotal = cacheService.get(totalKey, Integer.class);
+
+        if (cachedList != null && cachedTotal != null) {
+            return new PageResult<>(cachedTotal.longValue(), page, pageSize, cachedList);
+        }
+
         int offset = (page - 1) * pageSize;
         long total = newsMapper.count(category);
         List<News> newsList = newsMapper.findList(category, offset, pageSize);
@@ -26,6 +41,8 @@ public class NewsServiceImpl implements NewsService {
             convertToLocale(news, locale);
         }
 
+        cacheService.set(listKey, newsList);
+        cacheService.set(totalKey, total);
         return new PageResult<>(total, page, pageSize, newsList);
     }
 
@@ -45,26 +62,46 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     public List<News> getLatest(int limit, String locale) {
+        String key = CacheService.keyNewsFeatured(locale);
+        @SuppressWarnings("unchecked")
+        List<News> cached = cacheService.get(key, (Class<List<News>>) (Class<?>) ArrayList.class);
+        if (cached != null) {
+            return cached;
+        }
+
         List<News> newsList = newsMapper.findLatest(limit);
         for (News news : newsList) {
             convertToLocale(news, locale);
         }
+        cacheService.set(key, newsList);
         return newsList;
     }
 
     @Override
     public boolean save(News news) {
-        return newsMapper.insert(news) > 0;
+        boolean result = newsMapper.insert(news) > 0;
+        if (result) {
+            cacheService.deleteByPattern("news:*");
+        }
+        return result;
     }
 
     @Override
     public boolean update(News news) {
-        return newsMapper.update(news) > 0;
+        boolean result = newsMapper.update(news) > 0;
+        if (result) {
+            cacheService.deleteByPattern("news:*");
+        }
+        return result;
     }
 
     @Override
     public boolean deleteById(Long id) {
-        return newsMapper.deleteById(id) > 0;
+        boolean result = newsMapper.deleteById(id) > 0;
+        if (result) {
+            cacheService.deleteByPattern("news:*");
+        }
+        return result;
     }
 
     private void convertToLocale(News news, String locale) {
