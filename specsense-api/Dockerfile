@@ -1,10 +1,10 @@
-FROM maven:3.8.6-openjdk-8-slim AS builder
+FROM maven:3.8.6-eclipse-temurin-8 AS builder
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 RUN mvn package -DskipTests
 
-FROM openjdk:8-jre-slim
+FROM eclipse-temurin:8-jre
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 COPY --from=builder /app/src/main/resources /app/resources
