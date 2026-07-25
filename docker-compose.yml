@@ -16,6 +16,8 @@ services:
       SPRING_REDIS_PASSWORD: redisYouthful123
     ports:
       - "8080:8080"
+    volumes:
+      - /www/specsense/uploads:/app/uploads
 
   frontend:
     build:
