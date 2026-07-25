@@ -355,7 +355,7 @@ const addCategory = () => {
 
 const editCategory = (row) => {
   isEditCategory.value = true
-  const catId = row.id.startsWith('cat_') ? row.id.replace('cat_', '') : row.id
+  const catId = String(row.id).startsWith('cat_') ? String(row.id).replace('cat_', '') : row.id
   const cat = categories.value.find(c => c.id === parseInt(catId))
   if (cat) {
     categoryForm.id = cat.id
@@ -396,7 +396,7 @@ const removeCategory = async (id) => {
       type: 'warning',
     })
 
-    const catId = id.startsWith('cat_') ? id.replace('cat_', '') : id
+    const catId = String(id).startsWith('cat_') ? id.replace('cat_', '') : id
     await $fetch(`${config.public.apiBase}/api/admin/brand-categories/${catId}`, { method: 'DELETE', headers: headers.value })
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
@@ -426,7 +426,7 @@ const addBrand = () => {
 
 const addBrandUnderCategory = (categoryId) => {
   isEditBrand.value = false
-  const catId = categoryId.startsWith('cat_') ? categoryId.replace('cat_', '') : categoryId
+  const catId = String(categoryId).startsWith('cat_') ? categoryId.replace('cat_', '') : categoryId
   brandForm.id = null
   brandForm.categoryId = parseInt(catId) || null
   brandForm.nameEn = ''
