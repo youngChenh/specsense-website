@@ -90,10 +90,32 @@
           <el-input v-model="form.excerptZh" type="textarea" rows="2" />
         </el-form-item>
         <el-form-item :label="$t('admin.content') + ' (EN)'">
-          <el-input v-model="form.contentEn" type="textarea" rows="6" />
+          <div class="editor-wrapper">
+            <QuillEditor
+              ref="enQuillRef"
+              v-model:content="form.contentEn"
+              contentType="html"
+              :options="quillOptions"
+              placeholder="Enter English content..."
+              class="content-editor"
+              @focus="activeQuillRef = enQuillRef?.getQuill()"
+              @ready="(q) => q.root.addEventListener('drop', (e) => handleDrop(e, q))"
+            />
+          </div>
         </el-form-item>
         <el-form-item :label="$t('admin.content') + ' (ZH)'">
-          <el-input v-model="form.contentZh" type="textarea" rows="6" />
+          <div class="editor-wrapper">
+            <QuillEditor
+              ref="zhQuillRef"
+              v-model:content="form.contentZh"
+              contentType="html"
+              :options="quillOptions"
+              placeholder="输入中文内容..."
+              class="content-editor"
+              @focus="activeQuillRef = zhQuillRef?.getQuill()"
+              @ready="(q) => q.root.addEventListener('drop', (e) => handleDrop(e, q))"
+            />
+          </div>
         </el-form-item>
         <el-form-item :label="$t('admin.imageUrl')">
           <div class="flex items-center gap-4">
@@ -130,6 +152,9 @@
 </template>
 
 <script setup>
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css'
+
 definePageMeta({
   layout: 'admin',
 })
@@ -137,6 +162,11 @@ definePageMeta({
 const { t } = useI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
+
+// 两个编辑器的 quill 实例
+const enQuillRef = ref(null)
+const zhQuillRef = ref(null)
+const activeQuillRef = ref(null)
 
 onMounted(() => {
   if (!import.meta.client) return
@@ -147,6 +177,59 @@ onMounted(() => {
   if (!token) navigateTo('/admin/login')
   fetchData()
 })
+
+// 上传图片到服务器
+const uploadImage = async (file) => {
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await fetch(`${config.public.apiBase}/api/admin/upload`, {
+      method: 'POST',
+      headers: headers.value,
+      body: formData
+    })
+    const result = await response.json()
+
+    if (result.code === 200 && result.data?.url) {
+      return result.data.url
+    } else {
+      ElMessage.error(result.message || 'Upload failed')
+      return null
+    }
+  } catch (error) {
+    console.error('Upload error:', error)
+    ElMessage.error('Upload failed')
+    return null
+  }
+}
+
+// 处理拖拽上传
+const handleDrop = async (e, quill) => {
+  e.preventDefault()
+  e.stopPropagation()
+
+  const files = e.dataTransfer?.files
+  if (!files || files.length === 0) return
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i]
+    if (!file.type.startsWith('image/')) continue
+
+    const url = await uploadImage(file)
+    if (url) {
+      const range = quill.getSelection(true)
+      quill.insertEmbed(range.index, 'image', url)
+      quill.setSelection(range.index + 1)
+    }
+  }
+}
+
+// Quill 配置
+const quillOptions = {
+  theme: 'snow',
+  placeholder: 'Enter content...',
+}
 
 const data = ref([])
 const showDialog = ref(false)
@@ -237,7 +320,8 @@ const remove = async (id) => {
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {
-    ElMessage.error(t('admin.deleteFailed'))
+    const errorMsg = error.data?.message || error._data?.message || error.message || ''
+    ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
   }
 }
 
@@ -333,5 +417,31 @@ const getFullImageUrl = (url) => {
 }
 .admin-table :deep(.el-table__row:hover > td) {
   background: #f9fafb !important;
+}
+.editor-wrapper {
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.editor-wrapper :deep(.ql-container) {
+  height: 300px;
+  font-size: 14px;
+}
+.editor-wrapper :deep(.ql-toolbar) {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #dcdfe6;
+}
+.editor-wrapper :deep(.ql-container.ql-snow) {
+  border: none;
+}
+.editor-wrapper:deep(.ql-editor.ql-blank::before) {
+  color: #aaa;
+  font-style: normal;
+}
+.editor-wrapper.drag-over {
+  border-color: #409eff;
+  background: #f0f9ff;
 }
 </style>

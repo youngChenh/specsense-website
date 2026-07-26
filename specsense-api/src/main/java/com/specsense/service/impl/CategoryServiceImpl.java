@@ -3,6 +3,7 @@ package com.specsense.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.specsense.mapper.CategoryMapper;
+import com.specsense.mapper.ProductMapper;
 import com.specsense.model.entity.Category;
 import com.specsense.model.dto.CategoryDTO;
 import com.specsense.service.CacheService;
@@ -19,6 +20,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private ProductMapper productMapper;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -117,6 +121,9 @@ public class CategoryServiceImpl implements CategoryService {
     public boolean deleteById(Long id) {
         if (categoryMapper.countByParentId(id) > 0) {
             throw new RuntimeException("Cannot delete category with children");
+        }
+        if (productMapper.countByCategoryId(id) > 0) {
+            throw new RuntimeException("Cannot delete category with products");
         }
         boolean result = categoryMapper.deleteById(id) > 0;
         if (result) {

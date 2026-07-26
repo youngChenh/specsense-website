@@ -21,4 +21,6 @@ public class ProductDTO {
     private Integer sortOrder;
     private String categoryName;
     private String categoryKey;
+    private String highlights;
+    private String applications;
 }

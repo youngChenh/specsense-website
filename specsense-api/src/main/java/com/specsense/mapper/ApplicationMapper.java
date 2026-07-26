@@ -7,17 +7,17 @@ import java.util.List;
 @Mapper
 public interface ApplicationMapper {
 
-    @Select("SELECT * FROM application ORDER BY id")
+    @Select("SELECT * FROM application WHERE del_flag = 0 ORDER BY id")
     List<Application> findAll();
 
-    @Select("SELECT * FROM application WHERE id = #{id}")
+    @Select("SELECT * FROM application WHERE del_flag = 0 AND id = #{id}")
     Application findById(@Param("id") Long id);
 
-    @Select("SELECT * FROM application WHERE `type` = #{type}")
+    @Select("SELECT * FROM application WHERE del_flag = 0 AND `type` = #{type}")
     Application findByType(@Param("type") String type);
 
-    @Insert("INSERT INTO application (`type`, title_en, title_zh, description_en, description_zh, icon, image_url, linked_category_keys) " +
-            "VALUES (#{type}, #{titleEn}, #{titleZh}, #{descriptionEn}, #{descriptionZh}, #{icon}, #{imageUrl}, #{linkedCategoryKeys})")
+    @Insert("INSERT INTO application (`type`, title_en, title_zh, description_en, description_zh, icon, image_url, linked_category_keys, del_flag) " +
+            "VALUES (#{type}, #{titleEn}, #{titleZh}, #{descriptionEn}, #{descriptionZh}, #{icon}, #{imageUrl}, #{linkedCategoryKeys}, 0)")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Application application);
 
@@ -26,6 +26,6 @@ public interface ApplicationMapper {
             "icon = #{icon}, image_url = #{imageUrl}, linked_category_keys = #{linkedCategoryKeys} WHERE id = #{id}")
     int update(Application application);
 
-    @Delete("DELETE FROM application WHERE id = #{id}")
+    @Update("UPDATE application SET del_flag = 1 WHERE id = #{id}")
     int deleteById(@Param("id") Long id);
 }

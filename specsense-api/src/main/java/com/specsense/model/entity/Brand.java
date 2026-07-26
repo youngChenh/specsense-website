@@ -18,6 +18,7 @@ public class Brand {
     private Integer sortOrder;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer delFlag;
 
     // For display
     private String name;

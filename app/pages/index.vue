@@ -363,7 +363,7 @@ async function fetchBanners() {
     const result = await response.json()
     if (result.code === 200 && result.data) {
       carouselSlides.value = result.data.map((banner: any) => ({
-        image: banner.imageUrl,
+        image: getImageUrl(banner.imageUrl),
         title: banner.title,
         subtitle: banner.subtitle,
         linkUrl: banner.linkUrl

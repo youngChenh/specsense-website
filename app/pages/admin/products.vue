@@ -222,6 +222,12 @@
             <el-button type="primary" plain @click="addSpec" :icon="Plus">{{ $t('admin.addSpec') }}</el-button>
           </div>
         </el-form-item>
+        <el-form-item label="亮点 (Highlights)">
+          <el-input v-model="form.highlights" type="textarea" :rows="3" placeholder="输入产品亮点，多个亮点用换行分隔" />
+        </el-form-item>
+        <el-form-item label="应用范围 (Applications)">
+          <el-input v-model="form.applications" type="textarea" :rows="3" placeholder="输入产品应用范围" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showDialog = false">{{ $t('admin.cancel') }}</el-button>
@@ -272,6 +278,8 @@ const form = reactive({
   specs: [],
   featured: false,
   sortOrder: 0,
+  highlights: '',
+  applications: '',
 })
 
 const treeProps = {
@@ -383,6 +391,8 @@ const addProductUnderCategory = (categoryId) => {
     else if (k === 'specs') form[k] = []
     else if (k === 'imageUrls') form[k] = []
     else if (k === 'pdfUrls') form[k] = []
+    else if (k === 'highlights') form[k] = ''
+    else if (k === 'applications') form[k] = ''
     else form[k] = null
   })
   // Extract actual category id from "cat_{id}" format
@@ -407,6 +417,8 @@ const editProduct = (row) => {
     featured: row.featured || false,
     sortOrder: row.sortOrder || 0,
     specs: parseSpecs(row.specs),
+    highlights: row.highlights || '',
+    applications: row.applications || '',
   })
   showDialog.value = true
 }
@@ -560,7 +572,8 @@ const removeProduct = async (id) => {
     fetchData()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error(t('admin.deleteFailed') + ': ' + (error.data?.message || error.message || ''))
+      const errorMsg = error.data?.message || error._data?.message || error.message || ''
+      ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
     }
   }
 }

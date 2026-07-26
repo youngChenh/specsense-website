@@ -397,12 +397,20 @@ const removeCategory = async (id) => {
     })
 
     const catId = String(id).startsWith('cat_') ? id.replace('cat_', '') : id
-    await $fetch(`${config.public.apiBase}/api/admin/brand-categories/${catId}`, { method: 'DELETE', headers: headers.value })
+    const response = await fetch(`${config.public.apiBase}/api/admin/brand-categories/${catId}`, {
+      method: 'DELETE',
+      headers: headers.value
+    })
+    const data = await response.json()
+    if (!response.ok) {
+      throw new Error(data.message || 'Delete failed')
+    }
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error(t('admin.deleteFailed') + ': ' + (error.data?.message || error.message || ''))
+      const errorMsg = error.message || ''
+      ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
     }
   }
 }
@@ -517,12 +525,20 @@ const removeBrand = async (id) => {
       type: 'warning',
     })
 
-    await $fetch(`${config.public.apiBase}/api/admin/brands/${id}`, { method: 'DELETE', headers: headers.value })
+    const response = await fetch(`${config.public.apiBase}/api/admin/brands/${id}`, {
+      method: 'DELETE',
+      headers: headers.value
+    })
+    const data = await response.json()
+    if (!response.ok) {
+      throw new Error(data.message || 'Delete failed')
+    }
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error(t('admin.deleteFailed') + ': ' + (error.data?.message || error.message || ''))
+      const errorMsg = error.message || ''
+      ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
     }
   }
 }

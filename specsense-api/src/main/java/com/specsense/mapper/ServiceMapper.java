@@ -7,17 +7,17 @@ import java.util.List;
 @Mapper
 public interface ServiceMapper {
 
-    @Select("SELECT * FROM service ORDER BY id")
+    @Select("SELECT * FROM service WHERE del_flag = 0 ORDER BY id")
     List<ServiceEntity> findAll();
 
-    @Select("SELECT * FROM service WHERE id = #{id}")
+    @Select("SELECT * FROM service WHERE del_flag = 0 AND id = #{id}")
     ServiceEntity findById(@Param("id") Long id);
 
-    @Select("SELECT * FROM service WHERE `type` = #{type}")
+    @Select("SELECT * FROM service WHERE del_flag = 0 AND `type` = #{type}")
     ServiceEntity findByType(@Param("type") String type);
 
-    @Insert("INSERT INTO service (`type`, title_en, title_zh, description_en, description_zh) " +
-            "VALUES (#{type}, #{titleEn}, #{titleZh}, #{descriptionEn}, #{descriptionZh})")
+    @Insert("INSERT INTO service (`type`, title_en, title_zh, description_en, description_zh, del_flag) " +
+            "VALUES (#{type}, #{titleEn}, #{titleZh}, #{descriptionEn}, #{descriptionZh}, 0)")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(ServiceEntity service);
 
@@ -25,6 +25,6 @@ public interface ServiceMapper {
             "description_en = #{descriptionEn}, description_zh = #{descriptionZh} WHERE id = #{id}")
     int update(ServiceEntity service);
 
-    @Delete("DELETE FROM service WHERE id = #{id}")
+    @Update("UPDATE service SET del_flag = 1 WHERE id = #{id}")
     int deleteById(@Param("id") Long id);
 }

@@ -16,6 +16,7 @@ public class Application {
     private String linkedCategoryKeys;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer delFlag;
 
     // For display
     private String title;

@@ -7,19 +7,19 @@ import java.util.List;
 @Mapper
 public interface BannerMapper {
 
-    @Select("SELECT * FROM banner WHERE enabled = true AND locale = #{locale} ORDER BY sort_order")
+    @Select("SELECT * FROM banner WHERE del_flag = 0 AND enabled = true AND locale = #{locale} ORDER BY sort_order")
     List<Banner> findEnabledByLocale(@Param("locale") String locale);
 
-    @Select("SELECT * FROM banner ORDER BY sort_order")
+    @Select("SELECT * FROM banner WHERE del_flag = 0 ORDER BY sort_order")
     List<Banner> findAll();
 
-    @Select("SELECT * FROM banner WHERE id = #{id}")
+    @Select("SELECT * FROM banner WHERE del_flag = 0 AND id = #{id}")
     Banner findById(@Param("id") Long id);
 
     @Insert("INSERT INTO banner (image_url, link_url, title_en, title_zh, subtitle_en, subtitle_zh, " +
-            "sort_order, enabled, locale) " +
+            "sort_order, enabled, locale, del_flag) " +
             "VALUES (#{imageUrl}, #{linkUrl}, #{titleEn}, #{titleZh}, #{subtitleEn}, #{subtitleZh}, " +
-            "#{sortOrder}, #{enabled}, #{locale})")
+            "#{sortOrder}, #{enabled}, #{locale}, 0)")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Banner banner);
 
@@ -30,6 +30,6 @@ public interface BannerMapper {
             "WHERE id = #{id}")
     int update(Banner banner);
 
-    @Delete("DELETE FROM banner WHERE id = #{id}")
+    @Update("UPDATE banner SET del_flag = 1 WHERE id = #{id}")
     int deleteById(@Param("id") Long id);
 }

@@ -45,10 +45,12 @@ com\specsense\controller\ServiceController.class
 com\specsense\mapper\NewsMapper.class
 com\specsense\service\impl\ProductServiceImpl.class
 com\specsense\controller\StaticFileController.class
+com\specsense\service\CacheService.class
 com\specsense\controller\DownloadController.class
 com\specsense\mapper\ApplicationMapper.class
 com\specsense\service\impl\ProductServiceImpl$1.class
 com\specsense\service\impl\DownloadServiceImpl.class
+com\specsense\config\WebMvcConfig.class
 com\specsense\model\dto\ApplicationDTO.class
 com\specsense\config\CorsConfig.class
 com\specsense\model\dto\LoginRequest.class
@@ -77,6 +79,7 @@ com\specsense\model\entity\News.class
 com\specsense\model\entity\ContactInquiry.class
 com\specsense\mapper\BrandCategoryMapper.class
 com\specsense\model\vo\PageResult.class
+com\specsense\config\RedisConfig.class
 com\specsense\SpecsenseApplication.class
 com\specsense\controller\NewsController.class
 com\specsense\model\vo\LoginVO.class

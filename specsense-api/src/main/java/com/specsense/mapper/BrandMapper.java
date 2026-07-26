@@ -10,6 +10,7 @@ public interface BrandMapper {
     @Select("SELECT b.*, bc.name_en as category_name, bc.`key` as category_key " +
             "FROM brand b " +
             "LEFT JOIN brand_category bc ON b.category_id = bc.id " +
+            "WHERE b.del_flag = 0 " +
             "ORDER BY b.sort_order")
     List<Brand> findAll();
 
@@ -17,7 +18,7 @@ public interface BrandMapper {
             "SELECT b.*, bc.name_en as category_name, bc.`key` as category_key " +
             "FROM brand b " +
             "LEFT JOIN brand_category bc ON b.category_id = bc.id " +
-            "WHERE 1=1 " +
+            "WHERE b.del_flag = 0 " +
             "<if test='categoryId != null'> AND b.category_id = #{categoryId}</if>" +
             "<if test='categoryKey != null'> AND bc.`key` = #{categoryKey}</if>" +
             "<if test='featured != null'> AND b.featured = #{featured}</if>" +
@@ -32,7 +33,7 @@ public interface BrandMapper {
     @Select("<script>" +
             "SELECT COUNT(*) FROM brand b " +
             "LEFT JOIN brand_category bc ON b.category_id = bc.id " +
-            "WHERE 1=1 " +
+            "WHERE b.del_flag = 0 " +
             "<if test='categoryId != null'> AND b.category_id = #{categoryId}</if>" +
             "<if test='categoryKey != null'> AND bc.`key` = #{categoryKey}</if>" +
             "<if test='featured != null'> AND b.featured = #{featured}</if>" +
@@ -44,19 +45,19 @@ public interface BrandMapper {
     @Select("SELECT b.*, bc.name_en as category_name, bc.`key` as category_key " +
             "FROM brand b " +
             "LEFT JOIN brand_category bc ON b.category_id = bc.id " +
-            "WHERE b.slug = #{slug}")
+            "WHERE b.del_flag = 0 AND b.slug = #{slug}")
     Brand findBySlug(@Param("slug") String slug);
 
-    @Select("SELECT * FROM brand WHERE id = #{id}")
+    @Select("SELECT * FROM brand WHERE del_flag = 0 AND id = #{id}")
     Brand findById(@Param("id") Long id);
 
-    @Select("SELECT * FROM brand WHERE featured = true ORDER BY sort_order LIMIT #{limit}")
+    @Select("SELECT * FROM brand WHERE del_flag = 0 AND featured = true ORDER BY sort_order LIMIT #{limit}")
     List<Brand> findFeatured(@Param("limit") int limit);
 
     @Insert("INSERT INTO brand (category_id, name_en, name_zh, slug, logo_url, description_en, description_zh, " +
-            "website_url, featured, sort_order) " +
+            "website_url, featured, sort_order, del_flag) " +
             "VALUES (#{categoryId}, #{nameEn}, #{nameZh}, #{slug}, #{logoUrl}, #{descriptionEn}, #{descriptionZh}, " +
-            "#{websiteUrl}, #{featured}, #{sortOrder})")
+            "#{websiteUrl}, #{featured}, #{sortOrder}, 0)")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Brand brand);
 
@@ -66,6 +67,6 @@ public interface BrandMapper {
             "WHERE id = #{id}")
     int update(Brand brand);
 
-    @Delete("DELETE FROM brand WHERE id = #{id}")
+    @Update("UPDATE brand SET del_flag = 1 WHERE id = #{id}")
     int deleteById(@Param("id") Long id);
 }

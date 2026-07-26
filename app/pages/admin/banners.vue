@@ -26,7 +26,7 @@
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column label="图片" width="200">
           <template #default="{ row }">
-            <img :src="row.imageUrl" class="banner-thumb" />
+            <img :src="getImageUrl(row.imageUrl)" class="banner-thumb" />
           </template>
         </el-table-column>
         <el-table-column prop="titleZh" label="中文标题" />
@@ -57,7 +57,7 @@
             <el-button @click="showUploadDialog = true">上传图片</el-button>
           </div>
           <div v-if="form.imageUrl" class="mt-2">
-            <img :src="form.imageUrl" class="preview-thumb" />
+            <img :src="getImageUrl(form.imageUrl)" class="preview-thumb" />
           </div>
         </el-form-item>
         <el-form-item label="跳转链接">
@@ -114,6 +114,7 @@ definePageMeta({
   layout: 'admin',
 })
 
+const { getImageUrl } = useImageUrl()
 const config = useRuntimeConfig()
 const headers = ref({})
 
@@ -209,7 +210,8 @@ const remove = async (id) => {
     ElMessage.success('删除成功')
     fetchData()
   } catch (error) {
-    ElMessage.error('删除失败')
+    const errorMsg = error.data?.message || error._data?.message || error.message || ''
+    ElMessage.error('删除失败' + (errorMsg ? ': ' + errorMsg : ''))
   }
 }
 

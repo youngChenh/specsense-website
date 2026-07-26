@@ -110,7 +110,8 @@ const remove = async (id) => {
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {
-    ElMessage.error(t('admin.deleteFailed'))
+    const errorMsg = error.data?.message || error._data?.message || error.message || ''
+    ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
   }
 }
 </script>

@@ -35,6 +35,7 @@ D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\sp
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\mapper\BrandCategoryMapper.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\CompanyInfoController.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\CompanyInfo.java
+D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\config\RedisConfig.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\BannerAdminController.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\config\JwtConfig.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\impl\AdminServiceImpl.java
@@ -43,6 +44,7 @@ D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\sp
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\dto\LoginRequest.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\Brand.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\ServiceEntity.java
+D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\config\WebMvcConfig.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\NewsService.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\AdminCrudController.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\Application.java
@@ -62,6 +64,7 @@ D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\sp
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\BrandController.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\ApplicationController.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\BrandCategoryService.java
+D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\CacheService.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\EmailService.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\vo\PageResult.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\News.java

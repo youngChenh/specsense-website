@@ -210,6 +210,10 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
+        // Set highlights and applications
+        dto.setHighlights(product.getHighlights());
+        dto.setApplications(product.getApplications());
+
         return dto;
     }
 }

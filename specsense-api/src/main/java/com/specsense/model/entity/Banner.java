@@ -17,6 +17,7 @@ public class Banner {
     private String locale;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer delFlag;
 
     // For display
     private String title;

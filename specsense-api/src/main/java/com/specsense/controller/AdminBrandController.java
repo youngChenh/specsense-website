@@ -70,7 +70,7 @@ public class AdminBrandController {
             brandCategoryService.deleteById(id);
             return Result.success();
         } catch (Exception e) {
-            return Result.error(400, e.getMessage());
+            return Result.error(500, e.getMessage());
         }
     }
 

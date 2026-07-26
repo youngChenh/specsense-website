@@ -318,7 +318,8 @@ const deleteMenu = async (id) => {
     fetchMenus()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('删除失败: ' + (error.data?.message || error.message || ''))
+      const errorMsg = error.data?.message || error._data?.message || error.message || ''
+      ElMessage.error('删除失败' + (errorMsg ? ': ' + errorMsg : ''))
     }
   }
 }

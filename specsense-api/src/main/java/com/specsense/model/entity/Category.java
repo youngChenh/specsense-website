@@ -13,6 +13,7 @@ public class Category {
     private Integer sortOrder;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer delFlag;
 
     // For tree structure
     private String name;

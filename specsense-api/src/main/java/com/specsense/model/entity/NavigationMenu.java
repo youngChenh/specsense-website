@@ -18,5 +18,6 @@ public class NavigationMenu {
     private Boolean enabled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer delFlag;
     private List<NavigationMenu> children; // For tree structure
 }

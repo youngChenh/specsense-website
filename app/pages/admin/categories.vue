@@ -232,7 +232,8 @@ const remove = async (id) => {
     fetchData()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error(t('admin.deleteFailed') + ': ' + (error.message || ''))
+      const errorMsg = error.data?.message || error._data?.message || error.message || ''
+      ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
     }
   }
 }

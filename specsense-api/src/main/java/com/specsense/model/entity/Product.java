@@ -21,6 +21,9 @@ public class Product {
     private Integer sortOrder;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer delFlag;
+    private String highlights;
+    private String applications;
 
     // For display
     private String name;

@@ -8,17 +8,17 @@ import java.util.List;
 public interface DownloadMapper {
 
     @Select("<script>" +
-            "SELECT * FROM download WHERE 1=1 " +
+            "SELECT * FROM download WHERE del_flag = 0 " +
             "<if test='category != null'> AND category = #{category}</if>" +
             "ORDER BY created_at DESC" +
             "</script>")
     List<Download> findAll(@Param("category") String category);
 
-    @Select("SELECT * FROM download WHERE id = #{id}")
+    @Select("SELECT * FROM download WHERE del_flag = 0 AND id = #{id}")
     Download findById(@Param("id") Long id);
 
-    @Insert("INSERT INTO download (category, name_en, name_zh, description_en, description_zh, file_url, file_size, original_filename) " +
-            "VALUES (#{category}, #{nameEn}, #{nameZh}, #{descriptionEn}, #{descriptionZh}, #{fileUrl}, #{fileSize}, #{originalFilename})")
+    @Insert("INSERT INTO download (category, name_en, name_zh, description_en, description_zh, file_url, file_size, original_filename, del_flag) " +
+            "VALUES (#{category}, #{nameEn}, #{nameZh}, #{descriptionEn}, #{descriptionZh}, #{fileUrl}, #{fileSize}, #{originalFilename}, 0)")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Download download);
 
@@ -27,6 +27,6 @@ public interface DownloadMapper {
             "file_url = #{fileUrl}, file_size = #{fileSize}, original_filename = #{originalFilename} WHERE id = #{id}")
     int update(Download download);
 
-    @Delete("DELETE FROM download WHERE id = #{id}")
+    @Update("UPDATE download SET del_flag = 1 WHERE id = #{id}")
     int deleteById(@Param("id") Long id);
 }
