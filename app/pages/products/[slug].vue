@@ -71,15 +71,9 @@
               </div>
 
               <!-- PDF Section -->
-              <div v-if="pdfList.length > 0" class="bg-gray-50 rounded-xl p-4">
-                <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                  <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
-                  </svg>
-                  PDF Preview
-                </h4>
+              <div v-if="pdfList.length > 0" class="mb-4">
                 <!-- PDF Canvas Preview -->
-                <div ref="pdfContainerRef" class="mb-4 flex flex-col items-center bg-gray-100 rounded-lg">
+                <div ref="pdfContainerRef" class="flex flex-col items-center">
                   <div v-if="pdfLoading" class="flex items-center justify-center h-64">
                     <span class="text-gray-500">Loading PDF...</span>
                   </div>
