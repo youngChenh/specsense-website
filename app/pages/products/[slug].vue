@@ -215,12 +215,12 @@ const displayDescription = computed(() => {
 
 const displayHighlights = computed(() => {
   if (!product.value) return ''
-  return product.value.highlights || ''
+  return (product.value.highlights || '').replace(/\n/g, '<br>')
 })
 
 const displayApplications = computed(() => {
   if (!product.value) return ''
-  return product.value.applications || ''
+  return (product.value.applications || '').replace(/\n/g, '<br>')
 })
 
 const allImages = computed(() => {
