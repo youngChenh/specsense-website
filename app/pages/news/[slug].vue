@@ -55,9 +55,7 @@
 
         <!-- Article Content -->
         <div v-if="article" class="prose prose-lg max-w-none">
-          <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-            {{ article.excerpt }}
-          </p>
+          <p class="text-xl text-gray-600 mb-8 leading-relaxed" v-html="article.excerpt"></p>
           <div class="text-gray-700 space-y-6" v-html="article.content"></div>
         </div>
 
@@ -145,8 +143,8 @@ async function fetchArticle() {
         categoryLabel: `news.${articleData.category}`,
         date: articleData.publishedAt ? new Date(articleData.publishedAt).toLocaleDateString() : '',
         image: articleData.imageUrl || '',
-        excerpt: locale.value === 'zh' ? (articleData.excerptZh || articleData.excerptEn) : (articleData.excerptEn || articleData.excerptZh),
-        content: locale.value === 'zh' ? (articleData.contentZh || articleData.contentEn) : (articleData.contentEn || articleData.contentZh),
+        excerpt: ((locale.value === 'zh' ? (articleData.excerptZh || articleData.excerptEn) : (articleData.excerptEn || articleData.excerptZh)) || '').replace(/\n/g, '<br>'),
+        content: (locale.value === 'zh' ? (articleData.contentZh || articleData.contentEn) : (articleData.contentEn || articleData.contentZh) || '').replace(/\n/g, '<br>'),
       }
     }
 
