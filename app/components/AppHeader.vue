@@ -1,10 +1,10 @@
 <template>
   <header class="bg-white shadow-sm sticky top-0 z-50">
-    <nav class="flex justify-center items-center h-16 px-4 sm:px-6 lg:px-8">
+    <nav class="flex justify-center items-center h-20 px-4 sm:px-6 lg:px-8">
       <div class="flex items-center gap-6">
         <!-- Logo -->
         <NuxtLink :to="localePath('/')" class="flex items-center h-full flex-shrink-0">
-          <img src="/logo.jpg" alt="SpeSense" class="h-12 w-auto object-contain" />
+          <img src="/logo.jpg" alt="SpeSense" class="h-14 w-auto object-contain" />
         </NuxtLink>
 
         <!-- Desktop Navigation -->
@@ -12,7 +12,7 @@
           <template v-for="item in navItems" :key="item.path">
             <!-- Menu items with children -->
             <div v-if="item.children && item.children.length > 0" class="relative" @mouseenter="activeMenu = item.key" @mouseleave="handleMenuLeave">
-              <button class="px-3 py-2 text-sm text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-0.5" :class="{ 'text-blue-600': isActiveMenu(item.key) }">
+              <button class="px-4 py-3 text-base text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-0.5" :class="{ 'text-blue-600': isActiveMenu(item.key) }">
                 {{ getLabel(item) }}
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -47,7 +47,7 @@
               </div>
             </div>
             <!-- Simple menu items without children -->
-            <NuxtLink v-else :to="localePath(item.path)" class="px-3 py-2 text-sm text-gray-600 hover:text-blue-600 font-medium transition-colors" active-class="text-blue-600">
+            <NuxtLink v-else :to="localePath(item.path)" class="px-4 py-3 text-base text-gray-600 hover:text-blue-600 font-medium transition-colors" active-class="text-blue-600">
               {{ getLabel(item) }}
             </NuxtLink>
           </template>
