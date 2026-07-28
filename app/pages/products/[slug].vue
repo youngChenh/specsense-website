@@ -42,8 +42,12 @@
             <!-- Left Column - Image & PDF (bigger, natural flow) -->
             <div class="w-[60%]">
               <!-- Main Image -->
-              <div class="bg-gray-100 rounded-xl overflow-hidden mb-6">
-                <div class="relative">
+              <div
+                class="bg-gray-100 rounded-xl overflow-hidden mb-6"
+                @mouseenter="onCarouselHover(true)"
+                @mouseleave="onCarouselHover(false)"
+              >
+                <div class="relative cursor-zoom-in" @click="lightboxOpen = true; lightboxImage = activeImage">
                   <img
                     v-if="allImages.length > 0"
                     :src="getImageUrl(activeImage)"
@@ -55,15 +59,35 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
+
+                  <!-- Arrows -->
+                  <button
+                    v-if="allImages.length > 1"
+                    @click.stop="prevCarousel"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 transition-colors shadow"
+                  >
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button
+                    v-if="allImages.length > 1"
+                    @click.stop="nextCarousel"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/70 hover:bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 transition-colors shadow"
+                  >
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
                 </div>
                 <!-- Thumbnails -->
                 <div v-if="allImages.length > 1" class="flex gap-2 p-3 overflow-x-auto">
                   <button
                     v-for="(img, idx) in allImages"
                     :key="idx"
-                    @click="activeImage = img"
+                    @click="carouselIndex = idx"
                     class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all"
-                    :class="activeImage === img ? 'border-blue-500' : 'border-transparent opacity-70 hover:opacity-100'"
+                    :class="carouselIndex === idx ? 'border-blue-500' : 'border-transparent opacity-70 hover:opacity-100'"
                   >
                     <img :src="getImageUrl(img)" :alt="'Thumbnail ' + (idx + 1)" class="w-full h-full object-cover" />
                   </button>
@@ -142,7 +166,7 @@
               </div>
 
               <!-- Action Buttons -->
-              <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
+              <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200 relative z-[60]" style="pointer-events: auto;">
                 <button
                   @click="showInquiryModal = true"
                   class="flex-1 px-6 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
@@ -168,11 +192,46 @@
           </div>
         </div>
       </section>
+
+      <!-- Lightbox -->
+      <Teleport to="body">
+        <div
+          v-if="lightboxOpen"
+          class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
+          @click="lightboxOpen = false"
+        >
+          <button
+            class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+            @click="lightboxOpen = false"
+          >
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <img
+            :src="getImageUrl(lightboxImage)"
+            :alt="displayName"
+            class="max-w-[90vw] max-h-[90vh] object-contain"
+            @click.stop
+          />
+        </div>
+      </Teleport>
+
+      <!-- Inquiry Modal -->
+      <Teleport to="body">
+        <InquiryModal
+          v-if="showInquiryModal"
+          :product-name="displayName"
+          @close="showInquiryModal = false"
+        />
+      </Teleport>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
+import InquiryModal from '~/components/InquiryModal.vue'
+
 const route = useRoute()
 const { locale } = useI18n()
 const api = useApi()
@@ -191,7 +250,47 @@ useHead({
 })
 
 const showInquiryModal = ref(false)
-const activeImage = ref('')
+const lightboxOpen = ref(false)
+const lightboxImage = ref('')
+const carouselIndex = ref(0)
+let carouselInterval: NodeJS.Timeout | null = null
+let resumeTimeout: NodeJS.Timeout | null = null
+
+const activeImage = computed(() => {
+  if (allImages.value.length === 0) return ''
+  return allImages.value[carouselIndex.value] || allImages.value[0]
+})
+
+function nextCarousel() {
+  if (allImages.value.length === 0) return
+  carouselIndex.value = (carouselIndex.value + 1) % allImages.value.length
+}
+
+function prevCarousel() {
+  if (allImages.value.length === 0) return
+  carouselIndex.value = (carouselIndex.value - 1 + allImages.value.length) % allImages.value.length
+}
+
+function startCarouselAutoplay() {
+  stopCarouselAutoplay()
+  carouselInterval = setInterval(nextCarousel, 4000)
+}
+
+function stopCarouselAutoplay() {
+  if (carouselInterval) {
+    clearInterval(carouselInterval)
+    carouselInterval = null
+  }
+}
+
+function onCarouselHover(entering: boolean) {
+  if (entering) {
+    stopCarouselAutoplay()
+    if (resumeTimeout) { clearTimeout(resumeTimeout); resumeTimeout = null }
+  } else {
+    resumeTimeout = setTimeout(startCarouselAutoplay, 2000)
+  }
+}
 const loading = ref(true)
 const product = ref<any>(null)
 const pdfLoading = ref(false)
@@ -341,10 +440,9 @@ async function fetchProduct() {
   const slug = route.params.slug as string
   try {
     product.value = await api.fetchProduct(slug, locale.value)
-    if (product.value?.imageUrls?.length > 0) {
-      activeImage.value = product.value.imageUrls[0]
-    } else if (product.value?.imageUrl) {
-      activeImage.value = product.value.imageUrl
+    carouselIndex.value = 0
+    if (allImages.value.length > 1) {
+      startCarouselAutoplay()
     }
     // Render PDF if available
     if (product.value?.pdfUrls?.length > 0) {
@@ -360,10 +458,17 @@ async function fetchProduct() {
 }
 
 watch(locale, () => {
+  stopCarouselAutoplay()
+  if (resumeTimeout) { clearTimeout(resumeTimeout); resumeTimeout = null }
   fetchProduct()
 })
 
 onMounted(() => {
   fetchProduct()
+})
+
+onUnmounted(() => {
+  stopCarouselAutoplay()
+  if (resumeTimeout) { clearTimeout(resumeTimeout); resumeTimeout = null }
 })
 </script>

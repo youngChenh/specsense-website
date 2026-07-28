@@ -99,6 +99,8 @@ const emit = defineEmits<{
   close: []
 }>()
 
+const api = useApi()
+
 const form = reactive({
   name: '',
   email: '',
@@ -114,8 +116,13 @@ async function submitForm() {
   submitStatus.value = 'idle'
 
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    await api.submitContact({
+      name: form.name,
+      email: form.email,
+      company: form.company,
+      productInterest: props.productName,
+      message: form.message,
+    })
     submitStatus.value = 'success'
 
     // Auto close after success

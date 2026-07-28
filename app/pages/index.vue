@@ -1,9 +1,13 @@
 <template>
   <div>
     <!-- Hero Carousel Section -->
-    <section class="relative bg-gray-900">
+    <section class="relative bg-gray-100">
       <!-- Carousel -->
-      <div class="relative h-[500px] lg:h-[600px] overflow-hidden">
+      <div
+        class="relative h-[500px] lg:h-[600px] overflow-hidden"
+        @mouseenter="onCarouselHover(true)"
+        @mouseleave="onCarouselHover(false)"
+      >
         <div
           v-for="(slide, index) in carouselSlides"
           :key="index"
@@ -15,7 +19,7 @@
             :alt="slide.title"
             class="w-full h-full object-cover"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-black/10 to-transparent"></div>
           <div class="absolute inset-0 flex flex-col items-center justify-end pb-24">
             <div class="text-center px-4">
               <h1 class="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
@@ -356,6 +360,8 @@ const loadingNews = ref(true)
 const carouselSlides = ref<any[]>([])
 const currentSlide = ref(0)
 let autoPlayInterval: NodeJS.Timeout | null = null
+let resumeTimeout: NodeJS.Timeout | null = null
+const isHovering = ref(false)
 
 async function fetchBanners() {
   try {
@@ -394,6 +400,24 @@ function stopAutoPlay() {
   if (autoPlayInterval) {
     clearInterval(autoPlayInterval)
     autoPlayInterval = null
+  }
+}
+
+function onCarouselHover(hovering: boolean) {
+  isHovering.value = hovering
+  if (hovering) {
+    // Mouse enter: stop auto-play immediately
+    stopAutoPlay()
+    // Clear any pending resume
+    if (resumeTimeout) {
+      clearTimeout(resumeTimeout)
+      resumeTimeout = null
+    }
+  } else {
+    // Mouse leave: wait 3 seconds then resume
+    resumeTimeout = setTimeout(() => {
+      startAutoPlay()
+    }, 2000)
   }
 }
 
@@ -483,6 +507,10 @@ onMounted(() => {
 
 onUnmounted(() => {
   stopAutoPlay()
+  if (resumeTimeout) {
+    clearTimeout(resumeTimeout)
+    resumeTimeout = null
+  }
 })
 
 // Icon components

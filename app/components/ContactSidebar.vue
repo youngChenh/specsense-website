@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed right-4 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3">
+  <div class="fixed right-4 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3" :style="{ marginTop: '145px' }">
     <!-- Contact Us -->
     <div class="relative">
       <button

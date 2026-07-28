@@ -29,17 +29,17 @@ spring:
     time-zone: Asia/Shanghai
     default-property-inclusion: non_null
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: youngChenh@outlook.com
-    password: Chc5930!
+    host: smtp.ym.163.com
+    port: 25
+    username: info@spesense.com
+    password: ordermore2026+
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
-            required: true
+          starttls.required: true
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
