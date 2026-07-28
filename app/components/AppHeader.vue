@@ -1,84 +1,82 @@
 <template>
   <header class="bg-white shadow-sm sticky top-0 z-50">
-    <nav class="flex justify-center items-center h-20 px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center gap-6">
-        <!-- Logo -->
-        <NuxtLink :to="localePath('/')" class="flex items-center h-full flex-shrink-0">
-          <img src="/logo.jpg" alt="SpeSense" class="h-14 w-auto object-contain" />
-        </NuxtLink>
+    <nav class="flex justify-between items-center h-20 px-4 sm:px-6 lg:px-8 max-w-[1800px] mx-auto">
+      <!-- Logo - Left -->
+      <NuxtLink :to="localePath('/')" class="flex items-center flex-shrink-0">
+        <img src="/logo.jpg" alt="SpeSense" class="h-20 w-auto object-contain" />
+      </NuxtLink>
 
-        <!-- Desktop Navigation -->
-        <div class="hidden md:flex items-center gap-1">
-          <template v-for="item in navItems" :key="item.path">
-            <!-- Menu items with children -->
-            <div v-if="item.children && item.children.length > 0" class="relative" @mouseenter="activeMenu = item.key" @mouseleave="handleMenuLeave">
-              <button class="px-4 py-3 text-base text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-0.5" :class="{ 'text-blue-600': isActiveMenu(item.key) }">
-                {{ getLabel(item) }}
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <!-- Dropdown Menu -->
-              <div v-if="activeMenu === item.key" class="absolute left-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50" @mouseenter="cancelLeaveTimer" @mouseleave="handleMenuLeave">
-                <template v-for="child in item.children" :key="child.key">
-                  <!-- Item with children: clickable header + dropdown on hover -->
-                  <div v-if="child.children && child.children.length > 0" class="relative group">
-                    <NuxtLink
-                      :to="localePath(child.path)"
-                      class="w-full px-4 py-2 text-left text-gray-600 hover:text-blue-600 hover:bg-gray-50 flex items-center justify-between"
-                    >
-                      {{ getLabel(child) }}
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </NuxtLink>
-                    <!-- Second Level Dropdown -->
-                    <div class="absolute left-full top-0 ml-1 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 hidden group-hover:block">
-                      <NuxtLink v-for="subChild in child.children" :key="subChild.key" :to="localePath(subChild.path)" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">
-                        {{ getLabel(subChild) }}
-                      </NuxtLink>
-                    </div>
-                  </div>
-                  <!-- Item without children: simple link -->
-                  <NuxtLink v-else :to="localePath(child.path)" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">
-                    {{ getLabel(child) }}
-                  </NuxtLink>
-                </template>
-              </div>
-            </div>
-            <!-- Simple menu items without children -->
-            <NuxtLink v-else :to="localePath(item.path)" class="px-4 py-3 text-base text-gray-600 hover:text-blue-600 font-medium transition-colors" active-class="text-blue-600">
+      <!-- Desktop Navigation - Center -->
+      <div class="hidden md:flex items-center gap-1 flex-1 justify-center">
+        <template v-for="item in navItems" :key="item.path">
+          <!-- Menu items with children -->
+          <div v-if="item.children && item.children.length > 0" class="relative" @mouseenter="activeMenu = item.key" @mouseleave="handleMenuLeave">
+            <button class="px-4 py-3 text-lg text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-0.5" :class="{ 'text-blue-600': isActiveMenu(item.key) }">
               {{ getLabel(item) }}
-            </NuxtLink>
-          </template>
-
-          <!-- Language Switcher -->
-          <div class="flex items-center gap-1 border-l border-gray-200 pl-3 ml-2">
-            <button
-              v-for="locale in availableLocales"
-              :key="locale.code"
-              @click="switchLocale(locale.code)"
-              class="px-2 py-1 text-sm rounded cursor-pointer"
-              :class="currentLocale === locale.code ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'"
-            >
-              {{ locale.name }}
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
+            <!-- Dropdown Menu -->
+            <div v-if="activeMenu === item.key" class="absolute left-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50" @mouseenter="cancelLeaveTimer" @mouseleave="handleMenuLeave">
+              <template v-for="child in item.children" :key="child.key">
+                <!-- Item with children: clickable header + dropdown on hover -->
+                <div v-if="child.children && child.children.length > 0" class="relative group">
+                  <NuxtLink
+                    :to="localePath(child.path)"
+                    class="w-full px-4 py-2 text-left text-gray-600 hover:text-blue-600 hover:bg-gray-50 flex items-center justify-between"
+                  >
+                    {{ getLabel(child) }}
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </NuxtLink>
+                  <!-- Second Level Dropdown -->
+                  <div class="absolute left-full top-0 ml-1 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 hidden group-hover:block">
+                    <NuxtLink v-for="subChild in child.children" :key="subChild.key" :to="localePath(subChild.path)" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">
+                      {{ getLabel(subChild) }}
+                    </NuxtLink>
+                  </div>
+                </div>
+                <!-- Item without children: simple link -->
+                <NuxtLink v-else :to="localePath(child.path)" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">
+                  {{ getLabel(child) }}
+                </NuxtLink>
+              </template>
+            </div>
           </div>
-        </div>
+          <!-- Simple menu items without children -->
+          <NuxtLink v-else :to="localePath(item.path)" class="px-4 py-3 text-lg text-gray-600 hover:text-blue-600 font-medium transition-colors" active-class="text-blue-600">
+            {{ getLabel(item) }}
+          </NuxtLink>
+        </template>
 
-        <!-- Mobile menu button -->
-        <button
-          @click="mobileMenuOpen = !mobileMenuOpen"
-          class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 ml-4"
-        >
-          <svg v-if="!mobileMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          <svg v-else class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <!-- Language Switcher -->
+        <div class="flex items-center gap-1 border-l border-gray-200 pl-3 ml-2">
+          <button
+            v-for="locale in availableLocales"
+            :key="locale.code"
+            @click="switchLocale(locale.code)"
+            class="px-2 py-1 text-sm rounded cursor-pointer"
+            :class="currentLocale === locale.code ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'"
+          >
+            {{ locale.name }}
+          </button>
+        </div>
       </div>
+
+      <!-- Mobile menu button -->
+      <button
+        @click="mobileMenuOpen = !mobileMenuOpen"
+        class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 ml-4"
+      >
+        <svg v-if="!mobileMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg v-else class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
 
       <!-- Mobile Navigation -->
       <div v-if="mobileMenuOpen" class="md:hidden py-4 border-t">
