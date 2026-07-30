@@ -11,10 +11,10 @@ export const useApi = () => {
 
   // Categories
   const fetchCategories = async (locale = 'en') => {
-    const { data } = await useFetch(`${baseUrl}/api/categories`, {
+    const data = await $fetch(`${baseUrl}/api/categories`, {
       params: { locale },
     })
-    return data.value?.data || []
+    return (data as any)?.data || []
   }
 
   // Products
@@ -25,7 +25,7 @@ export const useApi = () => {
     featured?: boolean
     locale?: string
   } = {}) => {
-    const { data } = await useFetch(`${baseUrl}/api/products`, {
+    const data = await $fetch(`${baseUrl}/api/products`, {
       params: {
         page: params.page || 1,
         pageSize: params.pageSize || 12,
@@ -34,29 +34,29 @@ export const useApi = () => {
         locale: params.locale || 'en',
       },
     })
-    return data.value
+    return data
   }
 
   const fetchProduct = async (slug: string, locale = 'en') => {
-    const { data } = await useFetch(`${baseUrl}/api/products/${slug}`, {
+    const data = await $fetch(`${baseUrl}/api/products/${encodeURIComponent(slug)}`, {
       params: { locale },
     })
-    return data.value?.data
+    return (data as any)?.data
   }
 
   const fetchFeaturedProducts = async (limit = 4, locale = 'en') => {
-    const { data } = await useFetch(`${baseUrl}/api/products/featured`, {
+    const data = await $fetch(`${baseUrl}/api/products/featured`, {
       params: { limit, locale },
     })
-    return data.value?.data || []
+    return (data as any)?.data || []
   }
 
   // Brands
   const fetchBrandCategories = async (locale = 'en') => {
-    const { data } = await useFetch(`${baseUrl}/api/brands/categories`, {
+    const data = await $fetch(`${baseUrl}/api/brands/categories`, {
       params: { locale },
     })
-    return data.value?.data || []
+    return (data as any)?.data || []
   }
 
   const fetchBrands = async (params: {
@@ -66,7 +66,7 @@ export const useApi = () => {
     featured?: boolean
     locale?: string
   } = {}) => {
-    const { data } = await useFetch(`${baseUrl}/api/brands`, {
+    const data = await $fetch(`${baseUrl}/api/brands`, {
       params: {
         page: params.page || 1,
         pageSize: params.pageSize || 50,
@@ -75,14 +75,14 @@ export const useApi = () => {
         locale: params.locale || 'en',
       },
     })
-    return data.value
+    return data
   }
 
   const fetchFeaturedBrands = async (limit = 8, locale = 'en') => {
-    const { data } = await useFetch(`${baseUrl}/api/brands/featured`, {
+    const data = await $fetch(`${baseUrl}/api/brands/featured`, {
       params: { limit, locale },
     })
-    return data.value?.data || []
+    return (data as any)?.data || []
   }
 
   // News
@@ -92,7 +92,7 @@ export const useApi = () => {
     category?: string
     locale?: string
   } = {}) => {
-    const { data } = await useFetch(`${baseUrl}/api/news`, {
+    const data = await $fetch(`${baseUrl}/api/news`, {
       params: {
         page: params.page || 1,
         pageSize: params.pageSize || 10,
@@ -100,59 +100,59 @@ export const useApi = () => {
         locale: params.locale || 'en',
       },
     })
-    return data.value
+    return data
   }
 
   const fetchNewsItem = async (slug: string, locale = 'en') => {
-    const { data } = await useFetch(`${baseUrl}/api/news/${slug}`, {
+    const data = await $fetch(`${baseUrl}/api/news/${encodeURIComponent(slug)}`, {
       params: { locale },
     })
-    return data.value?.data
+    return (data as any)?.data
   }
 
   const fetchLatestNews = async (limit = 3, locale = 'en') => {
-    const { data } = await useFetch(`${baseUrl}/api/news/latest`, {
+    const data = await $fetch(`${baseUrl}/api/news/latest`, {
       params: { limit, locale },
     })
-    return data.value?.data || []
+    return (data as any)?.data || []
   }
 
   // Applications
   const fetchApplications = async (locale = 'en') => {
-    const { data } = await useFetch(`${baseUrl}/api/applications`, {
+    const data = await $fetch(`${baseUrl}/api/applications`, {
       params: { locale },
     })
-    return data.value?.data || []
+    return (data as any)?.data || []
   }
 
   // Services
   const fetchServices = async (locale = 'en') => {
-    const { data } = await useFetch(`${baseUrl}/api/services`, {
+    const data = await $fetch(`${baseUrl}/api/services`, {
       params: { locale },
     })
-    return data.value?.data || []
+    return (data as any)?.data || []
   }
 
   // Downloads
   const fetchDownloads = async (category?: string, locale = 'en') => {
-    const { data } = await useFetch(`${baseUrl}/api/downloads`, {
+    const data = await $fetch(`${baseUrl}/api/downloads`, {
       params: { category, locale },
     })
-    return data.value?.data || []
+    return (data as any)?.data || []
   }
 
   // Company Info
   const fetchCompanyInfo = async (locale = 'en') => {
-    const { data } = await useFetch(`${baseUrl}/api/company-info`, {
+    const data = await $fetch(`${baseUrl}/api/company-info`, {
       params: { locale },
     })
-    return data.value?.data
+    return (data as any)?.data
   }
 
   // Navigation
   const fetchNavigation = async (position: string) => {
-    const { data } = await useFetch(`${baseUrl}/api/navigation/${position}`)
-    return data.value?.data || []
+    const data = await $fetch(`${baseUrl}/api/navigation/${position}`)
+    return (data as any)?.data || []
   }
 
   // Contact
@@ -163,14 +163,11 @@ export const useApi = () => {
     productInterest?: string
     message: string
   }) => {
-    const { data, error } = await useFetch(`${baseUrl}/api/contact`, {
+    const data = await $fetch(`${baseUrl}/api/contact`, {
       method: 'POST',
       body: form,
     })
-    if (error.value) {
-      throw new Error(error.value.message || 'Failed to submit')
-    }
-    return data.value
+    return data
   }
 
   return {

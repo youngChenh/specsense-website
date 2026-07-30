@@ -47,7 +47,7 @@
                 @mouseenter="onCarouselHover(true)"
                 @mouseleave="onCarouselHover(false)"
               >
-                <div class="relative cursor-zoom-in" @click="lightboxOpen = true; lightboxImage = activeImage">
+                <div class="relative cursor-zoom-in" @click="lightboxOpen = true; lightboxIndex = carouselIndex; lightboxImage = activeImage">
                   <img
                     v-if="allImages.length > 0"
                     :src="getImageUrl(activeImage)"
@@ -148,7 +148,7 @@
                   Product Highlights
                 </h3>
                 <div class="bg-yellow-50 rounded-xl p-5 border border-yellow-100">
-                  <div class="prose prose-sm max-w-none text-gray-700" v-html="displayHighlights"></div>
+                  <div class="prose prose-xs max-w-none text-gray-700 text-sm" v-html="displayHighlights"></div>
                 </div>
               </div>
 
@@ -161,7 +161,7 @@
                   Application scope
                 </h3>
                 <div class="bg-green-50 rounded-xl p-5 border border-green-100">
-                  <div class="prose prose-sm max-w-none text-gray-700" v-html="displayApplications"></div>
+                  <div class="prose prose-xs max-w-none text-gray-700 text-sm" v-html="displayApplications"></div>
                 </div>
               </div>
 
@@ -199,13 +199,34 @@
           v-if="lightboxOpen"
           class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
           @click="lightboxOpen = false"
+          @keydown.left="prevLightbox"
+          @keydown.right="nextLightbox"
+          tabindex="0"
         >
           <button
-            class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+            class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10"
             @click="lightboxOpen = false"
           >
             <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <button
+            v-if="allImages.length > 1"
+            class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-colors"
+            @click.stop="prevLightbox"
+          >
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            v-if="allImages.length > 1"
+            class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-colors"
+            @click.stop="nextLightbox"
+          >
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
           </button>
           <img
@@ -214,6 +235,9 @@
             class="max-w-[90vw] max-h-[90vh] object-contain"
             @click.stop
           />
+          <div v-if="allImages.length > 1" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm">
+            {{ lightboxIndex + 1 }} / {{ allImages.length }}
+          </div>
         </div>
       </Teleport>
 
@@ -252,6 +276,7 @@ useHead({
 const showInquiryModal = ref(false)
 const lightboxOpen = ref(false)
 const lightboxImage = ref('')
+const lightboxIndex = ref(0)
 const carouselIndex = ref(0)
 let carouselInterval: NodeJS.Timeout | null = null
 let resumeTimeout: NodeJS.Timeout | null = null
@@ -269,6 +294,18 @@ function nextCarousel() {
 function prevCarousel() {
   if (allImages.value.length === 0) return
   carouselIndex.value = (carouselIndex.value - 1 + allImages.value.length) % allImages.value.length
+}
+
+function nextLightbox() {
+  if (allImages.value.length === 0) return
+  lightboxIndex.value = (lightboxIndex.value + 1) % allImages.value.length
+  lightboxImage.value = allImages.value[lightboxIndex.value]
+}
+
+function prevLightbox() {
+  if (allImages.value.length === 0) return
+  lightboxIndex.value = (lightboxIndex.value - 1 + allImages.value.length) % allImages.value.length
+  lightboxImage.value = allImages.value[lightboxIndex.value]
 }
 
 function startCarouselAutoplay() {
@@ -463,6 +500,20 @@ watch(locale, () => {
   fetchProduct()
 })
 
+watch(lightboxOpen, (open) => {
+  if (open) {
+    document.addEventListener('keydown', handleLightboxKeydown)
+  } else {
+    document.removeEventListener('keydown', handleLightboxKeydown)
+  }
+})
+
+function handleLightboxKeydown(e: KeyboardEvent) {
+  if (e.key === 'ArrowLeft') prevLightbox()
+  if (e.key === 'ArrowRight') nextLightbox()
+  if (e.key === 'Escape') lightboxOpen = false
+}
+
 onMounted(() => {
   fetchProduct()
 })
@@ -470,5 +521,6 @@ onMounted(() => {
 onUnmounted(() => {
   stopCarouselAutoplay()
   if (resumeTimeout) { clearTimeout(resumeTimeout); resumeTimeout = null }
+  document.removeEventListener('keydown', handleLightboxKeydown)
 })
 </script>

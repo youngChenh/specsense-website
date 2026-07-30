@@ -11,12 +11,16 @@
         <template v-for="item in navItems" :key="item.path">
           <!-- Menu items with children -->
           <div v-if="item.children && item.children.length > 0" class="relative" @mouseenter="activeMenu = item.key" @mouseleave="handleMenuLeave">
-            <button class="px-4 py-3 text-lg text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-0.5" :class="{ 'text-blue-600': isActiveMenu(item.key) }">
+            <NuxtLink
+              :to="localePath(item.path)"
+              class="px-4 py-3 text-lg text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-0.5"
+              :class="{ 'text-blue-600': isActiveMenu(item.key) }"
+            >
               {{ getLabel(item) }}
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
-            </button>
+            </NuxtLink>
             <!-- Dropdown Menu -->
             <div v-if="activeMenu === item.key" class="absolute left-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50" @mouseenter="cancelLeaveTimer" @mouseleave="handleMenuLeave">
               <template v-for="child in item.children" :key="child.key">
