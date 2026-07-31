@@ -318,7 +318,7 @@
       "message": "Your Message",
       "submit": "Send Inquiry",
       "sending": "Sending...",
-      "success": "Thank you! We'll be in touch soon.",
+      "success": "Sent successfully",
       "error": "Something went wrong. Please try again."
     },
     "info": {
