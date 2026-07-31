@@ -160,7 +160,7 @@ export const useApi = () => {
     name: string
     email: string
     company?: string
-    productInterest?: string
+    product?: string
     message: string
   }) => {
     const data = await $fetch(`${baseUrl}/api/contact`, {

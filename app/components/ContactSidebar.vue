@@ -95,13 +95,7 @@
         <h3 class="text-lg font-bold text-gray-900 mb-4">WeChat</h3>
         <div class="flex flex-col items-center">
           <div class="w-40 h-40 bg-gray-100 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
-            <img v-if="wechatQrCode" :src="wechatQrCode" alt="WeChat QR Code" class="w-full h-full object-contain" />
-            <div v-else class="text-gray-400 text-sm text-center p-4">
-              <svg class="w-12 h-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              No QR Code
-            </div>
+            <img src="/wechat.jpg" alt="WeChat QR Code" class="w-full h-full object-contain cursor-zoom-in" @click="wechatLightboxOpen = true" />
           </div>
           <div class="text-center">
             <p class="text-sm text-gray-500 mb-1">{{ $t('contact.info.phone') }}</p>
@@ -154,6 +148,30 @@
         @click="closeAll"
       ></div>
     </Teleport>
+
+    <!-- WeChat Lightbox -->
+    <Teleport to="body">
+      <div
+        v-if="wechatLightboxOpen"
+        class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center"
+        @click="wechatLightboxOpen = false"
+      >
+        <button
+          class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10"
+          @click="wechatLightboxOpen = false"
+        >
+          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <img
+          src="/wechat.jpg"
+          alt="WeChat QR Code"
+          class="max-w-[80vw] max-h-[80vh] object-contain"
+          @click.stop
+        />
+      </div>
+    </Teleport>
   </div>
 
   <!-- Inquiry Modal -->
@@ -176,6 +194,7 @@ const showWhatsApp = ref(false)
 const showWeChat = ref(false)
 const showEmail = ref(false)
 const openInquiryModal = ref(false)
+const wechatLightboxOpen = ref(false)
 
 // Company info
 const companyInfo = ref<any>(null)
@@ -240,4 +259,16 @@ onMounted(() => {
 watch(locale, () => {
   loadCompanyInfo()
 })
+
+watch(wechatLightboxOpen, (open) => {
+  if (open) {
+    document.addEventListener('keydown', handleLightboxKeydown)
+  } else {
+    document.removeEventListener('keydown', handleLightboxKeydown)
+  }
+})
+
+function handleLightboxKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') wechatLightboxOpen = false
+}
 </script>

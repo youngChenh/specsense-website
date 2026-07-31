@@ -4,7 +4,7 @@
     <div class="absolute inset-0 bg-black bg-opacity-50" @click="$emit('close')"></div>
 
     <!-- Modal -->
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 max-h-[90vh] overflow-y-auto">
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
       <!-- Close Button -->
       <button
         @click="$emit('close')"
@@ -60,6 +60,17 @@
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
+            {{ $t('contact.form.product') }}
+          </label>
+          <input
+            v-model="form.product"
+            type="text"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
             {{ $t('contact.form.message') }} *
           </label>
           <textarea
@@ -77,16 +88,23 @@
         >
           {{ isSubmitting ? $t('contact.form.sending') : $t('contact.form.submit') }}
         </button>
-
-        <div v-if="submitStatus === 'success'" class="p-3 bg-green-50 text-green-700 rounded-lg text-center">
-          {{ $t('contact.form.success') }}
-        </div>
-
-        <div v-if="submitStatus === 'error'" class="p-3 bg-red-50 text-red-700 rounded-lg text-center">
-          {{ $t('contact.form.error') }}
-        </div>
       </form>
     </div>
+
+    <!-- Success Toast -->
+    <Teleport to="body">
+      <div
+        v-if="showToast"
+        class="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none"
+      >
+        <div class="bg-gray-900/90 text-white px-8 py-4 rounded-xl shadow-2xl flex items-center gap-3">
+          <svg class="w-6 h-6 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <span class="text-lg font-medium">发送成功</span>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -105,33 +123,28 @@ const form = reactive({
   name: '',
   email: '',
   company: '',
+  product: props.productName,
   message: '',
 })
 
 const isSubmitting = ref(false)
-const submitStatus = ref<'idle' | 'success' | 'error'>('idle')
+const showToast = ref(false)
 
 async function submitForm() {
   isSubmitting.value = true
-  submitStatus.value = 'idle'
 
   try {
     await api.submitContact({
       name: form.name,
       email: form.email,
       company: form.company,
-      productInterest: props.productName,
+      product: form.product,
       message: form.message,
     })
-    submitStatus.value = 'success'
-
-    // Auto close after success
-    setTimeout(() => {
-      emit('close')
-    }, 2000)
+    showToast.value = true
+    await new Promise(resolve => setTimeout(resolve, 1200))
+    emit('close')
   } catch {
-    submitStatus.value = 'error'
-  } finally {
     isSubmitting.value = false
   }
 }

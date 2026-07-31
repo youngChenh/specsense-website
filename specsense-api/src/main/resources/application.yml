@@ -29,17 +29,16 @@ spring:
     time-zone: Asia/Shanghai
     default-property-inclusion: non_null
   mail:
-    host: smtp.ym.163.com
-    port: 25
+    host: smtp.qiye.163.com
+    port: 465
     username: info@spesense.com
-    password: ordermore2026+
+    password: 1xM9LAhQt@gqXj1A
     properties:
       mail:
         smtp:
           auth: true
-          starttls:
+          ssl:
             enable: true
-          starttls.required: true
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
