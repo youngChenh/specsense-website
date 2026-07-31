@@ -442,7 +442,7 @@ async function renderPdf(url: string) {
     const existingCanvases = pdfContainerRef.value.querySelectorAll('canvas')
     existingCanvases.forEach(c => c.remove())
 
-    const scale = 1.5
+    const scale = 3.0
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i)
       const viewport = page.getViewport({ scale })
