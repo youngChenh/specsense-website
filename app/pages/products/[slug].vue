@@ -442,25 +442,20 @@ async function renderPdf(url: string) {
     const existingCanvases = pdfContainerRef.value.querySelectorAll('canvas')
     existingCanvases.forEach(c => c.remove())
 
-    const scale = 3.0
-    const dpr = window.devicePixelRatio || 1
+    const scale = 4.0
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i)
       const viewport = page.getViewport({ scale })
 
-      // Create canvas with device pixel ratio for sharpest display
+      // Create canvas
       const canvas = document.createElement('canvas')
-      canvas.width = viewport.width * dpr
-      canvas.height = viewport.height * dpr
-      canvas.style.width = viewport.width + 'px'
-      canvas.style.height = viewport.height + 'px'
-      canvas.style.marginBottom = '8px'
-      canvas.style.display = 'block'
+      canvas.width = viewport.width
+      canvas.height = viewport.height
+      canvas.className = 'w-full mb-2 block'
       pdfContainerRef.value.appendChild(canvas)
 
       const context = canvas.getContext('2d')
       if (!context) continue
-      context.scale(dpr, dpr)
       await page.render({ canvasContext: context, viewport }).promise
       console.log(`Page ${i} rendered`)
     }
