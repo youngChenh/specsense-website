@@ -50,7 +50,10 @@
             </div>
           </div>
           <!-- Simple menu items without children -->
-          <NuxtLink v-else :to="localePath(item.path)" class="px-4 py-3 text-lg text-gray-600 hover:text-blue-600 font-medium transition-colors" active-class="text-blue-600">
+          <NuxtLink v-else :to="localePath(item.path)" class="px-4 py-3 text-lg text-gray-600 hover:text-blue-600 font-medium transition-colors flex items-center gap-1.5" active-class="text-blue-600">
+            <svg v-if="item.key === 'contact'" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
             {{ getLabel(item) }}
           </NuxtLink>
         </template>
