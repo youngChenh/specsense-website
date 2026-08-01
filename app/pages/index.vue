@@ -166,61 +166,57 @@
           <h2 class="text-3xl font-bold text-gray-900 mb-4">{{ $t('home.applicationsPreview.title') }}</h2>
           <p class="text-gray-600 max-w-2xl mx-auto">{{ $t('home.applicationsPreview.desc') }}</p>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <NuxtLink
-            v-for="app in applicationsData"
-            :key="app.id"
-            :to="localePath(`/applications?type=${app.type}`)"
-            class="group relative overflow-hidden rounded-2xl aspect-square"
-          >
-            <img
-              v-if="app.imageUrl"
-              :src="getImageUrl(app.imageUrl)"
-              :alt="app.title"
-              class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
-            <div v-else class="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-            <div class="absolute inset-0 flex flex-col items-center justify-end p-4">
-              <component :is="getIconComponent(app.type)" class="w-8 h-8 text-white mb-2 opacity-90" />
-              <h3 class="text-white font-semibold text-center text-sm">{{ app.title }}</h3>
-            </div>
-          </NuxtLink>
-        </div>
-
-        <!-- Featured Products for Applications -->
-        <div v-if="applicationProducts.length > 0" class="mt-16">
-          <h3 class="text-2xl font-bold text-center text-gray-900 mb-8">{{ $t('home.products.featured') }}</h3>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <ProductCard
-              v-for="product in applicationProducts"
-              :key="product.slug || product.id"
-              :product="product"
-            />
-          </div>
-          <div class="text-center mt-8">
+        <div class="relative">
+          <div class="flex gap-6 justify-center">
             <NuxtLink
-              :to="localePath('/products')"
-              class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+              v-for="app in visibleApps"
+              :key="app.id"
+              :to="localePath(`/applications?type=${app.type}`)"
+              class="group relative overflow-hidden rounded-2xl aspect-square w-48 flex-shrink-0"
             >
-              {{ $t('home.products.viewAll') }}
-              <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              <img
+                v-if="app.imageUrl"
+                :src="getImageUrl(app.imageUrl)"
+                :alt="app.title"
+                class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <div v-else class="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+              <div class="absolute inset-0 flex flex-col items-center justify-end p-4">
+                <component :is="getIconComponent(app.type)" class="w-8 h-8 text-white mb-2 opacity-90" />
+                <h3 class="text-white font-semibold text-center text-sm">{{ app.title }}</h3>
+              </div>
             </NuxtLink>
           </div>
-        </div>
-
-        <div class="text-center mt-12">
-          <NuxtLink
-            :to="localePath('/applications')"
-            class="inline-flex items-center text-blue-600 font-semibold hover:text-blue-800"
+          <!-- Carousel Arrows -->
+          <button
+            v-if="appTotalPages > 1"
+            @click="prevAppCarousel"
+            class="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center text-gray-700 -translate-x-1/2"
           >
-            {{ $t('common.viewAll') }}
-            <svg class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
-          </NuxtLink>
+          </button>
+          <button
+            v-if="appTotalPages > 1"
+            @click="nextAppCarousel"
+            class="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center text-gray-700 translate-x-1/2"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+        <!-- Carousel Indicators -->
+        <div v-if="appTotalPages > 1" class="flex justify-center gap-2 mt-6">
+          <button
+            v-for="(_, index) in appTotalPages"
+            :key="index"
+            @click="appCarouselIndex = index"
+            class="w-2.5 h-2.5 rounded-full transition-all duration-300"
+            :class="appCarouselIndex === index ? 'bg-blue-600 w-6' : 'bg-gray-300 hover:bg-gray-400'"
+          ></button>
         </div>
       </div>
     </section>
@@ -362,6 +358,35 @@ const currentSlide = ref(0)
 let autoPlayInterval: NodeJS.Timeout | null = null
 let resumeTimeout: NodeJS.Timeout | null = null
 const isHovering = ref(false)
+
+// Applications carousel
+const appCarouselIndex = ref(0)
+const appCarouselItems = 4
+
+const appTotalPages = computed(() => {
+  return Math.ceil(applicationsData.value.length / appCarouselItems)
+})
+
+const visibleApps = computed(() => {
+  const start = appCarouselIndex.value * appCarouselItems
+  return applicationsData.value.slice(start, start + appCarouselItems)
+})
+
+function nextAppCarousel() {
+  if (appCarouselIndex.value < appTotalPages.value - 1) {
+    appCarouselIndex.value++
+  } else {
+    appCarouselIndex.value = 0
+  }
+}
+
+function prevAppCarousel() {
+  if (appCarouselIndex.value > 0) {
+    appCarouselIndex.value--
+  } else {
+    appCarouselIndex.value = appTotalPages.value - 1
+  }
+}
 
 async function fetchBanners() {
   try {

@@ -35,15 +35,16 @@
         </div>
       </section>
 
-      <!-- Product Details - Two Column Layout -->
+      <!-- Product Details -->
       <section class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex gap-8">
-            <!-- Left Column - Image & PDF (bigger, natural flow) -->
+          <!-- Row 1: Image & Info side by side -->
+          <div class="flex gap-8 mb-8">
+            <!-- Left Column - Image -->
             <div class="w-[60%]">
               <!-- Main Image -->
               <div
-                class="bg-gray-100 rounded-xl overflow-hidden mb-6"
+                class="bg-gray-100 rounded-xl overflow-hidden"
                 @mouseenter="onCarouselHover(true)"
                 @mouseleave="onCarouselHover(false)"
               >
@@ -93,23 +94,10 @@
                   </button>
                 </div>
               </div>
-
-              <!-- PDF Section -->
-              <div v-if="pdfList.length > 0" class="mb-4">
-                <!-- PDF Canvas Preview -->
-                <div ref="pdfContainerRef" class="flex flex-col items-center">
-                  <div v-if="pdfLoading" class="flex items-center justify-center h-64">
-                    <span class="text-gray-500">Loading PDF...</span>
-                  </div>
-                  <div v-else-if="pdfError" class="flex items-center justify-center h-64">
-                    <span class="text-red-500">Failed to load PDF</span>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            <!-- Right Column - Product Info (fixed, does not scroll) -->
-            <div class="w-[40%] sticky top-0 h-fit overflow-y-auto" style="max-height: calc(100vh - 100px);">
+            <!-- Right Column - Product Info -->
+            <div class="w-[40%]">
               <!-- Product Header -->
               <div class="mb-6">
                 <span class="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm font-medium mb-3">
@@ -187,6 +175,18 @@
                   </svg>
                   {{ $t('products.downloadPdf') || 'Download PDF' }}
                 </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: PDF Section -->
+          <div v-if="pdfList.length > 0">
+            <div ref="pdfContainerRef" class="flex flex-col items-center">
+              <div v-if="pdfLoading" class="flex items-center justify-center h-64">
+                <span class="text-gray-500">Loading PDF...</span>
+              </div>
+              <div v-else-if="pdfError" class="flex items-center justify-center h-64">
+                <span class="text-red-500">Failed to load PDF</span>
               </div>
             </div>
           </div>
