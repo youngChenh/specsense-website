@@ -39,7 +39,7 @@
       <section class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <!-- Row 1: Image & Info side by side -->
-          <div class="flex gap-8 mb-8">
+          <div class="flex gap-8 items-start mb-8">
             <!-- Left Column - Image -->
             <div class="w-[60%]">
               <!-- Main Image -->
@@ -141,7 +141,7 @@
               </div>
 
               <!-- Applications -->
-              <div v-if="displayApplications" class="mb-8">
+              <div v-if="false" class="mb-8">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.985 23.985 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -154,7 +154,7 @@
               </div>
 
               <!-- Action Buttons -->
-              <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200 relative z-[60]" style="pointer-events: auto;">
+              <div class="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
                 <button
                   @click="showInquiryModal = true"
                   class="flex-1 px-6 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
@@ -181,6 +181,10 @@
 
           <!-- Row 2: PDF Section -->
           <div v-if="pdfList.length > 0">
+            <div class="flex items-center gap-4 mb-6">
+              <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap cursor-pointer hover:text-blue-600">产品概述</h3>
+              <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
             <div ref="pdfContainerRef" class="flex flex-col items-center">
               <div v-if="pdfLoading" class="flex items-center justify-center h-64">
                 <span class="text-gray-500">Loading PDF...</span>
