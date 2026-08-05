@@ -226,7 +226,9 @@ CREATE TABLE contact_inquiry (
     product VARCHAR(300) COMMENT 'Product of interest',
     message TEXT NOT NULL COMMENT 'Inquiry message',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_created_at (created_at)
+    deleted TINYINT DEFAULT 0 COMMENT 'Logical delete: 0=not deleted, 1=deleted',
+    INDEX idx_created_at (created_at),
+    INDEX idx_deleted (deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Contact form submissions';
 
 -- ----------------------------

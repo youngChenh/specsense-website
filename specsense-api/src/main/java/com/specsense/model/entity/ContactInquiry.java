@@ -12,4 +12,5 @@ public class ContactInquiry {
     private String product;
     private String message;
     private LocalDateTime createdAt;
+    private Integer deleted = 0;
 }
