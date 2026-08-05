@@ -16,9 +16,13 @@ spring:
       max-request-size: 100MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://43.159.58.248/youthful_db?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://43.159.58.248/youthful_db?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&connectTimeout=30000&socketTimeout=60000
     username: youthful
     password: Youthful@123456
+    hikari:
+      connection-timeout: 30000
+      max-lifetime: 1800000
+      idle-timeout: 600000
   redis:
     host: 43.159.58.248
     port: 6379
@@ -32,7 +36,7 @@ spring:
     host: smtp.qiye.163.com
     port: 465
     username: info@spesense.com
-    password: 1xM9LAhQt@gqXj1A
+    password: bRMVnPeS7n$Y8n4t
     properties:
       mail:
         smtp:
