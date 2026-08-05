@@ -224,7 +224,12 @@
     "categories": "品牌分类",
     "allBrands": "全部品牌",
     "filterBy": "按分类筛选",
-    "noBrands": "该分类下暂无品牌"
+    "noBrands": "该分类下暂无品牌",
+    "carousel": {
+      "optical": "光学集成",
+      "supply": "产品供应链",
+      "afterSales": "售后服务"
+    }
   },
   "services": {
     "title": "服务与支持",
