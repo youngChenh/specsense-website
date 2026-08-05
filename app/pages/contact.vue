@@ -1,12 +1,13 @@
 <template>
   <div class="bg-gray-50">
     <!-- Hero -->
-    <section class="bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ $t('contact.title') }}</h1>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-          {{ $t('contact.subtitle') }}
-        </p>
+    <section class="relative">
+      <div class="w-full h-[350px] overflow-hidden">
+        <img
+          src="/Contact_Us.png"
+          alt="Contact Us"
+          class="w-full h-full object-cover"
+        />
       </div>
     </section>
 
