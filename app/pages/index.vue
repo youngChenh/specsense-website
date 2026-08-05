@@ -87,38 +87,32 @@
     </section>
 
     <!-- Features Section -->
-    <section class="py-20 bg-white">
+    <section class="py-20 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">
           {{ $t('home.features.title') }}
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="text-center p-8 rounded-xl bg-gray-50 hover:shadow-lg transition-shadow">
-            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg class="w-10 h-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold mb-3">{{ $t('home.features.precision.title') }}</h3>
-            <p class="text-gray-600">{{ $t('home.features.precision.desc') }}</p>
+          <div class="text-center bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <img
+              src="/01-optical-integration.png"
+              alt="Optical Integration"
+              class="w-full h-64 object-cover mx-auto"
+            />
           </div>
-          <div class="text-center p-8 rounded-xl bg-gray-50 hover:shadow-lg transition-shadow">
-            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg class="w-10 h-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold mb-3">{{ $t('home.features.reliability.title') }}</h3>
-            <p class="text-gray-600">{{ $t('home.features.reliability.desc') }}</p>
+          <div class="text-center bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <img
+              src="/02-product-supply-chain.png"
+              alt="Product Supply Chain"
+              class="w-full h-64 object-cover mx-auto"
+            />
           </div>
-          <div class="text-center p-8 rounded-xl bg-gray-50 hover:shadow-lg transition-shadow">
-            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg class="w-10 h-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold mb-3">{{ $t('home.features.support.title') }}</h3>
-            <p class="text-gray-600">{{ $t('home.features.support.desc') }}</p>
+          <div class="text-center bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <img
+              src="/03-after-sales-support.png"
+              alt="After-sales Support"
+              class="w-full h-64 object-cover mx-auto"
+            />
           </div>
         </div>
       </div>

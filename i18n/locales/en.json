@@ -256,7 +256,12 @@
     "categories": "Categories",
     "allBrands": "All Brands",
     "filterBy": "Filter by category",
-    "noBrands": "No brands found in this category"
+    "noBrands": "No brands found in this category",
+    "carousel": {
+      "optical": "Optical Integration",
+      "supply": "Product Supply Chain",
+      "afterSales": "After-sales Support"
+    }
   },
   "news": {
     "title": "News",

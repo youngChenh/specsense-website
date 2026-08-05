@@ -36,30 +36,21 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <!-- Mission -->
-          <div class="bg-white rounded-xl shadow-md p-8">
-            <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-              <svg class="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ $t('about.mission.title') }}</h3>
-            <p class="text-gray-600" v-if="mission">{{ mission }}</p>
-            <p class="text-gray-600" v-else>{{ $t('about.mission.desc') }}</p>
+          <div class="rounded-xl overflow-hidden shadow-md">
+            <img
+              src="/mission.png"
+              alt="Our Mission"
+              class="w-full h-full object-cover"
+            />
           </div>
 
           <!-- Values -->
-          <div class="bg-white rounded-xl shadow-md p-8">
-            <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-              <svg class="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ $t('about.values.title') }}</h3>
-            <div class="grid grid-cols-3 gap-4">
-              <div v-for="value in values" :key="value" class="text-center">
-                <div class="text-2xl font-bold text-blue-600">{{ value }}</div>
-              </div>
-            </div>
+          <div class="rounded-xl overflow-hidden shadow-md">
+            <img
+              src="/vision.png"
+              alt="Our Vision"
+              class="w-full h-full object-cover"
+            />
           </div>
         </div>
       </div>

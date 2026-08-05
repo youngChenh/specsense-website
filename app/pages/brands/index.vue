@@ -1,15 +1,60 @@
 <template>
   <div class="bg-gray-50 min-h-screen">
-    <!-- Page Header -->
-    <section class="bg-gradient-to-br from-blue-50 to-indigo-100 py-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ $t('brands.title') }}</h1>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">{{ $t('brands.subtitle') }}</p>
+    <!-- Page Header with Carousel -->
+    <section class="relative">
+      <!-- Carousel -->
+      <div
+        class="relative h-[350px] w-full overflow-hidden"
+        @mouseenter="onCarouselHover(true)"
+        @mouseleave="onCarouselHover(false)"
+      >
+        <div
+          v-for="(slide, index) in brandCarouselSlides"
+          :key="index"
+          class="absolute inset-0 transition-opacity duration-1000"
+          :class="currentBrandSlide === index ? 'opacity-100' : 'opacity-0'"
+        >
+          <img
+            :src="slide.image"
+            :alt="slide.title"
+            class="w-full h-full object-cover"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-black/20 to-transparent"></div>
+        </div>
+
+        <!-- Carousel Indicators -->
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
+          <button
+            v-for="(_, index) in brandCarouselSlides"
+            :key="index"
+            @click="currentBrandSlide = index"
+            class="w-3 h-3 rounded-full transition-all duration-300"
+            :class="currentBrandSlide === index ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/80'"
+          ></button>
+        </div>
+
+        <!-- Carousel Arrows -->
+        <button
+          @click="prevBrandSlide"
+          class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-colors z-10"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button
+          @click="nextBrandSlide"
+          class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-colors z-10"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
       </div>
     </section>
 
     <!-- Brands Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="w-full max-w-[1581.11px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="flex flex-col lg:flex-row gap-8">
         <!-- Category Sidebar -->
         <div class="lg:w-64 flex-shrink-0">
@@ -163,6 +208,69 @@ const brands = ref<any[]>([])
 const categories = ref<any[]>([])
 const selectedCategory = ref('all')
 
+// Brand carousel data
+const brandCarouselSlides = computed(() => [
+  {
+    image: '/banner_1.png',
+    title: locale.value === 'zh' ? '光学集成' : 'Optical Integration',
+    subtitle: locale.value === 'zh' ? '探索我们的合作品牌和制造商' : 'Explore our partner brands and manufacturers'
+  },
+  {
+    image: '/banner_2.png',
+    title: locale.value === 'zh' ? '产品供应链' : 'Product Supply Chain',
+    subtitle: locale.value === 'zh' ? '探索我们的合作品牌和制造商' : 'Explore our partner brands and manufacturers'
+  },
+  {
+    image: '/banner_3.png',
+    title: locale.value === 'zh' ? '售后服务' : 'After-sales Support',
+    subtitle: locale.value === 'zh' ? '探索我们的合作品牌和制造商' : 'Explore our partner brands and manufacturers'
+  }
+])
+const currentBrandSlide = ref(0)
+let brandCarouselInterval: NodeJS.Timeout | null = null
+let brandCarouselResumeTimeout: NodeJS.Timeout | null = null
+const isBrandCarouselHovering = ref(false)
+
+function nextBrandSlide() {
+  if (brandCarouselSlides.value.length === 0) return
+  currentBrandSlide.value = (currentBrandSlide.value + 1) % brandCarouselSlides.value.length
+}
+
+function prevBrandSlide() {
+  if (brandCarouselSlides.value.length === 0) return
+  currentBrandSlide.value = (currentBrandSlide.value - 1 + brandCarouselSlides.value.length) % brandCarouselSlides.value.length
+}
+
+function startBrandCarouselAutoPlay() {
+  brandCarouselInterval = setInterval(() => {
+    if (!isBrandCarouselHovering.value) {
+      currentBrandSlide.value = (currentBrandSlide.value + 1) % brandCarouselSlides.value.length
+    }
+  }, 4000)
+}
+
+function stopBrandCarouselAutoPlay() {
+  if (brandCarouselInterval) {
+    clearInterval(brandCarouselInterval)
+    brandCarouselInterval = null
+  }
+}
+
+function onCarouselHover(hovering: boolean) {
+  isBrandCarouselHovering.value = hovering
+  if (hovering) {
+    stopBrandCarouselAutoPlay()
+    if (brandCarouselResumeTimeout) {
+      clearTimeout(brandCarouselResumeTimeout)
+      brandCarouselResumeTimeout = null
+    }
+  } else {
+    brandCarouselResumeTimeout = setTimeout(() => {
+      startBrandCarouselAutoPlay()
+    }, 2000)
+  }
+}
+
 watch(selectedCategory, () => {
   fetchBrands()
 })
@@ -249,6 +357,15 @@ async function fetchCategories() {
 onMounted(() => {
   fetchCategories()
   fetchBrands()
+  startBrandCarouselAutoPlay()
+})
+
+onUnmounted(() => {
+  stopBrandCarouselAutoPlay()
+  if (brandCarouselResumeTimeout) {
+    clearTimeout(brandCarouselResumeTimeout)
+    brandCarouselResumeTimeout = null
+  }
 })
 </script>
 
