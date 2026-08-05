@@ -1,5 +1,7 @@
 package com.specsense.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -13,6 +15,8 @@ import javax.mail.internet.MimeMessage;
 @Service
 public class EmailService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
+
     @Autowired
     private JavaMailSender mailSender;
 
@@ -20,6 +24,7 @@ public class EmailService {
     private String fromEmail;
 
     public void sendContactInquiry(String name, String email, String company, String product, String message) {
+        logger.info("【邮件发送】开始发送询价邮件 - 发件人: {}, 邮箱: {}, 公司: {}", name, email, company);
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -32,19 +37,29 @@ public class EmailService {
             helper.setText(htmlContent, true);
 
             mailSender.send(mimeMessage);
+            logger.info("【邮件发送】成功发送 HTML 格式邮件到: {}", fromEmail);
         } catch (MessagingException e) {
+            logger.error("【邮件发送】HTML邮件发送失败，尝试发送纯文本邮件: {}", e.getMessage());
             // Fallback to simple text email
             sendSimpleEmail(name, email, company, product, message);
+        } catch (Exception e) {
+            logger.error("【邮件发送】邮件发送异常: {}", e.getMessage(), e);
+            throw e;
         }
     }
 
     private void sendSimpleEmail(String name, String email, String company, String product, String message) {
-        SimpleMailMessage messageObj = new SimpleMailMessage();
-        messageObj.setFrom(fromEmail);
-        messageObj.setTo(fromEmail);
-        messageObj.setSubject("【官网询价】来自 " + name + " 的询价请求");
-        messageObj.setText(buildInquiryTextContent(name, email, company, product, message));
-        mailSender.send(messageObj);
+        try {
+            SimpleMailMessage messageObj = new SimpleMailMessage();
+            messageObj.setFrom(fromEmail);
+            messageObj.setTo(fromEmail);
+            messageObj.setSubject("【官网询价】来自 " + name + " 的询价请求");
+            messageObj.setText(buildInquiryTextContent(name, email, company, product, message));
+            mailSender.send(messageObj);
+            logger.info("【邮件发送】成功发送纯文本格式邮件到: {}", fromEmail);
+        } catch (Exception e) {
+            logger.error("【邮件发送】纯文本邮件发送也失败了: {}", e.getMessage(), e);
+        }
     }
 
     private String buildInquiryEmailContent(String name, String email, String company, String product, String message) {

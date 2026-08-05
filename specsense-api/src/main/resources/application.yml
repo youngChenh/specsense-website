@@ -62,3 +62,7 @@ logging:
   level:
     com.specsense: DEBUG
     org.springframework: INFO
+  file:
+    name: ./logs/specsense.log
+    max-size: 10MB
+    max-history: 30
