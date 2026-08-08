@@ -136,6 +136,11 @@ const sidebarCategories = computed(() => {
     subcategories: (cat.children || []).map((sub: any) => ({
       key: sub.key,
       label: locale.value === 'zh' ? sub.nameZh : sub.nameEn,
+      // 三级分类
+      subcategories: (sub.children || []).map((third: any) => ({
+        key: third.key,
+        label: locale.value === 'zh' ? third.nameZh : third.nameEn,
+      }))
     }))
   }))
 })
@@ -159,6 +164,12 @@ function getCategoryName(key: string): string {
     for (const sub of (cat.children || [])) {
       if (sub.key === key) {
         return locale.value === 'zh' ? sub.nameZh : sub.nameEn
+      }
+      // 三级分类
+      for (const third of (sub.children || [])) {
+        if (third.key === key) {
+          return locale.value === 'zh' ? third.nameZh : third.nameEn
+        }
       }
     }
   }

@@ -45,16 +45,36 @@
           v-if="expandedCategories.includes(category.key) && category.subcategories?.length"
           class="subcategories bg-gray-50"
         >
-          <button
+          <div
             v-for="sub in category.subcategories"
             :key="sub.key"
-            @click="$emit('category-change', sub.key)"
-            class="w-full px-6 py-2 text-left text-sm transition-colors flex items-center"
-            :class="selectedCategory === sub.key ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'"
+            class="sub-item"
           >
-            <span class="w-1.5 h-1.5 rounded-full mr-2" :class="selectedCategory === sub.key ? 'bg-blue-600' : 'bg-gray-300'"></span>
-            {{ sub.label }}
-          </button>
+            <button
+              @click="$emit('category-change', sub.key)"
+              class="w-full px-6 py-2 text-left text-sm transition-colors flex items-center"
+              :class="selectedCategory === sub.key ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'"
+            >
+              <span class="w-1.5 h-1.5 rounded-full mr-2" :class="selectedCategory === sub.key ? 'bg-blue-600' : 'bg-gray-300'"></span>
+              {{ sub.label }}
+            </button>
+            <!-- 三级分类 -->
+            <div
+              v-if="sub.subcategories?.length"
+              class="third-level"
+            >
+              <button
+                v-for="third in sub.subcategories"
+                :key="third.key"
+                @click="$emit('category-change', third.key)"
+                class="w-full px-8 py-1.5 text-left text-xs transition-colors flex items-center"
+                :class="selectedCategory === third.key ? 'text-blue-600 font-medium' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50'"
+              >
+                <span class="w-1 h-1 rounded-full mr-2" :class="selectedCategory === third.key ? 'bg-blue-600' : 'bg-gray-300'"></span>
+                {{ third.label }}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -65,6 +85,7 @@
 interface Subcategory {
   key: string
   label: string
+  subcategories?: Subcategory[]
 }
 
 interface Category {
@@ -123,8 +144,17 @@ function isCategoryActive(key: string) {
   padding-bottom: 2px;
 }
 
+.sub-item {
+  position: relative;
+}
+
 .subcategories button {
   position: relative;
+}
+
+.third-level {
+  padding-top: 1px;
+  padding-bottom: 1px;
 }
 
 /* 确保从父按钮移动到子菜单时不会触发间隙 */

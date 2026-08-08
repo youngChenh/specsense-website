@@ -37,9 +37,35 @@
                   </NuxtLink>
                   <!-- Second Level Dropdown -->
                   <div class="absolute left-full top-0 ml-1 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 hidden group-hover:block">
-                    <NuxtLink v-for="subChild in child.children" :key="subChild.key" :to="localePath(subChild.path)" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">
-                      {{ getLabel(subChild) }}
-                    </NuxtLink>
+                    <template v-for="subChild in child.children" :key="subChild.key">
+                      <!-- 二级分类有三级子分类 -->
+                      <div v-if="subChild.children && subChild.children.length > 0" class="relative group">
+                        <NuxtLink
+                          :to="localePath(subChild.path)"
+                          class="w-full px-4 py-2 text-left text-gray-600 hover:text-blue-600 hover:bg-gray-50 flex items-center justify-between"
+                        >
+                          {{ getLabel(subChild) }}
+                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </NuxtLink>
+                        <!-- Third Level Dropdown -->
+                        <div class="absolute left-full top-0 ml-1 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 hidden group-hover:block">
+                          <NuxtLink
+                            v-for="thirdChild in subChild.children"
+                            :key="thirdChild.key"
+                            :to="localePath(thirdChild.path)"
+                            class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                          >
+                            {{ getLabel(thirdChild) }}
+                          </NuxtLink>
+                        </div>
+                      </div>
+                      <!-- 二级分类没有三级子分类 -->
+                      <NuxtLink v-else :to="localePath(subChild.path)" class="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50">
+                        {{ getLabel(subChild) }}
+                      </NuxtLink>
+                    </template>
                   </div>
                 </div>
                 <!-- Item without children: simple link -->
@@ -109,15 +135,36 @@
                     >
                       {{ getLabel(child) }}
                     </NuxtLink>
-                    <NuxtLink
-                      v-for="subChild in child.children"
-                      :key="subChild.key"
-                      :to="localePath(subChild.path)"
-                      class="block px-6 py-1 text-gray-500 hover:text-blue-600 text-sm"
-                      @click="mobileMenuOpen = false"
-                    >
-                      {{ getLabel(subChild) }}
-                    </NuxtLink>
+                    <template v-for="subChild in child.children" :key="subChild.key">
+                      <!-- 二级分类有三级子分类 -->
+                      <div v-if="subChild.children && subChild.children.length > 0" class="space-y-1">
+                        <NuxtLink
+                          :to="localePath(subChild.path)"
+                          class="block px-6 py-1 text-sm text-gray-500 hover:text-blue-600"
+                          @click="mobileMenuOpen = false"
+                        >
+                          {{ getLabel(subChild) }}
+                        </NuxtLink>
+                        <NuxtLink
+                          v-for="thirdChild in subChild.children"
+                          :key="thirdChild.key"
+                          :to="localePath(thirdChild.path)"
+                          class="block px-8 py-1 text-gray-400 hover:text-blue-600 text-sm"
+                          @click="mobileMenuOpen = false"
+                        >
+                          {{ getLabel(thirdChild) }}
+                        </NuxtLink>
+                      </div>
+                      <!-- 二级分类没有三级子分类 -->
+                      <NuxtLink
+                        v-else
+                        :to="localePath(subChild.path)"
+                        class="block px-6 py-1 text-gray-500 hover:text-blue-600 text-sm"
+                        @click="mobileMenuOpen = false"
+                      >
+                        {{ getLabel(subChild) }}
+                      </NuxtLink>
+                    </template>
                   </div>
                   <NuxtLink
                     v-else
@@ -201,18 +248,43 @@ async function loadHeaderMenus() {
 
 // Build nav items from dynamic categories
 const navItems = computed(() => {
-  // If we have header menus from API, use them directly (they already have children)
+  // If we have header menus from API, use them directly
   if (headerMenus.value.length > 0) {
-    return headerMenus.value.map(menu => ({
-      key: menu.key,
-      path: menu.path,
-      label: locale.value === 'zh' ? menu.labelZh : menu.labelEn,
-      children: (menu.children || []).map(child => ({
-        key: child.key,
-        path: child.path,
-        label: locale.value === 'zh' ? child.labelZh : child.labelEn,
-      })),
-    }))
+    return headerMenus.value.map(menu => {
+      // 产品中心使用 dynamicCategories 来获取三级分类
+      if (menu.key === 'header-products' && dynamicCategories.value.length > 0) {
+        return {
+          key: menu.key,
+          path: menu.path,
+          label: locale.value === 'zh' ? menu.labelZh : menu.labelEn,
+          children: dynamicCategories.value.map((cat: any) => ({
+            key: cat.key,
+            path: `/products?category=${cat.key}`,
+            label: locale.value === 'zh' ? cat.nameZh : cat.nameEn,
+            children: (cat.children || []).map((subCat: any) => ({
+              key: subCat.key,
+              path: `/products?category=${subCat.key}`,
+              label: locale.value === 'zh' ? subCat.nameZh : subCat.nameEn,
+              children: (subCat.children || []).map((thirdCat: any) => ({
+                key: thirdCat.key,
+                path: `/products?category=${thirdCat.key}`,
+                label: locale.value === 'zh' ? thirdCat.nameZh : thirdCat.nameEn,
+              })),
+            })),
+          })),
+        }
+      }
+      return {
+        key: menu.key,
+        path: menu.path,
+        label: locale.value === 'zh' ? menu.labelZh : menu.labelEn,
+        children: (menu.children || []).map(child => ({
+          key: child.key,
+          path: child.path,
+          label: locale.value === 'zh' ? child.labelZh : child.labelEn,
+        })),
+      }
+    })
   }
 
   if (dynamicCategories.value.length > 0) {
@@ -225,11 +297,16 @@ const navItems = computed(() => {
         children: dynamicCategories.value.map((cat: any) => ({
           key: cat.key,
           path: `/products?category=${cat.key}`,
-          label: cat.name,
+          label: locale.value === 'zh' ? cat.nameZh : cat.nameEn,
           children: (cat.children || []).map((subCat: any) => ({
             key: subCat.key,
-            label: subCat.name,
             path: `/products?category=${subCat.key}`,
+            label: locale.value === 'zh' ? subCat.nameZh : subCat.nameEn,
+            children: (subCat.children || []).map((thirdCat: any) => ({
+              key: thirdCat.key,
+              path: `/products?category=${thirdCat.key}`,
+              label: locale.value === 'zh' ? thirdCat.nameZh : thirdCat.nameEn,
+            })),
           })),
         })),
       },
