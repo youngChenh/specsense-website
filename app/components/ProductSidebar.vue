@@ -51,16 +51,26 @@
             class="sub-item"
           >
             <button
-              @click="$emit('category-change', sub.key)"
-              class="w-full px-6 py-2 text-left text-sm transition-colors flex items-center"
+              @click="toggleSubCategory(sub.key)"
+              class="w-full px-6 py-2 text-left text-sm transition-colors flex items-center justify-between"
               :class="selectedCategory === sub.key ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'"
             >
-              <span class="w-1.5 h-1.5 rounded-full mr-2" :class="selectedCategory === sub.key ? 'bg-blue-600' : 'bg-gray-300'"></span>
-              {{ sub.label }}
+              <div class="flex items-center">
+                <span class="w-1.5 h-1.5 rounded-full mr-2" :class="selectedCategory === sub.key ? 'bg-blue-600' : 'bg-gray-300'"></span>
+                {{ sub.label }}
+              </div>
+              <svg
+                v-if="sub.subcategories?.length"
+                class="w-3 h-3 transition-transform"
+                :class="{ 'rotate-180': expandedSubcategories.includes(sub.key) }"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
-            <!-- 三级分类 -->
+            <!-- 三级分类 - 默认折叠，点击二级分类展开 -->
             <div
-              v-if="sub.subcategories?.length"
+              v-if="expandedSubcategories.includes(sub.key) && sub.subcategories?.length"
               class="third-level"
             >
               <button
@@ -104,6 +114,7 @@ defineEmits<{
 }>()
 
 const expandedCategories = ref<string[]>([])
+const expandedSubcategories = ref<string[]>([])
 const hoveredCategory = ref<string | null>(null)
 
 // Auto-expand all categories when categories change
@@ -124,6 +135,15 @@ function toggleCategory(key: string) {
     expandedCategories.value.splice(index, 1)
   } else {
     expandedCategories.value.push(key)
+  }
+}
+
+function toggleSubCategory(key: string) {
+  const index = expandedSubcategories.value.indexOf(key)
+  if (index > -1) {
+    expandedSubcategories.value.splice(index, 1)
+  } else {
+    expandedSubcategories.value.push(key)
   }
 }
 
