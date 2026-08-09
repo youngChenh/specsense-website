@@ -185,12 +185,13 @@
               <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap cursor-pointer hover:text-blue-600">产品概述</h3>
               <div class="flex-1 h-px bg-gray-200"></div>
             </div>
-            <div class="flex flex-col items-center">
-              <iframe
-                :src="getFullUrl(pdfList[0])"
-                class="w-full h-[800px] border border-gray-200 rounded-lg"
-                frameborder="0"
-              />
+            <div ref="pdfContainerRef" class="flex flex-col items-center">
+              <div v-if="pdfLoading" class="flex items-center justify-center h-64">
+                <span class="text-gray-500">Loading PDF...</span>
+              </div>
+              <div v-else-if="pdfError" class="flex items-center justify-center h-64">
+                <span class="text-red-500">Failed to load PDF</span>
+              </div>
             </div>
           </div>
         </div>
@@ -266,6 +267,16 @@ const localePath = useLocalePath()
 const config = useRuntimeConfig()
 const { getImageUrl } = useImageUrl()
 
+// Load PDF.js from CDN
+useHead({
+  script: [
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+      async: true,
+    },
+  ],
+})
+
 const showInquiryModal = ref(false)
 const lightboxOpen = ref(false)
 const lightboxImage = ref('')
@@ -323,6 +334,10 @@ function onCarouselHover(entering: boolean) {
 }
 const loading = ref(true)
 const product = ref<any>(null)
+const pdfLoading = ref(false)
+const pdfError = ref(false)
+const pdfPageCount = ref(0)
+const pdfContainerRef = ref<HTMLDivElement | null>(null)
 
 const displayName = computed(() => {
   if (!product.value) return ''
@@ -375,14 +390,105 @@ const pdfList = computed(() => {
   return []
 })
 
+async function waitForPdfJs(): Promise<boolean> {
+  // @ts-ignore
+  const pdfjs = window.pdfjsLib
+  if (pdfjs) return true
+
+  return new Promise((resolve) => {
+    const checkInterval = setInterval(() => {
+      // @ts-ignore
+      if (window.pdfjsLib) {
+        clearInterval(checkInterval)
+        resolve(true)
+      }
+    }, 100)
+
+    // Timeout after 10 seconds
+    setTimeout(() => {
+      clearInterval(checkInterval)
+      resolve(false)
+    }, 10000)
+  })
+}
+
+async function renderPdf(url: string) {
+  pdfLoading.value = true
+  pdfError.value = false
+  try {
+    const loaded = await waitForPdfJs()
+    if (!loaded) {
+      pdfError.value = true
+      return
+    }
+
+    const pdfUrl = getFullUrl(url)
+    console.log('Loading PDF from:', pdfUrl)
+    // @ts-ignore
+    const pdfjs = window.pdfjsLib
+    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+    const loadingTask = pdfjs.getDocument(pdfUrl)
+    const pdf = await loadingTask.promise
+    console.log('PDF loaded, pages:', pdf.numPages)
+    pdfPageCount.value = pdf.numPages
+
+    // Wait for next tick to ensure container is rendered
+    await nextTick()
+    await nextTick()
+
+    if (!pdfContainerRef.value) {
+      console.error('Container ref not found')
+      pdfError.value = true
+      return
+    }
+
+    // Clear previous canvases (keep loading/error divs)
+    const existingCanvases = pdfContainerRef.value.querySelectorAll('canvas')
+    existingCanvases.forEach(c => c.remove())
+
+    const scale = 4.0
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i)
+      const viewport = page.getViewport({ scale })
+
+      // Create canvas
+      const canvas = document.createElement('canvas')
+      canvas.width = viewport.width
+      canvas.height = viewport.height
+      canvas.className = 'w-full mb-2 block'
+      pdfContainerRef.value.appendChild(canvas)
+
+      const context = canvas.getContext('2d')
+      if (!context) continue
+      await page.render({ canvasContext: context, viewport }).promise
+      console.log(`Page ${i} rendered`)
+    }
+  } catch (e) {
+    console.error('PDF render error:', e)
+    pdfError.value = true
+  } finally {
+    pdfLoading.value = false
+  }
+}
+
 async function fetchProduct() {
   loading.value = true
+  pdfPageCount.value = 0
+  // Clear previous PDF canvases
+  if (pdfContainerRef.value) {
+    pdfContainerRef.value.querySelectorAll('canvas').forEach(c => c.remove())
+  }
   const slug = route.params.slug as string
   try {
     product.value = await api.fetchProduct(slug, locale.value)
     carouselIndex.value = 0
     if (allImages.value.length > 1) {
       startCarouselAutoplay()
+    }
+    // Render PDF if available
+    if (product.value?.pdfUrls?.length > 0) {
+      await nextTick()
+      renderPdf(product.value.pdfUrls[0])
     }
   } catch (error) {
     console.error('Failed to fetch product:', error)
