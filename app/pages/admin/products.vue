@@ -106,7 +106,7 @@
           <el-input v-model="form.nameZh" :placeholder="$t('admin.pleaseEnter') + $t('admin.nameZh')" />
         </el-form-item>
         <el-form-item :label="$t('admin.slug')">
-          <el-input v-model="form.slug" :placeholder="$t('admin.pleaseEnter') + $t('admin.slug')" :disabled="isEdit" />
+          <el-input v-model="form.slug" :placeholder="$t('admin.pleaseEnter') + $t('admin.slug')" />
         </el-form-item>
         <el-form-item :label="$t('admin.descriptionEn')">
           <el-input v-model="form.descriptionEn" type="textarea" rows="3" :placeholder="$t('admin.pleaseEnter') + $t('admin.descriptionEn')" />
