@@ -51,7 +51,7 @@
             class="sub-item"
           >
             <button
-              @click="toggleSubCategory(sub.key)"
+              @click="handleSubCategoryClick(sub)"
               class="w-full px-6 py-2 text-left text-sm transition-colors flex items-center justify-between"
               :class="selectedCategory === sub.key ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'"
             >
@@ -109,7 +109,7 @@ const props = defineProps<{
   categories: Category[]
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'category-change', category: string): void
 }>()
 
@@ -144,6 +144,16 @@ function toggleSubCategory(key: string) {
     expandedSubcategories.value.splice(index, 1)
   } else {
     expandedSubcategories.value.push(key)
+  }
+}
+
+function handleSubCategoryClick(sub: any) {
+  // 如果有三级子分类，展开/折叠
+  if (sub.subcategories?.length) {
+    toggleSubCategory(sub.key)
+  } else {
+    // 没有三级子分类，直接触发筛选
+    emit('category-change', sub.key)
   }
 }
 
