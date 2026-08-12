@@ -57,28 +57,31 @@
       </div>
     </section>
 
-    <!-- Timeline -->
+    <!-- 公司生产仓库 -->
     <section class="py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">{{ $t('about.timeline.title') }}</h2>
-        <div class="relative">
-          <div class="absolute left-1/2 transform -translate-x-px h-full w-0.5 bg-blue-200"></div>
-          <div class="space-y-12">
-            <div v-for="(event, index) in timeline" :key="event.year" class="relative">
-              <div
-                class="flex items-center"
-                :class="index % 2 === 0 ? 'justify-end' : 'justify-start'"
-              >
-                <div
-                  class="w-5/12 bg-white rounded-lg shadow-md p-6"
-                  :class="index % 2 === 0 ? 'text-right' : 'text-left'"
-                >
-                  <div class="text-3xl font-bold text-blue-600 mb-2">{{ event.year }}</div>
-                  <div class="text-gray-700">{{ $t(event.label) }}</div>
-                </div>
-              </div>
-              <div class="absolute left-1/2 transform -translate-x-1/2 -translate-y-1 w-4 h-4 bg-blue-600 rounded-full border-4 border-white"></div>
-            </div>
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">{{ $t('about.companyWarehouse') }}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <img
+              src="/about_us_1.jpg"
+              alt="公司生产仓库 1"
+              class="w-full h-72 object-cover hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+          <div class="rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <img
+              src="/about_us_2.png"
+              alt="公司生产仓库 2"
+              class="w-full h-72 object-cover hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+          <div class="rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <img
+              src="/about_us_3.png"
+              alt="公司生产仓库 3"
+              class="w-full h-72 object-cover hover:scale-105 transition-transform duration-300"
+            />
           </div>
         </div>
       </div>
