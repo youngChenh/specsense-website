@@ -176,7 +176,7 @@
             <div class="mt-1">{{ $t('about.contact.phone') }}</div>
           </div>
           <div>
-            <div class="text-2xl font-bold text-blue-600">{{ contactAddress }}</div>
+            <div class="text-2xl font-bold text-blue-600 max-w-[400px]">{{ contactAddress }}</div>
             <div class="mt-1">{{ $t('about.contact.address') }}</div>
           </div>
         </div>

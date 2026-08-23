@@ -145,9 +145,21 @@
               </div>
             </div>
 
-            <!-- Map Placeholder -->
-            <div class="bg-gray-200 rounded-2xl h-64 flex items-center justify-center">
-              <p class="text-gray-500">Map Location</p>
+            <!-- Map Location -->
+            <div class="bg-gray-200 rounded-2xl overflow-hidden">
+              <div class="flex gap-2 p-2">
+                <img src="/code_1.png" alt="code_1" class="w-1/2 object-contain" />
+                <img src="/code_2.jpg" alt="code_2" class="w-1/2 object-contain" />
+              </div>
+              <div class="flex justify-center gap-2 p-2 bg-gray-100">
+                <img src="/social_1.png" alt="social_1" class="h-8 object-contain" />
+                <img src="/social_2.png" alt="social_2" class="h-8 object-contain" />
+                <img src="/social_3.png" alt="social_3" class="h-8 object-contain" />
+                <img src="/social_4.png" alt="social_4" class="h-8 object-contain" />
+                <img src="/social_5.png" alt="social_5" class="h-8 object-contain" />
+                <img src="/social_6.png" alt="social_6" class="h-8 object-contain" />
+                <img src="/social_7.png" alt="social_7" class="h-8 object-contain" />
+              </div>
             </div>
           </div>
         </div>

@@ -20,9 +20,11 @@ spring:
     username: youthful
     password: Youthful@123456
     hikari:
-      connection-timeout: 30000
-      max-lifetime: 1800000
-      idle-timeout: 600000
+      connection-timeout: 20000
+      max-lifetime: 300000
+      idle-timeout: 300000
+      minimum-idle: 2
+      connection-test-query: SELECT 1
   redis:
     host: 43.159.58.248
     port: 6379
