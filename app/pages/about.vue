@@ -162,32 +162,6 @@
       </div>
     </section>
 
-    <!-- Contact CTA -->
-    <section class="py-20">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl font-bold text-gray-900 mb-6">{{ $t('about.contact.title') }}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-gray-600 mb-8">
-          <div>
-            <div class="text-2xl font-bold text-blue-600">{{ contactEmail }}</div>
-            <div class="mt-1">{{ $t('about.contact.email') }}</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-blue-600">{{ contactPhone }}</div>
-            <div class="mt-1">{{ $t('about.contact.phone') }}</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-blue-600 max-w-[400px]">{{ contactAddress }}</div>
-            <div class="mt-1">{{ $t('about.contact.address') }}</div>
-          </div>
-        </div>
-        <NuxtLink
-          :to="localePath('/contact')"
-          class="inline-flex items-center px-8 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          {{ $t('nav.contact') }}
-        </NuxtLink>
-      </div>
-    </section>
   </div>
 </template>
 
