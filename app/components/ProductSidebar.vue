@@ -151,10 +151,9 @@ function handleSubCategoryClick(sub: any) {
   // 如果有三级子分类，展开/折叠
   if (sub.subcategories?.length) {
     toggleSubCategory(sub.key)
-  } else {
-    // 没有三级子分类，直接触发筛选
-    emit('category-change', sub.key)
   }
+  // 直接选中二级分类，显示该分类下的产品
+  emit('category-change', sub.key)
 }
 
 function isCategoryActive(key: string) {
