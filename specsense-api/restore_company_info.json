@@ -1,0 +1,19 @@
+{
+    "id": 1,
+    "imageUrl": "/uploads/b000a49a-0e78-46cc-98b7-e843c121eac4.png",
+    "aboutEn": "To bridge science and industry through innovative optical technologies.",
+    "aboutZh": "通过创新的光学技术，连接科学与产业。",
+    "descriptionEn": "SpeSense Technologies Inc. is a global provider of photonics, spectroscopy, and sensor solutions. We specialize in high-performance optical instruments, advanced sensors, and customized measurement technologies for scientific research, industrial automation, healthcare, and beyond.\n\nOne-Stop Sourcing & Procurement Services\nIn addition to our core products, we offer comprehensive one-stop procurement and sourcing solutions. Leveraging our strong industry network and technical expertise, we help clients streamline their supply chain by identifying, inspecting, and procuring high-quality optical components, lab equipment, and custom photonics hardware.\n\nDriven by innovation, we partner with world-class manufacturers to ensure reliable products, expert support, and seamless global service.\n\nAt SpeSense, every spectrum reveals valuable information, and every measurement creates new possibilities.",
+    "descriptionZh": "SpeSense Technologies Inc. 是一家全球领先的光子学、光谱学和传感解决方案提供商。我们专注于高性能光学仪器、先进传感器以及定制化测量技术，广泛应用于科学研究、工业自动化、医疗健康等领域。\n一站式采购与供应服务  \n除了核心产品外，我们还提供全面的一站式采购和供应解决方案。凭借强大的行业网络和技术专长，我们帮助客户优化供应链，通过甄选、检验并采购高品质的光学元件、实验室设备以及定制化光子硬件，提升采购效率。\n我们以创新为驱动，携手世界一流的制造商，确保产品可靠、技术支持专业，并提供无缝的全球服务。\n在SpeSense，每一条光谱都蕴含着宝贵的信息，每一次测量都带来新的可能。",
+    "missionEn": "Empowering innovation through precision sensing.",
+    "missionZh": "以精准传感赋能创新",
+    "email": "info@specsense.com",
+    "phone": "+86 17582492026",
+    "addressEn": "No. 9 Yuhe Road, Guitang Subdistrict, Yuhua District, Changsha City",
+    "addressZh": "长沙市雨花区圭塘街道雨河路9号",
+    "valuesJson": "[\"Innovation\", \"Quality\", \"Integrity\", \"Customer Success\"]",
+    "timelineJson": "[{\"year\": \"2008\", \"event_en\": \"Founded in Shenzhen\", \"event_zh\": \"成立于深圳\"}, {\"year\": \"2012\", \"event_en\": \"Launched first spectrometer product line\", \"event_zh\": \"推出首款光谱仪产品线\"}, {\"year\": \"2016\", \"event_en\": \"Established R&D center\", \"event_zh\": \"成立研发中心\"}, {\"year\": \"2020\", \"event_en\": \"Expanded to global markets\", \"event_zh\": \"扩展至全球市场\"}, {\"year\": \"2024\", \"event_en\": \"Launched next-gen mini spectrometer\", \"event_zh\": \"推出下一代微型光谱仪\"}]",
+    "qualificationsJson": "[\"ISO 9001:2015 Certified\", \"CE Marking\", \"RoHS Compliance\"]",
+    "partnersStatsJson": "{\"countries\": \"60+\", \"customers\": \"300+\", \"researchInstitutions\": \"50+\"}",
+    "statsJson": "{\"years\": \"10+\", \"products\": \"200+\", \"countries\": \"60+\", \"engineers\": \"50+\"}"
+}
