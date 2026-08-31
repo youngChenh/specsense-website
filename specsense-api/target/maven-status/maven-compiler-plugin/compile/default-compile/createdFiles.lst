@@ -16,6 +16,7 @@ com\specsense\mapper\ProductMapper.class
 com\specsense\mapper\BannerMapper.class
 com\specsense\controller\BrandController.class
 com\specsense\service\ContactService.class
+com\specsense\service\impl\ProductServiceImpl$6.class
 com\specsense\model\entity\CompanyInfo.class
 com\specsense\service\impl\BrandServiceImpl.class
 com\specsense\model\entity\AdminUser.class
@@ -36,6 +37,7 @@ com\specsense\model\entity\Product.class
 com\specsense\mapper\AdminUserMapper.class
 com\specsense\model\entity\Brand.class
 com\specsense\service\CategoryService.class
+com\specsense\service\impl\ProductServiceImpl$5.class
 com\specsense\controller\ContactController.class
 com\specsense\controller\AdminBrandController.class
 com\specsense\service\ProductService.class
@@ -73,6 +75,7 @@ com\specsense\model\dto\BrandCategoryDTO.class
 com\specsense\service\impl\AdminServiceImpl.class
 com\specsense\service\impl\NavigationMenuServiceImpl.class
 com\specsense\mapper\CategoryMapper.class
+com\specsense\service\impl\ProductServiceImpl$4.class
 com\specsense\controller\NavigationController.class
 com\specsense\service\ApplicationService.class
 com\specsense\model\entity\News.class
@@ -82,7 +85,9 @@ com\specsense\model\vo\PageResult.class
 com\specsense\config\RedisConfig.class
 com\specsense\SpecsenseApplication.class
 com\specsense\controller\NewsController.class
+com\specsense\model\dto\ExternalImageItem.class
 com\specsense\model\vo\LoginVO.class
+com\specsense\model\dto\ProductSearchResultDTO.class
 com\specsense\mapper\CompanyInfoMapper.class
 com\specsense\service\CompanyInfoService.class
 com\specsense\model\entity\Application.class
