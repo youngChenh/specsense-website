@@ -17,11 +17,16 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 class="text-3xl font-bold text-gray-900 mb-6">{{ $t('about.company.title') }}</h2>
-            <p class="text-lg text-gray-600 mb-6 whitespace-pre-wrap">
-              {{ description || $t('about.company.desc') }}
+            <div v-if="loading" class="space-y-2 animate-pulse">
+              <div class="h-4 bg-gray-200 rounded w-full"></div>
+              <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+              <div class="h-4 bg-gray-200 rounded w-4/6"></div>
+            </div>
+            <p v-else-if="description" class="text-lg text-gray-600 mb-6 whitespace-pre-wrap">
+              {{ description }}
             </p>
           </div>
-          <div class="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl p-8">
+          <div v-if="companyImage" class="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl p-8">
             <img
               :src="getImageUrl(companyImage)"
               alt="SpeSense Headquarters"
@@ -100,7 +105,7 @@
             </div>
             <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ $t('about.qualifications.title') }}</h3>
             <p class="text-gray-600 mb-4">{{ $t('about.qualifications.desc') }}</p>
-            <ul class="space-y-2 text-gray-600">
+            <ul v-if="qualifications.length > 0" class="space-y-2 text-gray-600">
               <li v-for="q in qualifications" :key="q" class="flex items-center">
                 <svg class="w-5 h-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -119,17 +124,17 @@
             </div>
             <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ $t('about.partners.title') }}</h3>
             <p class="text-gray-600 mb-4">{{ $t('about.partners.desc') }}</p>
-            <div class="grid grid-cols-3 gap-4">
+            <div v-if="partnersStats" class="grid grid-cols-3 gap-4">
               <div class="text-center p-4 bg-gray-50 rounded-lg">
-                <div class="text-2xl font-bold text-blue-600">{{ partnersStats.institutions || '50+' }}</div>
+                <div class="text-2xl font-bold text-blue-600">{{ partnersStats.institutions }}</div>
                 <div class="text-sm text-gray-500">Research Institutions</div>
               </div>
               <div class="text-center p-4 bg-gray-50 rounded-lg">
-                <div class="text-2xl font-bold text-blue-600">{{ partnersStats.countries || '100+' }}</div>
+                <div class="text-2xl font-bold text-blue-600">{{ partnersStats.countries }}</div>
                 <div class="text-sm text-gray-500">Countries</div>
               </div>
               <div class="text-center p-4 bg-gray-50 rounded-lg">
-                <div class="text-2xl font-bold text-blue-600">{{ partnersStats.customers || '1000+' }}</div>
+                <div class="text-2xl font-bold text-blue-600">{{ partnersStats.customers }}</div>
                 <div class="text-sm text-gray-500">Customers</div>
               </div>
             </div>
@@ -139,23 +144,23 @@
     </section>
 
     <!-- Stats -->
-    <section class="py-20 bg-blue-600">
+    <section v-if="stats" class="py-20 bg-blue-600">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
           <div>
-            <div class="text-5xl font-bold mb-2">{{ stats.years || '18+' }}</div>
+            <div class="text-5xl font-bold mb-2">{{ stats.years }}</div>
             <div class="text-blue-200">Years Experience</div>
           </div>
           <div>
-            <div class="text-5xl font-bold mb-2">{{ stats.countries || '100+' }}</div>
+            <div class="text-5xl font-bold mb-2">{{ stats.countries }}</div>
             <div class="text-blue-200">Countries Served</div>
           </div>
           <div>
-            <div class="text-5xl font-bold mb-2">{{ stats.products || '200+' }}</div>
+            <div class="text-5xl font-bold mb-2">{{ stats.products }}</div>
             <div class="text-blue-200">Products</div>
           </div>
           <div>
-            <div class="text-5xl font-bold mb-2">{{ stats.engineers || '50+' }}</div>
+            <div class="text-5xl font-bold mb-2">{{ stats.engineers }}</div>
             <div class="text-blue-200">R&D Engineers</div>
           </div>
         </div>
@@ -166,84 +171,44 @@
 </template>
 
 <script setup lang="ts">
-const localePath = useLocalePath()
 const config = useRuntimeConfig()
 const { locale } = useI18n()
 const { getImageUrl } = useImageUrl()
 
-const companyInfo = ref<any>(null)
-const loading = ref(true)
+const { data: companyInfo, pending: loading, refresh: refreshCompanyInfo } = await useAsyncData(
+  'companyInfo',
+  async () => {
+    const response = await $fetch<any>(`${config.public.apiBase}/api/company-info?locale=${locale.value}`)
+    return response?.data || null
+  },
+  { watch: [locale] }
+)
 
-const timeline = computed(() => {
-  if (!companyInfo.value?.timelineJson) {
-    return [
-      { year: '2008', label: 'about.timeline.year2008' },
-      { year: '2012', label: 'about.timeline.year2012' },
-      { year: '2016', label: 'about.timeline.year2016' },
-      { year: '2020', label: 'about.timeline.year2020' },
-      { year: '2024', label: 'about.timeline.year2024' },
-    ]
-  }
+const stats = computed(() => {
+  if (!companyInfo.value?.statsJson) return null
   try {
-    const parsed = JSON.parse(companyInfo.value.timelineJson)
-    return parsed.map((item: any) => ({
-      year: item.year,
-      label: locale.value === 'zh' ? item.event_zh : item.event_en,
-    }))
+    return JSON.parse(companyInfo.value.statsJson)
+  } catch {
+    return null
+  }
+})
+
+const qualifications = computed(() => {
+  if (!companyInfo.value?.qualificationsJson) return []
+  try {
+    return JSON.parse(companyInfo.value.qualificationsJson)
   } catch {
     return []
   }
 })
 
-const stats = computed(() => {
-  if (!companyInfo.value?.statsJson) {
-    return { years: '18+', countries: '100+', products: '200+', engineers: '50+' }
-  }
-  try {
-    return JSON.parse(companyInfo.value.statsJson)
-  } catch {
-    return { years: '18+', countries: '100+', products: '200+', engineers: '50+' }
-  }
-})
-
-const values = computed(() => {
-  if (!companyInfo.value?.valuesJson) {
-    return ['Innovation', 'Quality', 'Integrity']
-  }
-  try {
-    return JSON.parse(companyInfo.value.valuesJson)
-  } catch {
-    return ['Innovation', 'Quality', 'Integrity']
-  }
-})
-
-const qualifications = computed(() => {
-  if (!companyInfo.value?.qualificationsJson) {
-    return ['ISO 9001:2015 Certified', 'CE Marking', 'RoHS Compliance']
-  }
-  try {
-    return JSON.parse(companyInfo.value.qualificationsJson)
-  } catch {
-    return ['ISO 9001:2015 Certified', 'CE Marking', 'RoHS Compliance']
-  }
-})
-
 const partnersStats = computed(() => {
-  if (!companyInfo.value?.partnersStatsJson) {
-    return { institutions: '50+', countries: '100+', customers: '1000+' }
-  }
+  if (!companyInfo.value?.partnersStatsJson) return null
   try {
     return JSON.parse(companyInfo.value.partnersStatsJson)
   } catch {
-    return { institutions: '50+', countries: '100+', customers: '1000+' }
+    return null
   }
-})
-
-const aboutText = computed(() => {
-  if (!companyInfo.value) return ''
-  return locale.value === 'zh'
-    ? (companyInfo.value.aboutZh || companyInfo.value.aboutEn || '')
-    : (companyInfo.value.aboutEn || companyInfo.value.aboutZh || '')
 })
 
 const description = computed(() => {
@@ -253,49 +218,5 @@ const description = computed(() => {
     : (companyInfo.value.descriptionEn || companyInfo.value.descriptionZh || '')
 })
 
-const mission = computed(() => {
-  if (!companyInfo.value) return ''
-  return locale.value === 'zh'
-    ? (companyInfo.value.missionZh || companyInfo.value.missionEn || '')
-    : (companyInfo.value.missionEn || companyInfo.value.missionZh || '')
-})
-
-const companyImage = computed(() => {
-  if (!companyInfo.value?.imageUrl) {
-    return 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=400&fit=crop'
-  }
-  return companyInfo.value.imageUrl
-})
-
-const contactEmail = computed(() => companyInfo.value?.email || 'info@specsense.com')
-const contactPhone = computed(() => companyInfo.value?.phone || '+86 400-888-8888')
-const contactAddress = computed(() => {
-  if (!companyInfo.value) return 'Shenzhen, China'
-  return locale.value === 'zh'
-    ? (companyInfo.value.addressZh || companyInfo.value.addressEn || 'Shenzhen, China')
-    : (companyInfo.value.addressEn || companyInfo.value.addressZh || 'Shenzhen, China')
-})
-
-async function fetchCompanyInfo() {
-  loading.value = true
-  try {
-    const response = await fetch(`${config.public.apiBase}/api/company-info?locale=${locale.value}`)
-    const result = await response.json()
-    if (result.code === 200 && result.data) {
-      companyInfo.value = result.data
-    }
-  } catch (error) {
-    console.error('Failed to fetch company info:', error)
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchCompanyInfo()
-})
-
-watch(locale, () => {
-  fetchCompanyInfo()
-})
+const companyImage = computed(() => companyInfo.value?.imageUrl || '')
 </script>

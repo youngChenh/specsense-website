@@ -248,52 +248,15 @@ async function loadHeaderMenus() {
 
 // Build nav items from dynamic categories
 const navItems = computed(() => {
-  // If we have header menus from API, use them directly
-  if (headerMenus.value.length > 0) {
-    return headerMenus.value.map(menu => {
-      // 产品中心使用 dynamicCategories 来获取三级分类
-      if (menu.key === 'header-products' && dynamicCategories.value.length > 0) {
-        return {
-          key: menu.key,
-          path: menu.path,
-          label: locale.value === 'zh' ? menu.labelZh : menu.labelEn,
-          children: dynamicCategories.value.map((cat: any) => ({
-            key: cat.key,
-            path: `/products?category=${cat.key}`,
-            label: locale.value === 'zh' ? cat.nameZh : cat.nameEn,
-            children: (cat.children || []).map((subCat: any) => ({
-              key: subCat.key,
-              path: `/products?category=${subCat.key}`,
-              label: locale.value === 'zh' ? subCat.nameZh : subCat.nameEn,
-              children: (subCat.children || []).map((thirdCat: any) => ({
-                key: thirdCat.key,
-                path: `/products?category=${thirdCat.key}`,
-                label: locale.value === 'zh' ? thirdCat.nameZh : thirdCat.nameEn,
-              })),
-            })),
-          })),
-        }
-      }
+  if (headerMenus.value.length === 0) return []
+
+  return headerMenus.value.map(menu => {
+    // 产品中心使用 dynamicCategories 来获取三级分类
+    if (menu.key === 'header-products' && dynamicCategories.value.length > 0) {
       return {
         key: menu.key,
         path: menu.path,
         label: locale.value === 'zh' ? menu.labelZh : menu.labelEn,
-        children: (menu.children || []).map(child => ({
-          key: child.key,
-          path: child.path,
-          label: locale.value === 'zh' ? child.labelZh : child.labelEn,
-        })),
-      }
-    })
-  }
-
-  if (dynamicCategories.value.length > 0) {
-    return [
-      { key: 'home', path: '/', label: 'nav.home' },
-      {
-        key: 'products',
-        path: '/products',
-        label: 'nav.products',
         children: dynamicCategories.value.map((cat: any) => ({
           key: cat.key,
           path: `/products?category=${cat.key}`,
@@ -309,157 +272,20 @@ const navItems = computed(() => {
             })),
           })),
         })),
-      },
-      { key: 'applications', path: '/applications', label: 'nav.applications', children: buildApplicationsChildren() },
-      { key: 'services', path: '/services', label: 'nav.services', children: buildServicesChildren() },
-      { key: 'news', path: '/news', label: 'nav.news' },
-      { key: 'about', path: '/about', label: 'nav.about', children: [
-        { key: 'company', path: '/about?section=company', label: 'nav.about.company' },
-        { key: 'qualifications', path: '/about?section=qualifications', label: 'nav.about.qualifications' },
-        { key: 'partners', path: '/about?section=partners', label: 'nav.about.partners' },
-        { key: 'timeline', path: '/about?section=timeline', label: 'nav.about.timeline' },
-      ]},
-      { key: 'contact', path: '/contact', label: 'nav.contact' },
-    ]
-  }
-  return staticNavItems
-})
-
-// Helper functions to build children
-function buildProductChildren() {
-  if (dynamicCategories.value.length > 0) {
-    return dynamicCategories.value.map((cat: any) => ({
-      key: cat.key,
-      label: cat.name,
-      children: (cat.children || []).map((subCat: any) => ({
-        key: subCat.key,
-        label: subCat.name,
-        path: `/products?category=${subCat.key}`,
+      }
+    }
+    return {
+      key: menu.key,
+      path: menu.path,
+      label: locale.value === 'zh' ? menu.labelZh : menu.labelEn,
+      children: (menu.children || []).map(child => ({
+        key: child.key,
+        path: child.path,
+        label: locale.value === 'zh' ? child.labelZh : child.labelEn,
       })),
-    }))
-  }
-  return [
-    { key: 'spectrometer', i18nKey: 'products.categories.spectrometer', path: '/products?category=spectrometer' },
-    { key: 'analyzer', i18nKey: 'products.categories.analyzer', path: '/products?category=analyzer' },
-    { key: 'sensor', i18nKey: 'products.categories.sensor', path: '/products?category=sensor' },
-    { key: 'lightsource', i18nKey: 'products.categories.lightsource', path: '/products?category=lightsource' },
-    { key: 'accessory', i18nKey: 'products.categories.accessory', path: '/products?category=accessory' },
-  ]
-}
-
-function buildServicesChildren() {
-  return [
-    { key: 'technical', i18nKey: 'services.technical.title', path: '/services?type=technical' },
-    { key: 'aftersales', i18nKey: 'services.afterSales.title', path: '/services?type=aftersales' },
-    { key: 'downloads', i18nKey: 'services.downloads.title', path: '/services?type=downloads' },
-    { key: 'training', i18nKey: 'services.training.title', path: '/services?type=training' },
-  ]
-}
-
-function buildApplicationsChildren() {
-  return [
-    { key: 'industrial', i18nKey: 'applications.industrial.title', path: '/applications?type=industrial' },
-    { key: 'research', i18nKey: 'applications.research.title', path: '/applications?type=research' },
-    { key: 'medical', i18nKey: 'applications.medical.title', path: '/applications?type=medical' },
-    { key: 'environment', i18nKey: 'applications.environment.title', path: '/applications?type=environment' },
-    { key: 'agriculture', i18nKey: 'applications.agriculture.title', path: '/applications?type=agriculture' },
-    { key: 'food', i18nKey: 'applications.food.title', path: '/applications?type=food' },
-  ]
-}
-
-const staticNavItems = [
-  { key: 'home', path: '/', label: 'nav.home' },
-  {
-    key: 'products',
-    path: '/products',
-    label: 'nav.products',
-    children: [
-      {
-        key: 'spectrometer',
-        label: 'products.categories.spectrometer',
-        children: [
-          { key: 'spectrometer-uv', path: '/products?category=spectrometer-uv', label: 'products.subcategories.spectrometer.uv' },
-          { key: 'spectrometer-nir', path: '/products?category=spectrometer-nir', label: 'products.subcategories.spectrometer.nir' },
-          { key: 'spectrometer-raman', path: '/products?category=spectrometer-raman', label: 'products.subcategories.spectrometer.raman' },
-          { key: 'spectrometer-mini', path: '/products?category=spectrometer-mini', label: 'products.subcategories.spectrometer.mini' },
-        ]
-      },
-      {
-        key: 'analyzer',
-        label: 'products.categories.analyzer',
-        children: [
-          { key: 'analyzer-photoelectric', path: '/products?category=analyzer-photoelectric', label: 'products.subcategories.analyzer.photoelectric' },
-          { key: 'analyzer-photometer', path: '/products?category=analyzer-photometer', label: 'products.subcategories.analyzer.photometer' },
-          { key: 'analyzer-color', path: '/products?category=analyzer-color', label: 'products.subcategories.analyzer.color' },
-        ]
-      },
-      {
-        key: 'sensor',
-        label: 'products.categories.sensor',
-        children: [
-          { key: 'sensor-fiber', path: '/products?category=sensor-fiber', label: 'products.subcategories.sensor.fiber' },
-          { key: 'sensor-photoelectric', path: '/products?category=sensor-photoelectric', label: 'products.subcategories.sensor.photoelectric' },
-          { key: 'sensor-displacement', path: '/products?category=sensor-displacement', label: 'products.subcategories.sensor.displacement' },
-        ]
-      },
-      {
-        key: 'lightsource',
-        label: 'products.categories.lightsource',
-        children: [
-          { key: 'lightsource-laser', path: '/products?category=lightsource-laser', label: 'products.subcategories.lightsource.laser' },
-          { key: 'lightsource-led', path: '/products?category=lightsource-led', label: 'products.subcategories.lightsource.led' },
-          { key: 'lightsource-halogen', path: '/products?category=lightsource-halogen', label: 'products.subcategories.lightsource.halogen' },
-        ]
-      },
-      {
-        key: 'accessory',
-        label: 'products.categories.accessory',
-        children: [
-          { key: 'accessory-fiberprobe', path: '/products?category=accessory-fiberprobe', label: 'products.subcategories.accessory.fiberProbe' },
-          { key: 'accessory-holder', path: '/products?category=accessory-holder', label: 'products.subcategories.accessory.holder' },
-          { key: 'accessory-coupler', path: '/products?category=accessory-coupler', label: 'products.subcategories.accessory.coupler' },
-        ]
-      },
-    ]
-  },
-  {
-    key: 'applications',
-    path: '/applications',
-    label: 'nav.applications',
-    children: [
-      { key: 'industrial', path: '/applications?type=industrial', label: 'applications.industrial.title' },
-      { key: 'research', path: '/applications?type=research', label: 'applications.research.title' },
-      { key: 'medical', path: '/applications?type=medical', label: 'applications.medical.title' },
-      { key: 'environment', path: '/applications?type=environment', label: 'applications.environment.title' },
-      { key: 'agriculture', path: '/applications?type=agriculture', label: 'applications.agriculture.title' },
-      { key: 'food', path: '/applications?type=food', label: 'applications.food.title' },
-    ]
-  },
-  {
-    key: 'services',
-    path: '/services',
-    label: 'nav.services',
-    children: [
-      { key: 'technical', path: '/services?type=technical', label: 'services.technical.title' },
-      { key: 'aftersales', path: '/services?type=aftersales', label: 'services.afterSales.title' },
-      { key: 'downloads', path: '/services?type=downloads', label: 'services.downloads.title' },
-      { key: 'training', path: '/services?type=training', label: 'services.training.title' },
-    ]
-  },
-  { key: 'news', path: '/news', label: 'nav.news' },
-  {
-    key: 'about',
-    path: '/about',
-    label: 'nav.about',
-    children: [
-      { key: 'company', path: '/about?section=company', label: 'about.company.title' },
-      { key: 'qualifications', path: '/about?section=qualifications', label: 'about.qualifications.title' },
-      { key: 'partners', path: '/about?section=partners', label: 'about.partners.title' },
-      { key: 'timeline', path: '/about?section=timeline', label: 'about.timeline.title' },
-    ]
-  },
-  { key: 'contact', path: '/contact', label: 'nav.contact' },
-]
+    }
+  })
+})
 
 // Helper function to get label with i18n support
 function getLabel(item: any) {

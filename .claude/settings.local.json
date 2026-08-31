@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(curl:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(python:*)",
+      "Read(//tmp/**)",
+      "Bash(cmd //c \"taskkill /F /PID 9572\")",
+      "Bash(nohup java:*)",
+      "Bash(echo \"Started PID: $!\")",
+      "Bash(pip install:*)",
+      "Bash(tasklist)"
     ]
   }
 }

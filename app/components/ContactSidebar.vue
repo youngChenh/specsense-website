@@ -230,18 +230,16 @@ const whatsappLightboxOpen = ref(false)
 const companyInfo = ref<any>(null)
 
 // Contact info from company
-const contactEmail = computed(() => companyInfo.value?.email || 'info@specsense.com')
-const contactPhone = computed(() => companyInfo.value?.phone || '+86 400-888-8888')
+const contactEmail = computed(() => companyInfo.value?.email || '')
+const contactPhone = computed(() => companyInfo.value?.phone || '')
 const contactAddress = computed(() => {
-  if (!companyInfo.value) return 'Shenzhen, China'
+  if (!companyInfo.value) return ''
   return locale.value === 'zh'
-    ? (companyInfo.value.addressZh || companyInfo.value.addressEn || 'Shenzhen, China')
-    : (companyInfo.value.addressEn || companyInfo.value.addressZh || 'Shenzhen, China')
+    ? (companyInfo.value.addressZh || companyInfo.value.addressEn || '')
+    : (companyInfo.value.addressEn || companyInfo.value.addressZh || '')
 })
 
-// WhatsApp - hardcoded for now
-const whatsappNumber = computed(() => companyInfo.value?.whatsapp || '+86 17582492026')
-const wechatQrCode = computed(() => companyInfo.value?.wechatQrCode || '')
+const whatsappNumber = computed(() => companyInfo.value?.whatsapp || '')
 const wechatPhone = computed(() => contactPhone.value)
 
 async function loadCompanyInfo() {

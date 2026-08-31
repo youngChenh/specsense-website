@@ -16,6 +16,12 @@ public class Product {
     private String imageUrl;
     private String imageUrls;
     private String pdfUrls;
+    private String downloadPdfUrl;
+    private String detailDescEn;
+    private String detailDescZh;
+    private String detailedSpecs;
+    private String alibabaImages;
+    private String externalImages;
     private String specsJson;
     private Boolean featured;
     private Integer sortOrder;

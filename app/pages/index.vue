@@ -4,7 +4,7 @@
     <section class="relative bg-gray-100">
       <!-- Carousel -->
       <div
-        class="relative h-[500px] lg:h-[600px] overflow-hidden"
+        class="relative aspect-[16/10] sm:aspect-[16/9] md:aspect-[21/9] lg:aspect-[21/9] w-full overflow-hidden"
         @mouseenter="onCarouselHover(true)"
         @mouseleave="onCarouselHover(false)"
       >
@@ -65,6 +65,27 @@
       <!-- CTA Buttons below Carousel -->
       <div class="bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <!-- Product Search -->
+          <form @submit.prevent="onSearchSubmit" class="max-w-2xl mx-auto mb-8">
+            <div class="relative flex items-center bg-white rounded-full shadow-lg overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-blue-500 transition-shadow">
+              <svg class="w-5 h-5 text-gray-400 ml-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+              </svg>
+              <input
+                v-model="searchKeyword"
+                type="text"
+                :placeholder="$t('home.search.placeholder')"
+                class="flex-1 px-4 py-4 text-gray-700 bg-transparent outline-none"
+              />
+              <button
+                type="submit"
+                :disabled="searching"
+                class="px-6 py-4 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {{ searching ? '...' : $t('home.search.button') }}
+              </button>
+            </div>
+          </form>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <NuxtLink
               :to="localePath('/products')"
@@ -177,7 +198,7 @@
               <div v-else class="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600"></div>
               <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
               <div class="absolute inset-0 flex flex-col items-center justify-end p-4">
-                <component :is="getIconComponent(app.type)" class="w-8 h-8 text-white mb-2 opacity-90" />
+                <AppIcon :name="app.type" class="w-8 h-8 text-white mb-2 opacity-90" />
                 <h3 class="text-white font-semibold text-center text-sm">{{ app.title }}</h3>
               </div>
             </NuxtLink>
@@ -221,16 +242,21 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 class="text-3xl font-bold text-gray-900 mb-6">{{ $t('home.about.title') }}</h2>
-            <p class="text-lg text-gray-600 mb-8">
-              {{ $t('home.about.desc') }}
+            <div v-if="!companyInfo" class="space-y-2 animate-pulse mb-8">
+              <div class="h-4 bg-gray-200 rounded w-full"></div>
+              <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+              <div class="h-4 bg-gray-200 rounded w-4/6"></div>
+            </div>
+            <p v-else-if="aboutDescription" class="text-lg text-gray-600 mb-8">
+              {{ aboutDescription }}
             </p>
-            <div class="grid grid-cols-2 gap-6 mb-8">
+            <div v-if="stats" class="grid grid-cols-2 gap-6 mb-8">
               <div class="text-center p-4 bg-white rounded-lg shadow-sm">
-                <div class="text-4xl font-bold text-blue-600">18+</div>
+                <div class="text-4xl font-bold text-blue-600">{{ stats.years }}</div>
                 <div class="text-gray-600 mt-1">Years Experience</div>
               </div>
               <div class="text-center p-4 bg-white rounded-lg shadow-sm">
-                <div class="text-4xl font-bold text-blue-600">100+</div>
+                <div class="text-4xl font-bold text-blue-600">{{ stats.countries }}</div>
                 <div class="text-gray-600 mt-1">Countries Served</div>
               </div>
             </div>
@@ -242,17 +268,17 @@
             </NuxtLink>
           </div>
           <div class="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl p-8 lg:p-12">
-            <div class="grid grid-cols-2 gap-6 text-center">
+            <div v-if="stats" class="grid grid-cols-2 gap-6 text-center">
               <div>
-                <div class="text-4xl font-bold text-blue-600">200+</div>
+                <div class="text-4xl font-bold text-blue-600">{{ stats.products }}</div>
                 <div class="text-gray-600 mt-2">Products</div>
               </div>
-              <div>
-                <div class="text-4xl font-bold text-blue-600">1000+</div>
+              <div v-if="partnersStats">
+                <div class="text-4xl font-bold text-blue-600">{{ partnersStats.customers }}</div>
                 <div class="text-gray-600 mt-2">Customers</div>
               </div>
               <div>
-                <div class="text-4xl font-bold text-blue-600">50+</div>
+                <div class="text-4xl font-bold text-blue-600">{{ stats.engineers }}</div>
                 <div class="text-gray-600 mt-2">R&D Engineers</div>
               </div>
               <div>
@@ -345,6 +371,30 @@ const applicationsData = ref<any[]>([])
 const applicationProducts = ref<any[]>([])
 const loadingProducts = ref(true)
 const loadingNews = ref(true)
+const searchKeyword = ref('')
+const searching = ref(false)
+
+async function onSearchSubmit() {
+  const kw = searchKeyword.value.trim()
+  if (!kw) return
+  searching.value = true
+  try {
+    const response = await $fetch<any>(`${config.public.apiBase}/api/products/search`, {
+      params: { q: kw, locale: locale.value }
+    })
+    const data = response?.data
+    const query: Record<string, string> = { q: kw }
+    if (data?.categoryKey) {
+      query.category = data.categoryKey
+    }
+    await navigateTo({ path: localePath('/products'), query })
+  } catch (error) {
+    console.error('Search failed:', error)
+    await navigateTo({ path: localePath('/products'), query: { q: kw } })
+  } finally {
+    searching.value = false
+  }
+}
 
 // Carousel data
 const carouselSlides = ref<any[]>([])
@@ -495,24 +545,13 @@ async function fetchApplicationProducts() {
   }
 }
 
-const getIconComponent = (type: string) => {
-  const icons: Record<string, any> = {
-    industrial: IndustrialIcon,
-    research: ResearchIcon,
-    medical: MedicalIcon,
-    environment: EnvironmentIcon,
-    agriculture: AgricultureIcon,
-    food: FoodIcon,
-  }
-  return icons[type] || IndustrialIcon
-}
-
 watch(locale, () => {
   fetchBanners()
   fetchFeaturedProducts()
   fetchLatestNews()
   fetchApplications()
   fetchApplicationProducts()
+  fetchCompanyInfo()
 })
 
 onMounted(() => {
@@ -521,6 +560,7 @@ onMounted(() => {
   fetchLatestNews()
   fetchApplications()
   fetchApplicationProducts()
+  fetchCompanyInfo()
   startAutoPlay()
 })
 
@@ -532,23 +572,35 @@ onUnmounted(() => {
   }
 })
 
-// Icon components
-const IndustrialIcon = {
-  template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>`
-}
-const ResearchIcon = {
-  template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>`
-}
-const MedicalIcon = {
-  template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>`
-}
-const EnvironmentIcon = {
-  template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
-}
-const AgricultureIcon = {
-  template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
-}
-const FoodIcon = {
-  template: `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>`
+// Company info for About preview section
+const companyInfo = ref<any>(null)
+
+const stats = computed(() => {
+  if (!companyInfo.value?.statsJson) return null
+  try { return JSON.parse(companyInfo.value.statsJson) } catch { return null }
+})
+
+const partnersStats = computed(() => {
+  if (!companyInfo.value?.partnersStatsJson) return null
+  try { return JSON.parse(companyInfo.value.partnersStatsJson) } catch { return null }
+})
+
+const aboutDescription = computed(() => {
+  if (!companyInfo.value) return ''
+  return locale.value === 'zh'
+    ? (companyInfo.value.aboutZh || companyInfo.value.aboutEn || '')
+    : (companyInfo.value.aboutEn || companyInfo.value.aboutZh || '')
+})
+
+async function fetchCompanyInfo() {
+  try {
+    const response = await fetch(`${config.public.apiBase}/api/company-info?locale=${locale.value}`)
+    const result = await response.json()
+    if (result.code === 200 && result.data) {
+      companyInfo.value = result.data
+    }
+  } catch (error) {
+    console.error('Failed to fetch company info:', error)
+  }
 }
 </script>

@@ -173,7 +173,7 @@
         </el-form-item>
 
         <!-- PDF Upload -->
-        <el-form-item label="产品PDF">
+        <el-form-item label="产品PDF（展示）">
           <el-upload
             :action="`${config.public.apiBase}/api/admin/upload`"
             :headers="headers"
@@ -188,7 +188,7 @@
               <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
-              上传PDF
+              上传PDF（展示）
             </el-button>
           </el-upload>
           <div v-if="uploading && uploadType === 'pdf'" class="mt-2">
@@ -203,7 +203,110 @@
               <button @click="removePdfUrl(idx)" class="text-red-500 hover:text-red-700 ml-1">×</button>
             </div>
           </div>
-          <p class="text-xs text-gray-400 mt-1">支持多份PDF上传，点击×删除</p>
+          <p class="text-xs text-gray-400 mt-1">这些PDF会在详情页内嵌展示</p>
+        </el-form-item>
+
+        <!-- Download PDF (single) -->
+        <el-form-item label="下载PDF（独立）">
+          <div class="flex items-center gap-4">
+            <el-upload
+              :action="`${config.public.apiBase}/api/admin/upload`"
+              :headers="headers"
+              :show-file-list="false"
+              :on-success="handleDownloadPdfSuccess"
+              :on-progress="(evt, file, fileList) => handleUploadProgress(evt, file, fileList, 'downloadPdf')"
+              :before-upload="beforePdfUpload"
+              accept=".pdf"
+            >
+              <el-button type="primary" plain :disabled="uploading">上传下载PDF</el-button>
+            </el-upload>
+            <el-input v-model="form.downloadPdfUrl" placeholder="下载PDF URL（与上方展示PDF不同）" class="flex-1" />
+          </div>
+          <div v-if="uploading && uploadType === 'downloadPdf'" class="mt-2">
+            <el-progress :percentage="uploadPercentage" :stroke-width="6" />
+          </div>
+          <div v-if="form.downloadPdfUrl" class="mt-2 flex items-center gap-2 px-2 py-1 bg-gray-100 rounded text-sm">
+            <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-gray-600 truncate flex-1">{{ getFileName(form.downloadPdfUrl) }}</span>
+            <button @click="form.downloadPdfUrl = ''" class="text-red-500 hover:text-red-700">×</button>
+          </div>
+        </el-form-item>
+
+        <!-- Detail description text -->
+        <el-form-item label="产品描述文字 (EN)">
+          <el-input v-model="form.detailDescEn" type="textarea" :rows="4" placeholder="PDF 之后展示的产品描述英文（独立字段）" />
+        </el-form-item>
+        <el-form-item label="产品描述文字 (ZH)">
+          <el-input v-model="form.detailDescZh" type="textarea" :rows="4" placeholder="PDF 之后展示的产品描述中文" />
+        </el-form-item>
+
+        <!-- Detailed specs (separate from top specs) -->
+        <el-form-item label="详细参数 (Detailed Specs)">
+          <div class="specs-editor w-full">
+            <div v-for="(spec, index) in form.detailedSpecs" :key="index" class="flex gap-2 mb-2">
+              <el-input v-model="spec.key" placeholder="参数名" class="flex-1" />
+              <el-input v-model="spec.value" placeholder="参数值" class="flex-1" />
+              <el-button type="danger" @click="removeDetailedSpec(index)" :icon="Delete" circle />
+            </div>
+            <el-button type="primary" plain @click="addDetailedSpec" :icon="Plus">添加详细参数</el-button>
+          </div>
+        </el-form-item>
+
+        <!-- Alibaba images (max 10) -->
+        <el-form-item label="阿里10图 (最多10张)">
+          <el-upload
+            :action="`${config.public.apiBase}/api/admin/upload`"
+            :headers="headers"
+            :on-success="handleAlibabaImageSuccess"
+            :on-progress="(evt, file, fileList) => handleUploadProgress(evt, file, fileList, 'alibaba')"
+            :before-upload="beforeImageUpload"
+            accept="image/*"
+            :show-file-list="false"
+            class="mb-2"
+          >
+            <el-button type="primary" plain size="small" :disabled="uploading || form.alibabaImages.length >= 10">
+              上传图片（{{ form.alibabaImages.length }}/10）
+            </el-button>
+          </el-upload>
+          <div v-if="uploading && uploadType === 'alibaba'" class="mt-2">
+            <el-progress :percentage="uploadPercentage" :stroke-width="6" />
+          </div>
+          <div v-if="form.alibabaImages.length > 0" class="flex flex-wrap gap-2 mt-2">
+            <div v-for="(url, idx) in form.alibabaImages" :key="idx" class="relative w-20 h-20 rounded border overflow-hidden group">
+              <img :src="getFullImageUrl(url)" class="w-full h-full object-cover" />
+              <button
+                @click="removeAlibabaImage(idx)"
+                class="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+              >×</button>
+            </div>
+          </div>
+        </el-form-item>
+
+        <!-- External images with links -->
+        <el-form-item label="带外链的图片">
+          <div class="w-full space-y-2">
+            <div v-for="(item, idx) in form.externalImages" :key="idx" class="flex gap-2 items-center p-2 bg-gray-50 rounded">
+              <el-upload
+                :action="`${config.public.apiBase}/api/admin/upload`"
+                :headers="headers"
+                :show-file-list="false"
+                :on-success="(res) => handleExternalImageUploadSuccess(res, idx)"
+                :before-upload="beforeImageUpload"
+                accept="image/*"
+              >
+                <div class="w-20 h-20 border rounded overflow-hidden cursor-pointer hover:border-blue-400">
+                  <img v-if="item.url" :src="getFullImageUrl(item.url)" class="w-full h-full object-cover" />
+                  <div v-else class="w-full h-full flex items-center justify-center text-xs text-gray-400">上传图</div>
+                </div>
+              </el-upload>
+              <el-input v-model="item.url" placeholder="图片URL" class="flex-1" />
+              <el-input v-model="item.link" placeholder="外链URL（可选）" class="flex-1" />
+              <el-button type="danger" @click="removeExternalImage(idx)" :icon="Delete" circle />
+            </div>
+            <el-button type="primary" plain @click="addExternalImage" :icon="Plus">添加带外链图片</el-button>
+          </div>
         </el-form-item>
 
         <el-form-item :label="$t('admin.featured')">
@@ -275,6 +378,12 @@ const form = reactive({
   imageUrl: '',
   imageUrls: [],
   pdfUrls: [],
+  downloadPdfUrl: '',
+  detailDescEn: '',
+  detailDescZh: '',
+  detailedSpecs: [],
+  alibabaImages: [],
+  externalImages: [],
   specs: [],
   featured: false,
   sortOrder: 0,
@@ -372,33 +481,27 @@ const flattenCategories = (cats, result = []) => {
 
 const addProduct = () => {
   isEdit.value = false
-  Object.keys(form).forEach(k => {
-    if (k === 'sortOrder') form[k] = 0
-    else if (k === 'featured') form[k] = false
-    else if (k === 'specs') form[k] = []
-    else if (k === 'imageUrls') form[k] = []
-    else if (k === 'pdfUrls') form[k] = []
-    else form[k] = null
-  })
+  resetForm()
   showDialog.value = true
 }
 
 const addProductUnderCategory = (categoryId) => {
   isEdit.value = false
-  Object.keys(form).forEach(k => {
-    if (k === 'sortOrder') form[k] = 0
-    else if (k === 'featured') form[k] = false
-    else if (k === 'specs') form[k] = []
-    else if (k === 'imageUrls') form[k] = []
-    else if (k === 'pdfUrls') form[k] = []
-    else if (k === 'highlights') form[k] = ''
-    else if (k === 'applications') form[k] = ''
-    else form[k] = null
-  })
+  resetForm()
   // Extract actual category id from "cat_{id}" format
   const catId = categoryId.startsWith('cat_') ? categoryId.replace('cat_', '') : categoryId
   form.categoryId = parseInt(catId) || null
   showDialog.value = true
+}
+
+const resetForm = () => {
+  Object.keys(form).forEach(k => {
+    if (k === 'sortOrder') form[k] = 0
+    else if (k === 'featured') form[k] = false
+    else if (['specs', 'imageUrls', 'pdfUrls', 'detailedSpecs', 'alibabaImages', 'externalImages'].includes(k)) form[k] = []
+    else if (['highlights', 'applications', 'detailDescEn', 'detailDescZh', 'downloadPdfUrl'].includes(k)) form[k] = ''
+    else form[k] = null
+  })
 }
 
 const editProduct = (row) => {
@@ -414,6 +517,12 @@ const editProduct = (row) => {
     imageUrl: parseUrl(row.imageUrl),
     imageUrls: parseJsonArray(row.imageUrls),
     pdfUrls: parseJsonArray(row.pdfUrls),
+    downloadPdfUrl: row.downloadPdfUrl || '',
+    detailDescEn: row.detailDescEn || '',
+    detailDescZh: row.detailDescZh || '',
+    detailedSpecs: parseSpecs(row.detailedSpecs),
+    alibabaImages: parseJsonArray(row.alibabaImages),
+    externalImages: parseExternalImages(row.externalImages),
     featured: row.featured || false,
     sortOrder: row.sortOrder || 0,
     specs: parseSpecs(row.specs),
@@ -443,12 +552,50 @@ const parseSpecs = (specsObj) => {
   return Object.entries(specsObj).map(([key, value]) => ({ key, value }))
 }
 
+const parseExternalImages = (val) => {
+  if (!val) return []
+  if (Array.isArray(val)) {
+    return val.map(item => ({
+      url: typeof item === 'string' ? item : (item?.url || ''),
+      link: typeof item === 'object' && item !== null ? (item.link || '') : '',
+    }))
+  }
+  if (typeof val === 'string' && val) {
+    try {
+      const parsed = JSON.parse(val)
+      if (Array.isArray(parsed)) {
+        return parsed.map(item => ({
+          url: typeof item === 'string' ? item : (item?.url || ''),
+          link: typeof item === 'object' && item !== null ? (item.link || '') : '',
+        }))
+      }
+    } catch { /* ignore */ }
+  }
+  return []
+}
+
 const addSpec = () => {
   form.specs.push({ key: '', value: '' })
 }
 
 const removeSpec = (index) => {
   form.specs.splice(index, 1)
+}
+
+const addDetailedSpec = () => {
+  form.detailedSpecs.push({ key: '', value: '' })
+}
+
+const removeDetailedSpec = (index) => {
+  form.detailedSpecs.splice(index, 1)
+}
+
+const addExternalImage = () => {
+  form.externalImages.push({ url: '', link: '' })
+}
+
+const removeExternalImage = (index) => {
+  form.externalImages.splice(index, 1)
 }
 
 const handleImageUploadSuccess = (response) => {
@@ -480,6 +627,61 @@ const handlePdfSuccess = (response) => {
   if (response.code === 200 && response.data) {
     const url = typeof response.data === 'string' ? response.data : response.data.url
     if (url) form.pdfUrls.push(url)
+    ElMessage.success(t('admin.uploadSuccess'))
+  } else {
+    ElMessage.error(response.message || t('admin.uploadFailed'))
+  }
+}
+
+const handleDownloadPdfSuccess = (response) => {
+  uploading.value = false
+  uploadPercentage.value = 0
+  if (response.code === 200 && response.data) {
+    const url = typeof response.data === 'string' ? response.data : response.data.url
+    if (url) form.downloadPdfUrl = url
+    ElMessage.success(t('admin.uploadSuccess'))
+  } else {
+    ElMessage.error(response.message || t('admin.uploadFailed'))
+  }
+}
+
+const beforePdfUpload = (file) => {
+  const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name)
+  const isLt50M = file.size / 1024 / 1024 < 50
+  if (!isPdf) ElMessage.error('仅支持 PDF 文件')
+  if (!isLt50M) ElMessage.error('PDF 大小需小于 50MB')
+  return isPdf && isLt50M
+}
+
+const handleAlibabaImageSuccess = (response) => {
+  uploading.value = false
+  uploadPercentage.value = 0
+  if (response.code === 200 && response.data) {
+    const url = typeof response.data === 'string' ? response.data : response.data.url
+    if (!url) return
+    if (form.alibabaImages.length >= 10) {
+      ElMessage.warning('最多 10 张')
+      return
+    }
+    form.alibabaImages.push(url)
+    ElMessage.success(t('admin.uploadSuccess'))
+  } else {
+    ElMessage.error(response.message || t('admin.uploadFailed'))
+  }
+}
+
+const removeAlibabaImage = (index) => {
+  form.alibabaImages.splice(index, 1)
+}
+
+const handleExternalImageUploadSuccess = (response, index) => {
+  uploading.value = false
+  uploadPercentage.value = 0
+  if (response.code === 200 && response.data) {
+    const url = typeof response.data === 'string' ? response.data : response.data.url
+    if (url && form.externalImages[index]) {
+      form.externalImages[index].url = url
+    }
     ElMessage.success(t('admin.uploadSuccess'))
   } else {
     ElMessage.error(response.message || t('admin.uploadFailed'))
@@ -539,18 +741,32 @@ const saveProduct = async () => {
       ? `${config.public.apiBase}/api/admin/products/${form.id}`
       : `${config.public.apiBase}/api/admin/products`
 
-    // Convert specs array to JSON object
+    // Convert specs arrays to JSON objects
     const specsObj = {}
     form.specs.forEach(spec => {
-      if (spec.key && spec.value) {
-        specsObj[spec.key] = spec.value
-      }
+      if (spec.key && spec.value) specsObj[spec.key] = spec.value
     })
-    const specsJson = Object.keys(specsObj).length > 0 ? JSON.stringify(specsObj) : null
-    const imageUrlsJson = form.imageUrls.length > 0 ? JSON.stringify(form.imageUrls) : null
-    const pdfUrlsJson = form.pdfUrls.length > 0 ? JSON.stringify(form.pdfUrls) : null
+    const detailedSpecsObj = {}
+    form.detailedSpecs.forEach(spec => {
+      if (spec.key && spec.value) detailedSpecsObj[spec.key] = spec.value
+    })
 
-    await $fetch(url, { method, headers: headers.value, body: { ...form, specsJson, imageUrls: imageUrlsJson, pdfUrls: pdfUrlsJson } })
+    // Filter out empty external image entries
+    const cleanedExternalImages = form.externalImages
+      .filter(item => item.url && item.url.trim())
+      .map(item => ({ url: item.url, link: item.link || '' }))
+
+    const body = {
+      ...form,
+      specsJson: Object.keys(specsObj).length > 0 ? JSON.stringify(specsObj) : null,
+      detailedSpecs: Object.keys(detailedSpecsObj).length > 0 ? JSON.stringify(detailedSpecsObj) : null,
+      imageUrls: form.imageUrls.length > 0 ? JSON.stringify(form.imageUrls) : null,
+      pdfUrls: form.pdfUrls.length > 0 ? JSON.stringify(form.pdfUrls) : null,
+      alibabaImages: form.alibabaImages.length > 0 ? JSON.stringify(form.alibabaImages) : null,
+      externalImages: cleanedExternalImages.length > 0 ? JSON.stringify(cleanedExternalImages) : null,
+    }
+
+    await $fetch(url, { method, headers: headers.value, body })
     ElMessage.success(t('admin.saveSuccess'))
     showDialog.value = false
     fetchData()

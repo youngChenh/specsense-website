@@ -279,7 +279,7 @@ INSERT INTO admin_user (username, password_hash, role) VALUES
 INSERT INTO banner (image_url, link_url, title_en, title_zh, subtitle_en, subtitle_zh, sort_order, enabled, locale) VALUES
 ('https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920&h=600&fit=crop', '/products', 'Precision Photoelectric Instruments', '精密光电仪器', 'Providing high-quality photoelectric detection solutions', '为您提供高品质的光电检测解决方案', 1, TRUE, 'zh'),
 ('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1920&h=600&fit=crop', '/products', 'Advanced Technology', '先进技术', 'Integrating innovative technology to empower industry upgrading', '融合创新科技，助力产业升级', 2, TRUE, 'zh'),
-('https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1920&h=600&fit=crop', '/contact', 'Global Service', '全球服务', 'Trusted partner serving 100+ countries and regions', '服务100+国家和地区，值得信赖', 3, TRUE, 'zh');
+('https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1920&h=600&fit=crop', '/contact', 'Global Service', '全球服务', 'Trusted partner serving 60+ countries and regions', '服务60+国家和地区，值得信赖', 3, TRUE, 'zh');
 
 -- Company Info
 INSERT INTO company_info (id, image_url, about_en, about_zh, description_en, description_zh, mission_en, mission_zh, email, phone, address_en, address_zh, values_json, timeline_json, qualifications_json, partners_stats_json, stats_json) VALUES
@@ -287,8 +287,8 @@ INSERT INTO company_info (id, image_url, about_en, about_zh, description_en, des
 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=400&fit=crop',
 'SpecSense Technologies Inc. is a high-tech enterprise specializing in the R&D and production of photoelectric instruments and sensors.',
 '思谱传感科技有限公司是一家专业从事光电仪器和传感器研发、生产的高新技术企业。',
-'Founded with a vision to provide world-class photoelectric measurement solutions, SpecSense has grown from a small research team to a global enterprise serving customers in over 100 countries. Our commitment to quality and innovation has made us a trusted partner for scientists and engineers worldwide. Our state-of-the-art manufacturing facility in Shenzhen combines advanced production technologies with rigorous quality control to deliver instruments that meet the highest international standards.',
-'思谱科技致力于提供世界一流的光电测量解决方案，从一个小规模研发团队发展成为为全球100多个国家客户提供服务的跨国企业。我们对质量和创新的执着追求使我们在全球范围内成为科学家和工程师值得信赖的合作伙伴。位于深圳的先进生产设施将先进生产技术与严格的质量控制相结合，交付满足最高国际标准的仪器。',
+'Founded with a vision to provide world-class photoelectric measurement solutions, SpecSense has grown from a small research team to a global enterprise serving customers in over 60 countries. Our commitment to quality and innovation has made us a trusted partner for scientists and engineers worldwide. Our state-of-the-art manufacturing facility in Shenzhen combines advanced production technologies with rigorous quality control to deliver instruments that meet the highest international standards.',
+'思谱科技致力于提供世界一流的光电测量解决方案，从一个小规模研发团队发展成为为全球60多个国家客户提供服务的跨国企业。我们对质量和创新的执着追求使我们在全球范围内成为科学家和工程师值得信赖的合作伙伴。位于深圳的先进生产设施将先进生产技术与严格的质量控制相结合，交付满足最高国际标准的仪器。',
 'To provide cutting-edge spectroscopic solutions that empower researchers and industries worldwide to achieve precise, reliable, and sustainable analysis.',
 '为全球研究人员和行业提供尖端的光谱解决方案，帮助他们实现精确、可靠和可持续的分析。',
 'info@specsense.com',
@@ -297,9 +297,9 @@ INSERT INTO company_info (id, image_url, about_en, about_zh, description_en, des
 '深圳市南山区高新技术产业园区A栋2楼',
 '["Innovation", "Quality", "Integrity", "Customer Success"]',
 '[{"year": "2008", "event_en": "Founded in Shenzhen", "event_zh": "成立于深圳"}, {"year": "2012", "event_en": "Launched first spectrometer product line", "event_zh": "推出首款光谱仪产品线"}, {"year": "2016", "event_en": "Established R&D center", "event_zh": "成立研发中心"}, {"year": "2020", "event_en": "Expanded to global markets", "event_zh": "扩展至全球市场"}, {"year": "2024", "event_en": "Launched next-gen mini spectrometer", "event_zh": "推出下一代微型光谱仪"}]',
-'["ISO 9001:2015", "CE Certification", "RoHS Compliance"]',
-'{"researchInstitutions": "50+", "countries": "100+", "customers": "1000+"}',
-'{"years": "18+", "countries": "100+", "products": "200+", "engineers": "50+"}'
+'["ISO 9001:2015 Certified", "CE Marking", "RoHS Compliance"]',
+'{"researchInstitutions": "50+", "countries": "60+", "customers": "300+"}',
+'{"years": "18+", "countries": "60+", "products": "200+", "engineers": "50+"}'
 );
 
 -- Navigation Menus (Header)

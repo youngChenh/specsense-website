@@ -17,13 +17,42 @@ public interface ProductMapper {
             " AND (c.`key` = #{categoryKey} OR c.parent_id IN (SELECT id FROM category WHERE `key` = #{categoryKey}))" +
             "</if>" +
             "<if test='featured != null'> AND p.featured = #{featured}</if>" +
-            "ORDER BY p.sort_order LIMIT #{offset}, #{limit}" +
+            "<if test='keyword != null and keyword != \"\"'> " +
+            " AND (p.name_en LIKE CONCAT('%', #{keyword}, '%') OR p.name_zh LIKE CONCAT('%', #{keyword}, '%'))" +
+            "</if>" +
+            "<choose>" +
+            "<when test='keyword != null and keyword != \"\"'>" +
+            " ORDER BY " +
+            "   CASE WHEN p.name_en = #{keyword} OR p.name_zh = #{keyword} THEN 0 " +
+            "        WHEN p.name_en LIKE CONCAT(#{keyword}, '%') OR p.name_zh LIKE CONCAT(#{keyword}, '%') THEN 1 " +
+            "        ELSE 2 END, " +
+            "   p.sort_order" +
+            "</when>" +
+            "<otherwise>ORDER BY p.sort_order</otherwise>" +
+            "</choose>" +
+            " LIMIT #{offset}, #{limit}" +
             "</script>")
     List<Product> findList(@Param("categoryId") Long categoryId,
                            @Param("categoryKey") String categoryKey,
                            @Param("featured") Boolean featured,
+                           @Param("keyword") String keyword,
                            @Param("offset") int offset,
                            @Param("limit") int limit);
+
+    @Select("<script>" +
+            "SELECT p.*, c.name_en as category_name, c.`key` as category_key, " +
+            "       CASE WHEN p.name_en = #{keyword} OR p.name_zh = #{keyword} THEN 0 " +
+            "            WHEN p.name_en LIKE CONCAT(#{keyword}, '%') OR p.name_zh LIKE CONCAT(#{keyword}, '%') THEN 1 " +
+            "            ELSE 2 END AS match_rank " +
+            "FROM product p " +
+            "LEFT JOIN category c ON p.category_id = c.id " +
+            "WHERE p.del_flag = 0 " +
+            "  AND (p.name_en LIKE CONCAT('%', #{keyword}, '%') OR p.name_zh LIKE CONCAT('%', #{keyword}, '%')) " +
+            "ORDER BY match_rank, p.sort_order " +
+            "LIMIT #{limit}" +
+            "</script>")
+    List<Product> searchTop(@Param("keyword") String keyword,
+                            @Param("limit") int limit);
 
     @Select("<script>" +
             "SELECT COUNT(*) FROM product p " +
@@ -34,10 +63,14 @@ public interface ProductMapper {
             " AND (c.`key` = #{categoryKey} OR c.parent_id IN (SELECT id FROM category WHERE `key` = #{categoryKey}))" +
             "</if>" +
             "<if test='featured != null'> AND p.featured = #{featured}</if>" +
+            "<if test='keyword != null and keyword != \"\"'> " +
+            " AND (p.name_en LIKE CONCAT('%', #{keyword}, '%') OR p.name_zh LIKE CONCAT('%', #{keyword}, '%'))" +
+            "</if>" +
             "</script>")
     long count(@Param("categoryId") Long categoryId,
               @Param("categoryKey") String categoryKey,
-              @Param("featured") Boolean featured);
+              @Param("featured") Boolean featured,
+              @Param("keyword") String keyword);
 
     @Select("SELECT p.*, c.name_en as category_name, c.`key` as category_key " +
             "FROM product p " +
@@ -52,16 +85,23 @@ public interface ProductMapper {
     List<Product> findFeatured(@Param("limit") int limit);
 
     @Insert("INSERT INTO product (category_id, name_en, name_zh, slug, description_en, description_zh, " +
-            "image_url, image_urls, pdf_urls, specs_json, featured, sort_order, del_flag, highlights, applications) " +
+            "image_url, image_urls, alibaba_images, external_images, pdf_urls, download_pdf_url, " +
+            "detail_desc_en, detail_desc_zh, specs_json, detailed_specs, " +
+            "featured, sort_order, del_flag, highlights, applications) " +
             "VALUES (#{categoryId}, #{nameEn}, #{nameZh}, #{slug}, #{descriptionEn}, #{descriptionZh}, " +
-            "#{imageUrl}, #{imageUrls}, #{pdfUrls}, #{specsJson}, #{featured}, #{sortOrder}, 0, #{highlights}, #{applications})")
+            "#{imageUrl}, #{imageUrls}, #{alibabaImages}, #{externalImages}, #{pdfUrls}, #{downloadPdfUrl}, " +
+            "#{detailDescEn}, #{detailDescZh}, #{specsJson}, #{detailedSpecs}, " +
+            "#{featured}, #{sortOrder}, 0, #{highlights}, #{applications})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Product product);
 
     @Update("UPDATE product SET category_id = #{categoryId}, name_en = #{nameEn}, name_zh = #{nameZh}, " +
             "slug = #{slug}, description_en = #{descriptionEn}, description_zh = #{descriptionZh}, " +
-            "image_url = #{imageUrl}, image_urls = #{imageUrls}, pdf_urls = #{pdfUrls}, " +
-            "specs_json = #{specsJson}, featured = #{featured}, sort_order = #{sortOrder}, " +
+            "image_url = #{imageUrl}, image_urls = #{imageUrls}, alibaba_images = #{alibabaImages}, " +
+            "external_images = #{externalImages}, pdf_urls = #{pdfUrls}, download_pdf_url = #{downloadPdfUrl}, " +
+            "detail_desc_en = #{detailDescEn}, detail_desc_zh = #{detailDescZh}, " +
+            "specs_json = #{specsJson}, detailed_specs = #{detailedSpecs}, " +
+            "featured = #{featured}, sort_order = #{sortOrder}, " +
             "highlights = #{highlights}, applications = #{applications} " +
             "WHERE id = #{id}")
     int update(Product product);

@@ -209,27 +209,27 @@ const categories = ref<any[]>([])
 const selectedCategory = ref('all')
 
 // Brand carousel data
-const brandCarouselSlides = computed(() => [
-  {
-    image: '/banner_1.png',
-    title: locale.value === 'zh' ? '光学集成' : 'Optical Integration',
-    subtitle: locale.value === 'zh' ? '探索我们的合作品牌和制造商' : 'Explore our partner brands and manufacturers'
-  },
-  {
-    image: '/banner_2.png',
-    title: locale.value === 'zh' ? '产品供应链' : 'Product Supply Chain',
-    subtitle: locale.value === 'zh' ? '探索我们的合作品牌和制造商' : 'Explore our partner brands and manufacturers'
-  },
-  {
-    image: '/banner_3.png',
-    title: locale.value === 'zh' ? '售后服务' : 'After-sales Support',
-    subtitle: locale.value === 'zh' ? '探索我们的合作品牌和制造商' : 'Explore our partner brands and manufacturers'
-  }
-])
+const brandCarouselSlides = ref<any[]>([])
 const currentBrandSlide = ref(0)
 let brandCarouselInterval: NodeJS.Timeout | null = null
 let brandCarouselResumeTimeout: NodeJS.Timeout | null = null
 const isBrandCarouselHovering = ref(false)
+
+async function fetchBrandBanners() {
+  try {
+    const response = await fetch(`${config.public.apiBase}/api/banners?locale=${locale.value}`)
+    const result = await response.json()
+    if (result.code === 200 && result.data) {
+      brandCarouselSlides.value = result.data.map((banner: any) => ({
+        image: getFullImageUrl(banner.imageUrl),
+        title: banner.title,
+        subtitle: banner.subtitle,
+      }))
+    }
+  } catch (error) {
+    console.error('Failed to fetch banners:', error)
+  }
+}
 
 function nextBrandSlide() {
   if (brandCarouselSlides.value.length === 0) return
@@ -357,7 +357,12 @@ async function fetchCategories() {
 onMounted(() => {
   fetchCategories()
   fetchBrands()
+  fetchBrandBanners()
   startBrandCarouselAutoPlay()
+})
+
+watch(locale, () => {
+  fetchBrandBanners()
 })
 
 onUnmounted(() => {

@@ -100,20 +100,12 @@
       "subtitle": "SpeSense Technologies provides professional solutions for scientific research, industrial inspection, and medical diagnostics.",
       "cta": "Explore Products"
     },
+    "search": {
+      "placeholder": "Search product name...",
+      "button": "Search"
+    },
     "features": {
-      "title": "Why Choose SpeSense",
-      "precision": {
-        "title": "High Precision",
-        "desc": "Sub-micron level accuracy for demanding applications"
-      },
-      "reliability": {
-        "title": "Reliability",
-        "desc": "Rugged design for industrial environments"
-      },
-      "support": {
-        "title": "Global Support",
-        "desc": "Technical support worldwide"
-      }
+      "title": "Why Choose SpeSense"
     },
     "products": {
       "title": "Featured Products",
@@ -188,48 +180,48 @@
     "download": "Download Datasheet",
     "downloadPdf": "Download PDF",
     "featuredProducts": "Featured Products",
-    "filterBy": "Filter by category"
+    "filterBy": "Filter by category",
+    "notFound": "Product Not Found",
+    "backToList": "Back to Products",
+    "highlights": "Product Highlights",
+    "overview": "Product Overview",
+    "pdfLoading": "Loading PDF...",
+    "pdfError": "Failed to load PDF",
+    "detailDescription": "Product Description",
+    "detailedSpecs": "Detailed Specifications",
+    "alibabaImages": "Alibaba Product Images",
+    "externalImages": "External Resources"
   },
   "applications": {
     "title": "Application Areas",
     "subtitle": "Our photoelectric instruments are widely used across various industries",
     "industrial": {
-      "title": "Industrial Inspection",
-      "desc": "Quality control and process monitoring in manufacturing"
+      "title": "Industrial Inspection"
     },
     "research": {
-      "title": "Scientific Research",
-      "desc": "Laboratory analysis and research applications"
+      "title": "Scientific Research"
     },
     "medical": {
-      "title": "Medical Diagnostics",
-      "desc": "Healthcare and biomedical analysis equipment"
+      "title": "Medical Diagnostics"
     },
     "environment": {
-      "title": "Environmental Monitoring",
-      "desc": "Pollution detection and environmental assessment"
+      "title": "Environmental Monitoring"
     },
     "agriculture": {
-      "title": "Agriculture",
-      "desc": "Crop quality assessment and soil analysis"
+      "title": "Agriculture"
     },
     "food": {
-      "title": "Food & Beverage",
-      "desc": "Quality control in food processing and safety testing"
+      "title": "Food & Beverage"
     }
   },
   "services": {
     "title": "Services & Support",
     "subtitle": "We provide comprehensive technical support and after-sales service",
     "technical": {
-      "title": "Technical Support",
-      "desc": "Professional technical consultation and application support",
-      "details": "Our team of experienced engineers provides detailed product selection guidance, application consultation, and technical training to help you maximize the performance of our instruments."
+      "title": "Technical Support"
     },
     "afterSales": {
-      "title": "After-Sales Service",
-      "desc": "Warranty, repair and maintenance services",
-      "details": "All products come with a comprehensive warranty period. We offer rapid repair services, regular maintenance, and calibration to ensure your instruments maintain optimal performance."
+      "title": "After-Sales Service"
     },
     "downloads": {
       "title": "Downloads Center",
@@ -245,9 +237,7 @@
       "download": "Download"
     },
     "training": {
-      "title": "Training",
-      "desc": "Product training and technical workshops",
-      "details": "We offer regular online and offline training sessions to help users master the operation and maintenance of our products."
+      "title": "Training"
     }
   },
   "brands": {
@@ -280,8 +270,7 @@
       "desc": "SpeSense Technologies Inc. is a high-tech enterprise specializing in the research, development, and manufacturing of photoelectric instruments and sensors."
     },
     "mission": {
-      "title": "Our Mission",
-      "desc": "To provide scientists and engineers worldwide with reliable, high-precision photoelectric measurement solutions."
+      "title": "Our Mission"
     },
     "values": {
       "title": "Our Values",
@@ -304,12 +293,7 @@
       "desc": "Long-term partnerships with leading research institutions"
     },
     "timeline": {
-      "title": "Our History",
-      "year2008": "Founded in Shenzhen",
-      "year2012": "First export to Europe",
-      "year2016": "ISO 9001 certification",
-      "year2020": "Global service network established",
-      "year2024": "100+ countries served"
+      "title": "Our History"
     },
     "companyWarehouse": "Production & Warehouse"
   },

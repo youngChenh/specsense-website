@@ -100,20 +100,12 @@
       "subtitle": "思谱传感科技为科学研究、工业检测和医疗诊断提供专业解决方案。",
       "cta": "浏览产品"
     },
+    "search": {
+      "placeholder": "搜索产品名称...",
+      "button": "搜索"
+    },
     "features": {
-      "title": "为什么选择思谱",
-      "precision": {
-        "title": "高精度",
-        "desc": "亚微米级精度，满足高精度应用需求"
-      },
-      "reliability": {
-        "title": "可靠性",
-        "desc": "坚固耐用，适用于工业环境"
-      },
-      "support": {
-        "title": "全球支持",
-        "desc": "提供全球技术支持和售后服务"
-      }
+      "title": "为什么选择思谱"
     },
     "products": {
       "title": "精选产品",
@@ -188,34 +180,38 @@
     "download": "下载规格书",
     "downloadPdf": "下载PDF",
     "featuredProducts": "精选产品",
-    "filterBy": "按分类筛选"
+    "filterBy": "按分类筛选",
+    "notFound": "未找到产品",
+    "backToList": "返回产品列表",
+    "highlights": "产品亮点",
+    "overview": "产品概述",
+    "pdfLoading": "加载PDF中...",
+    "pdfError": "PDF加载失败",
+    "detailDescription": "产品描述",
+    "detailedSpecs": "详细参数",
+    "alibabaImages": "阿里产品图",
+    "externalImages": "外部资源"
   },
   "applications": {
     "title": "应用领域",
     "subtitle": "我们的光电仪器广泛应用于各个行业",
     "industrial": {
-      "title": "工业检测",
-      "desc": "制造业质量控制和过程监控"
+      "title": "工业检测"
     },
     "research": {
-      "title": "科学研究",
-      "desc": "实验室分析和研究应用"
+      "title": "科学研究"
     },
     "medical": {
-      "title": "医疗诊断",
-      "desc": "医疗和生物医学分析设备"
+      "title": "医疗诊断"
     },
     "environment": {
-      "title": "环境监测",
-      "desc": "污染检测和环境评估"
+      "title": "环境监测"
     },
     "agriculture": {
-      "title": "农业",
-      "desc": "作物质量评估和土壤分析"
+      "title": "农业"
     },
     "food": {
-      "title": "食品饮料",
-      "desc": "食品加工质量控制和安全性检测"
+      "title": "食品饮料"
     }
   },
   "brands": {
@@ -235,14 +231,10 @@
     "title": "服务与支持",
     "subtitle": "我们提供全面的技术支持和售后服务",
     "technical": {
-      "title": "技术支持",
-      "desc": "专业技术咨询和应用支持",
-      "details": "我们经验丰富的工程师团队提供详细的产品选型指导、应用咨询和技术培训，帮助您充分发挥仪器性能。"
+      "title": "技术支持"
     },
     "afterSales": {
-      "title": "售后服务",
-      "desc": "保修、维修和维护服务",
-      "details": "所有产品均提供全面的保修期。我们提供快速维修服务、定期维护和校准，确保您的仪器保持最佳性能。"
+      "title": "售后服务"
     },
     "downloads": {
       "title": "下载中心",
@@ -258,9 +250,7 @@
       "download": "下载"
     },
     "training": {
-      "title": "培训服务",
-      "desc": "产品培训和技术研讨会",
-      "details": "我们提供定期的线上和线下培训课程，帮助用户掌握产品的操作和维护。"
+      "title": "培训服务"
     }
   },
   "news": {
@@ -280,8 +270,7 @@
       "desc": "思谱传感科技有限公司（SpeSense Technologies Inc.）是一家专业从事光电仪器和传感器研发、生产的高新技术企业。"
     },
     "mission": {
-      "title": "企业使命",
-      "desc": "为全球科学家和工程师提供可靠、高精度的光电测量解决方案。"
+      "title": "企业使命"
     },
     "values": {
       "title": "核心价值观",
@@ -304,12 +293,7 @@
       "desc": "与领先研究机构的长期合作关系"
     },
     "timeline": {
-      "title": "发展历程",
-      "year2008": "在深圳成立",
-      "year2012": "首次出口欧洲",
-      "year2016": "ISO 9001认证",
-      "year2020": "全球服务网络建立",
-      "year2024": "服务超过100个国家"
+      "title": "发展历程"
     },
     "companyWarehouse": "公司生产仓库"
   },

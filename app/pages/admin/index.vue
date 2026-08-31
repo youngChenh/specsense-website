@@ -99,7 +99,7 @@
           </template>
           <div class="chart-placeholder">
             <div class="bar-chart">
-              <div v-for="(item, index) in categoryData" :key="index" class="bar-item">
+              <div v-for="(item, index) in paginatedCategoryData" :key="index" class="bar-item">
                 <div class="bar-label">{{ item.name }}</div>
                 <div class="bar-container">
                   <div class="bar-fill" :style="{ width: item.percent + '%', backgroundColor: item.color }"></div>
@@ -107,6 +107,15 @@
                 <div class="bar-value">{{ item.count }}</div>
               </div>
             </div>
+            <el-pagination
+              v-if="categoryData.length > categoryPageSize"
+              v-model:current-page="categoryPage"
+              :page-size="categoryPageSize"
+              :total="categoryData.length"
+              layout="prev, pager, next, jumper"
+              small
+              class="category-pagination"
+            />
           </div>
         </el-card>
       </el-col>
@@ -259,6 +268,14 @@ const categoryData = ref([
   { name: '分析仪', count: 3, percent: 30, color: '#10b981' },
   { name: '传感器', count: 3, percent: 30, color: '#f59e0b' },
 ])
+
+const categoryPage = ref(1)
+const categoryPageSize = ref(8)
+
+const paginatedCategoryData = computed(() => {
+  const start = (categoryPage.value - 1) * categoryPageSize.value
+  return categoryData.value.slice(start, start + categoryPageSize.value)
+})
 
 onMounted(async () => {
   if (!import.meta.client) return
@@ -507,6 +524,21 @@ const editProduct = (row) => {
   font-size: 0.875rem;
   font-weight: 600;
   color: #374151;
+}
+
+.category-pagination {
+  margin-top: 16px;
+  justify-content: center;
+}
+.category-pagination :deep(.el-pager li),
+.category-pagination :deep(.btn-prev),
+.category-pagination :deep(.btn-next) {
+  background: transparent !important;
+  color: #6b7280;
+}
+.category-pagination :deep(.el-pager li.is-active) {
+  color: #3b82f6;
+  font-weight: 600;
 }
 
 /* Inquiry List */

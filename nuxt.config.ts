@@ -7,10 +7,17 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@nuxtjs/i18n',
     '@element-plus/nuxt',
+    '@nuxtjs/sitemap',
+    '@nuxtjs/robots',
   ],
 
   elementPlus: {
     importStyle: 'css',
+  },
+
+  site: {
+    url: process.env.NUXT_PUBLIC_SITE_URL || 'https://www.specsense.com',
+    name: 'SpeSense',
   },
 
   i18n: {
@@ -27,6 +34,24 @@ export default defineNuxtConfig({
       cookieKey: 'i18n_locale',
       redirectOn: 'root',
     },
+  },
+
+  sitemap: {
+    exclude: [
+      '/admin/**',
+      '/admin',
+      '/admin/login',
+      '/admin/*',
+      '/privacy',
+      '/terms',
+    ],
+    sources: [
+      '/api/sitemap/urls',
+    ],
+  },
+
+  robots: {
+    blockNonSeoBots: true,
   },
 
   app: {

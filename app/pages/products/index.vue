@@ -38,13 +38,16 @@
           </div>
 
           <!-- Active Filter Indicator -->
-          <div v-else-if="selectedCategory !== 'all'" class="mb-4 flex items-center justify-between bg-blue-50 rounded-lg px-4 py-2">
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-gray-600">{{ $t('products.filterBy') }}:</span>
-              <span class="text-sm font-medium text-blue-600">{{ getCategoryName(selectedCategory) }}</span>
+          <div v-else-if="searchQuery || selectedCategory !== 'all'" class="mb-4 flex items-center justify-between bg-blue-50 rounded-lg px-4 py-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm text-gray-600">{{ searchQuery ? '搜索' : $t('products.filterBy') }}:</span>
+              <span v-if="searchQuery" class="text-sm font-medium text-blue-600">"{{ searchQuery }}"</span>
+              <span v-if="searchQuery && selectedCategory !== 'all'" class="text-gray-400 text-sm">·</span>
+              <span v-if="selectedCategory !== 'all'" class="text-sm font-medium text-blue-600">{{ getCategoryName(selectedCategory) }}</span>
+              <span class="text-xs text-gray-500">({{ totalProducts }})</span>
             </div>
             <button
-              @click="selectedCategory = 'all'"
+              @click="clearFilters"
               class="text-sm text-blue-600 hover:text-blue-800"
             >
               {{ $t('products.allProducts') }}
@@ -65,7 +68,9 @@
             <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
-            <p class="text-gray-500 text-lg">No products found in this category.</p>
+            <p class="text-gray-500 text-lg">
+              {{ searchQuery ? `没有找到与 "${searchQuery}" 匹配的产品` : 'No products found in this category.' }}
+            </p>
           </div>
 
           <!-- Pagination -->
@@ -108,6 +113,7 @@ const { t, locale } = useI18n()
 const config = useRuntimeConfig()
 
 const selectedCategory = ref((route.query.category as string) || 'all')
+const searchQuery = ref((route.query.q as string) || '')
 const currentPage = ref(1)
 const pageSize = ref(12)
 const totalProducts = ref(0)
@@ -119,6 +125,12 @@ const categories = ref<any[]>([])
 // Watch for route changes
 watch(() => route.query.category, (newCategory) => {
   selectedCategory.value = (newCategory as string) || 'all'
+  currentPage.value = 1
+  fetchProducts()
+})
+
+watch(() => route.query.q, (newQuery) => {
+  searchQuery.value = (newQuery as string) || ''
   currentPage.value = 1
   fetchProducts()
 })
@@ -148,9 +160,18 @@ const sidebarCategories = computed(() => {
 function handleCategoryChange(category: string) {
   selectedCategory.value = category
   currentPage.value = 1
-  navigateTo({
-    query: category === 'all' ? {} : { category }
-  })
+  const query: Record<string, string> = {}
+  if (category !== 'all') query.category = category
+  if (searchQuery.value) query.q = searchQuery.value
+  navigateTo({ query })
+  fetchProducts()
+}
+
+function clearFilters() {
+  selectedCategory.value = 'all'
+  searchQuery.value = ''
+  currentPage.value = 1
+  navigateTo({ query: {} })
   fetchProducts()
 }
 
@@ -181,6 +202,7 @@ async function fetchProducts() {
   error.value = null
   try {
     const categoryParam = selectedCategory.value === 'all' ? undefined : selectedCategory.value
+    const keywordParam = searchQuery.value.trim() || undefined
     const url = `${config.public.apiBase}/api/products`
     const params: Record<string, any> = {
       page: currentPage.value,
@@ -189,6 +211,9 @@ async function fetchProducts() {
     }
     if (categoryParam) {
       params.category = categoryParam
+    }
+    if (keywordParam) {
+      params.keyword = keywordParam
     }
 
     const response = await fetch(url + '?' + new URLSearchParams(params))

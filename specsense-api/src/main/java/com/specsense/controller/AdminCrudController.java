@@ -105,7 +105,7 @@ public class AdminCrudController {
     @GetMapping("/products")
     public Result<List<ProductDTO>> listProducts(HttpServletRequest request) {
         if (!authenticate(request)) return Result.error(401, "Unauthorized");
-        return Result.success(productService.getList(null, null, null, 1, 1000, "en").getData());
+        return Result.success(productService.getList(null, null, null, null, 1, 1000, "en").getData());
     }
 
     @PostMapping("/products")

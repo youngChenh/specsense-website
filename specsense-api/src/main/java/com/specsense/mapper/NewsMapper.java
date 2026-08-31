@@ -8,7 +8,9 @@ import java.util.List;
 public interface NewsMapper {
 
     @Select("<script>" +
-            "SELECT * FROM news WHERE del_flag = 0 " +
+            "SELECT id, category, title_en, title_zh, slug, excerpt_en, excerpt_zh, " +
+            "image_url, author, published_at, created_at, updated_at, del_flag " +
+            "FROM news WHERE del_flag = 0 " +
             "<if test='category != null'> AND category = #{category}</if>" +
             "ORDER BY published_at DESC LIMIT #{offset}, #{limit}" +
             "</script>")
@@ -28,7 +30,9 @@ public interface NewsMapper {
     @Select("SELECT * FROM news WHERE del_flag = 0 AND id = #{id}")
     News findById(@Param("id") Long id);
 
-    @Select("SELECT * FROM news WHERE del_flag = 0 ORDER BY published_at DESC LIMIT #{limit}")
+    @Select("SELECT id, category, title_en, title_zh, slug, excerpt_en, excerpt_zh, " +
+            "image_url, author, published_at, created_at, updated_at, del_flag " +
+            "FROM news WHERE del_flag = 0 ORDER BY published_at DESC LIMIT #{limit}")
     List<News> findLatest(@Param("limit") int limit);
 
     @Insert("INSERT INTO news (category, title_en, title_zh, slug, excerpt_en, excerpt_zh, " +

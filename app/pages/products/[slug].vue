@@ -14,9 +14,9 @@
     <!-- Error State -->
     <div v-else-if="!product" class="min-h-screen flex items-center justify-center">
       <div class="text-center">
-        <h1 class="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ $t('products.notFound') }}</h1>
         <NuxtLink :to="localePath('/products')" class="text-blue-600 hover:text-blue-800">
-          Back to Products
+          {{ $t('products.backToList') }}
         </NuxtLink>
       </div>
     </div>
@@ -133,23 +133,10 @@
                   <svg class="w-5 h-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                   </svg>
-                  Product Highlights
+                  {{ $t('products.highlights') }}
                 </h3>
                 <div class="bg-yellow-50 rounded-xl p-5 border border-yellow-100">
                   <div class="prose prose-xs max-w-none text-gray-700 text-sm" v-html="displayHighlights"></div>
-                </div>
-              </div>
-
-              <!-- Applications -->
-              <div v-if="false" class="mb-8">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.985 23.985 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  Application scope
-                </h3>
-                <div class="bg-green-50 rounded-xl p-5 border border-green-100">
-                  <div class="prose prose-xs max-w-none text-gray-700 text-sm" v-html="displayApplications"></div>
                 </div>
               </div>
 
@@ -165,15 +152,15 @@
                   {{ $t('products.inquiry') }}
                 </button>
                 <a
-                  v-if="pdfList.length > 0"
-                  :href="getFullUrl(pdfList[0])"
+                  v-if="downloadPdfUrl"
+                  :href="getFullUrl(downloadPdfUrl)"
                   download
                   class="flex-1 px-6 py-4 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                 >
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  {{ $t('products.downloadPdf') || 'Download PDF' }}
+                  {{ $t('products.downloadPdf') }}
                 </a>
               </div>
             </div>
@@ -182,15 +169,79 @@
           <!-- Row 2: PDF Section -->
           <div v-if="pdfList.length > 0">
             <div class="flex items-center gap-4 mb-6">
-              <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap cursor-pointer hover:text-blue-600">产品概述</h3>
+              <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap cursor-pointer hover:text-blue-600">{{ $t('products.overview') }}</h3>
               <div class="flex-1 h-px bg-gray-200"></div>
             </div>
             <div ref="pdfContainerRef" class="flex flex-col items-center">
               <div v-if="pdfLoading" class="flex items-center justify-center h-64">
-                <span class="text-gray-500">Loading PDF...</span>
+                <span class="text-gray-500">{{ $t('products.pdfLoading') }}</span>
               </div>
               <div v-else-if="pdfError" class="flex items-center justify-center h-64">
-                <span class="text-red-500">Failed to load PDF</span>
+                <span class="text-red-500">{{ $t('products.pdfError') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 3: Detail Sections (after PDF) -->
+          <div class="space-y-10 mt-10">
+            <!-- 1) Product description text -->
+            <div v-if="displayDetailDesc">
+              <div class="flex items-center gap-4 mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap">{{ $t('products.detailDescription') }}</h3>
+                <div class="flex-1 h-px bg-gray-200"></div>
+              </div>
+              <div class="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-line" v-html="displayDetailDesc"></div>
+            </div>
+
+            <!-- 2) Detailed specs table -->
+            <div v-if="product.detailedSpecs && Object.keys(product.detailedSpecs).length > 0">
+              <div class="flex items-center gap-4 mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap">{{ $t('products.detailedSpecs') }}</h3>
+                <div class="flex-1 h-px bg-gray-200"></div>
+              </div>
+              <div class="bg-gray-50 rounded-xl overflow-hidden">
+                <table class="w-full">
+                  <tbody>
+                    <tr v-for="(value, key) in product.detailedSpecs" :key="key" class="border-b border-gray-200 last:border-0">
+                      <td class="py-3 px-4 font-medium text-gray-600 w-1/3">{{ key }}</td>
+                      <td class="py-3 px-4 text-gray-900">{{ value }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 3) Alibaba images (max 10) -->
+            <div v-if="alibabaImages.length > 0">
+              <div class="flex items-center gap-4 mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap">{{ $t('products.alibabaImages') }}</h3>
+                <div class="flex-1 h-px bg-gray-200"></div>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                <div v-for="(img, idx) in alibabaImages" :key="idx" class="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+                  <img :src="getImageUrl(img)" :alt="`Alibaba image ${idx + 1}`" class="w-full h-40 object-cover" />
+                </div>
+              </div>
+            </div>
+
+            <!-- 4) External images with links -->
+            <div v-if="externalImages.length > 0">
+              <div class="flex items-center gap-4 mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap">{{ $t('products.externalImages') }}</h3>
+                <div class="flex-1 h-px bg-gray-200"></div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <a
+                  v-for="(item, idx) in externalImages"
+                  :key="idx"
+                  :href="item.link || '#'"
+                  :target="item.link ? '_blank' : '_self'"
+                  rel="noopener noreferrer"
+                  class="group block bg-gray-50 rounded-xl overflow-hidden border border-gray-100 hover:border-blue-400 transition-colors"
+                >
+                  <img :src="getImageUrl(item.url)" :alt="`External image ${idx + 1}`" class="w-full h-44 object-cover group-hover:opacity-90" />
+                  <div v-if="item.link" class="px-3 py-2 text-xs text-blue-600 truncate">{{ item.link }}</div>
+                </a>
               </div>
             </div>
           </div>
@@ -358,9 +409,24 @@ const displayHighlights = computed(() => {
   return (product.value.highlights || '').replace(/\n/g, '<br>')
 })
 
-const displayApplications = computed(() => {
+const displayDetailDesc = computed(() => {
   if (!product.value) return ''
-  return (product.value.applications || '').replace(/\n/g, '<br>')
+  const raw = locale.value === 'zh'
+    ? (product.value.detailDescZh || product.value.detailDescEn || '')
+    : (product.value.detailDescEn || product.value.detailDescZh || '')
+  return (raw || '').replace(/\n/g, '<br>')
+})
+
+const downloadPdfUrl = computed(() => product.value?.downloadPdfUrl || '')
+
+const alibabaImages = computed(() => {
+  if (!product.value) return []
+  return (product.value.alibabaImages || []).slice(0, 10)
+})
+
+const externalImages = computed(() => {
+  if (!product.value) return []
+  return product.value.externalImages || []
 })
 
 const allImages = computed(() => {

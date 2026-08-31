@@ -3,6 +3,7 @@ package com.specsense.controller;
 import com.specsense.model.vo.Result;
 import com.specsense.model.vo.PageResult;
 import com.specsense.model.dto.ProductDTO;
+import com.specsense.model.dto.ProductSearchResultDTO;
 import com.specsense.model.entity.Product;
 import com.specsense.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,18 @@ public class ProductController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Boolean featured,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "12") int pageSize,
             @RequestParam(defaultValue = "en") String locale) {
-        return Result.success(productService.getList(categoryId, category, featured, page, pageSize, locale));
+        return Result.success(productService.getList(categoryId, category, featured, keyword, page, pageSize, locale));
+    }
+
+    @GetMapping("/search")
+    public Result<ProductSearchResultDTO> search(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "en") String locale) {
+        return Result.success(productService.search(q, locale));
     }
 
     @GetMapping("/{slug}")

@@ -151,14 +151,18 @@
                 <img src="/code_1.png" alt="code_1" class="w-1/2 object-contain" />
                 <img src="/code_2.jpg" alt="code_2" class="w-1/2 object-contain" />
               </div>
-              <div class="flex justify-center gap-2 p-2 bg-gray-100">
-                <img src="/social_1.png" alt="social_1" class="h-8 object-contain" />
-                <img src="/social_2.png" alt="social_2" class="h-8 object-contain" />
-                <img src="/social_3.png" alt="social_3" class="h-8 object-contain" />
-                <img src="/social_4.png" alt="social_4" class="h-8 object-contain" />
-                <img src="/social_5.png" alt="social_5" class="h-8 object-contain" />
-                <img src="/social_6.png" alt="social_6" class="h-8 object-contain" />
-                <img src="/social_7.png" alt="social_7" class="h-8 object-contain" />
+              <div class="flex justify-center gap-3 p-3 bg-gray-100">
+                <a
+                  v-for="link in socialLinks"
+                  :key="link.name"
+                  :href="link.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :title="link.name"
+                  class="hover:opacity-70 hover:scale-110 transition-all duration-200"
+                >
+                  <img :src="link.icon" :alt="link.name" class="h-8 object-contain" />
+                </a>
               </div>
             </div>
           </div>
@@ -197,14 +201,24 @@ async function loadCompanyInfo() {
   }
 }
 
-const contactEmail = computed(() => companyInfo.value?.email || 'info@specsense.com')
-const contactPhone = computed(() => companyInfo.value?.phone || '+86 400-888-8888')
+const contactEmail = computed(() => companyInfo.value?.email || '')
+const contactPhone = computed(() => companyInfo.value?.phone || '')
 const contactAddress = computed(() => {
-  if (!companyInfo.value) return 'Shenzhen, China'
+  if (!companyInfo.value) return ''
   return locale.value === 'zh'
-    ? (companyInfo.value.addressZh || companyInfo.value.addressEn || 'Shenzhen, China')
-    : (companyInfo.value.addressEn || companyInfo.value.addressZh || 'Shenzhen, China')
+    ? (companyInfo.value.addressZh || companyInfo.value.addressEn || '')
+    : (companyInfo.value.addressEn || companyInfo.value.addressZh || '')
 })
+
+const socialLinks = [
+  { name: 'Facebook', icon: '/social_1.png', url: 'https://www.facebook.com/SpeSenseTech' },
+  { name: 'Instagram', icon: '/social_2.png', url: 'https://www.instagram.com/spesense_technologies_inc/' },
+  { name: 'Pinterest', icon: '/social_3.png', url: 'https://www.pinterest.com/spesense/' },
+  { name: 'X', icon: '/social_4.png', url: 'https://x.com/spesense' },
+  { name: 'TikTok', icon: '/social_5.png', url: 'https://www.tiktok.com/@spesense' },
+  { name: 'YouTube', icon: '/social_6.png', url: 'https://www.youtube.com/@SpeSense' },
+  { name: 'LinkedIn', icon: '/social_7.png', url: 'https://www.linkedin.com/in/spesense/recent-activity/all/' },
+]
 
 onMounted(() => {
   loadCompanyInfo()

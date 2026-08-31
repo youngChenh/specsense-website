@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.specsense.mapper.ProductMapper;
 import com.specsense.model.entity.Product;
 import com.specsense.model.dto.ProductDTO;
+import com.specsense.model.dto.ProductSearchResultDTO;
 import com.specsense.model.vo.PageResult;
 import com.specsense.service.CacheService;
 import com.specsense.service.ProductService;
@@ -28,12 +29,14 @@ public class ProductServiceImpl implements ProductService {
     private CacheService cacheService;
 
     @Override
-    public PageResult<List<ProductDTO>> getList(Long categoryId, String categoryKey, Boolean featured, int page, int pageSize, String locale) {
+    public PageResult<List<ProductDTO>> getList(Long categoryId, String categoryKey, Boolean featured, String keyword, int page, int pageSize, String locale) {
+        String normalizedKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
         // 只缓存数据列表，不缓存PageResult以避免泛型反序列化问题
-        String listKey = String.format("products:list:%d:%s:%s:%d:%d:%s",
+        String listKey = String.format("products:list:%d:%s:%s:%s:%d:%d:%s",
             categoryId != null ? categoryId : 0,
             categoryKey != null ? categoryKey : "all",
             featured != null ? featured : "any",
+            normalizedKeyword != null ? normalizedKeyword : "any",
             page, pageSize, locale);
         String totalKey = listKey + ":total";
 
@@ -46,8 +49,8 @@ public class ProductServiceImpl implements ProductService {
         }
 
         int offset = (page - 1) * pageSize;
-        long total = productMapper.count(categoryId, categoryKey, featured);
-        List<Product> products = productMapper.findList(categoryId, categoryKey, featured, offset, pageSize);
+        long total = productMapper.count(categoryId, categoryKey, featured, normalizedKeyword);
+        List<Product> products = productMapper.findList(categoryId, categoryKey, featured, normalizedKeyword, offset, pageSize);
 
         List<ProductDTO> dtos = new ArrayList<>();
         for (Product product : products) {
@@ -66,6 +69,27 @@ public class ProductServiceImpl implements ProductService {
             return null;
         }
         return convertToDTO(product, locale);
+    }
+
+    @Override
+    public ProductSearchResultDTO search(String keyword, String locale) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return null;
+        }
+        String trimmed = keyword.trim();
+        List<Product> top = productMapper.searchTop(trimmed, 5);
+        if (top == null || top.isEmpty()) {
+            ProductSearchResultDTO empty = new ProductSearchResultDTO();
+            empty.setKeyword(trimmed);
+            return empty;
+        }
+        Product best = top.get(0);
+        ProductSearchResultDTO result = new ProductSearchResultDTO();
+        result.setKeyword(trimmed);
+        result.setCategoryKey(best.getCategoryKey());
+        result.setCategoryName(best.getCategoryName());
+        result.setBestMatch(convertToDTO(best, locale));
+        return result;
     }
 
     @Override
@@ -130,6 +154,18 @@ public class ProductServiceImpl implements ProductService {
         if (product.getPdfUrls() == null || product.getPdfUrls().trim().isEmpty()) {
             product.setPdfUrls(null);
         }
+        if (product.getDownloadPdfUrl() == null || product.getDownloadPdfUrl().trim().isEmpty()) {
+            product.setDownloadPdfUrl(null);
+        }
+        if (product.getDetailedSpecs() == null || product.getDetailedSpecs().trim().isEmpty()) {
+            product.setDetailedSpecs(null);
+        }
+        if (product.getAlibabaImages() == null || product.getAlibabaImages().trim().isEmpty()) {
+            product.setAlibabaImages(null);
+        }
+        if (product.getExternalImages() == null || product.getExternalImages().trim().isEmpty()) {
+            product.setExternalImages(null);
+        }
     }
 
     @Override
@@ -166,9 +202,11 @@ public class ProductServiceImpl implements ProductService {
         if ("zh".equals(locale)) {
             dto.setNameZh(product.getNameZh());
             dto.setDescriptionZh(product.getDescriptionZh());
+            dto.setDetailDescZh(product.getDetailDescZh());
         } else {
             dto.setNameEn(product.getNameEn());
             dto.setDescriptionEn(product.getDescriptionEn());
+            dto.setDetailDescEn(product.getDetailDescEn());
         }
 
         // Parse specs JSON
@@ -179,6 +217,19 @@ public class ProductServiceImpl implements ProductService {
                     new TypeReference<Map<String, String>>() {}
                 );
                 dto.setSpecs(specs);
+            } catch (Exception e) {
+                // Ignore parsing errors
+            }
+        }
+
+        // Parse detailed specs JSON (independent from specs)
+        if (product.getDetailedSpecs() != null && !product.getDetailedSpecs().isEmpty()) {
+            try {
+                Map<String, String> detailedSpecs = objectMapper.readValue(
+                    product.getDetailedSpecs(),
+                    new TypeReference<Map<String, String>>() {}
+                );
+                dto.setDetailedSpecs(detailedSpecs);
             } catch (Exception e) {
                 // Ignore parsing errors
             }
@@ -205,6 +256,35 @@ public class ProductServiceImpl implements ProductService {
                     new TypeReference<List<String>>() {}
                 );
                 dto.setPdfUrls(pdfUrls);
+            } catch (Exception e) {
+                // Ignore parsing errors
+            }
+        }
+
+        // Single download PDF URL
+        dto.setDownloadPdfUrl(product.getDownloadPdfUrl());
+
+        // Parse alibaba images JSON array (max 10)
+        if (product.getAlibabaImages() != null && !product.getAlibabaImages().isEmpty()) {
+            try {
+                List<String> alibabaImages = objectMapper.readValue(
+                    product.getAlibabaImages(),
+                    new TypeReference<List<String>>() {}
+                );
+                dto.setAlibabaImages(alibabaImages);
+            } catch (Exception e) {
+                // Ignore parsing errors
+            }
+        }
+
+        // Parse external images JSON array of {url, link}
+        if (product.getExternalImages() != null && !product.getExternalImages().isEmpty()) {
+            try {
+                List<com.specsense.model.dto.ExternalImageItem> externalImages = objectMapper.readValue(
+                    product.getExternalImages(),
+                    new TypeReference<List<com.specsense.model.dto.ExternalImageItem>>() {}
+                );
+                dto.setExternalImages(externalImages);
             } catch (Exception e) {
                 // Ignore parsing errors
             }
