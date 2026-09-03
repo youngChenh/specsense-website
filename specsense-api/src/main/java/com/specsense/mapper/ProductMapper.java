@@ -8,14 +8,17 @@ import java.util.List;
 public interface ProductMapper {
 
     @Select("<script>" +
+            "WITH RECURSIVE category_tree AS (" +
+            "  SELECT id FROM category WHERE `key` = #{categoryKey}" +
+            "  UNION ALL" +
+            "  SELECT c.id FROM category c INNER JOIN category_tree ct ON c.parent_id = ct.id" +
+            ")" +
             "SELECT p.*, c.name_en as category_name, c.`key` as category_key " +
             "FROM product p " +
             "LEFT JOIN category c ON p.category_id = c.id " +
             "WHERE p.del_flag = 0 " +
             "<if test='categoryId != null'> AND p.category_id = #{categoryId}</if>" +
-            "<if test='categoryKey != null'> " +
-            " AND (c.`key` = #{categoryKey} OR c.parent_id IN (SELECT id FROM category WHERE `key` = #{categoryKey}))" +
-            "</if>" +
+            "<if test='categoryKey != null'> AND p.category_id IN (SELECT id FROM category_tree)</if>" +
             "<if test='featured != null'> AND p.featured = #{featured}</if>" +
             "<if test='keyword != null and keyword != \"\"'> " +
             " AND (p.name_en LIKE CONCAT('%', #{keyword}, '%') OR p.name_zh LIKE CONCAT('%', #{keyword}, '%'))" +
@@ -55,13 +58,16 @@ public interface ProductMapper {
                             @Param("limit") int limit);
 
     @Select("<script>" +
+            "WITH RECURSIVE category_tree AS (" +
+            "  SELECT id FROM category WHERE `key` = #{categoryKey}" +
+            "  UNION ALL" +
+            "  SELECT c.id FROM category c INNER JOIN category_tree ct ON c.parent_id = ct.id" +
+            ")" +
             "SELECT COUNT(*) FROM product p " +
             "LEFT JOIN category c ON p.category_id = c.id " +
             "WHERE p.del_flag = 0 " +
             "<if test='categoryId != null'> AND p.category_id = #{categoryId}</if>" +
-            "<if test='categoryKey != null'> " +
-            " AND (c.`key` = #{categoryKey} OR c.parent_id IN (SELECT id FROM category WHERE `key` = #{categoryKey}))" +
-            "</if>" +
+            "<if test='categoryKey != null'> AND p.category_id IN (SELECT id FROM category_tree)</if>" +
             "<if test='featured != null'> AND p.featured = #{featured}</if>" +
             "<if test='keyword != null and keyword != \"\"'> " +
             " AND (p.name_en LIKE CONCAT('%', #{keyword}, '%') OR p.name_zh LIKE CONCAT('%', #{keyword}, '%'))" +
