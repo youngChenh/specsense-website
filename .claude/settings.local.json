@@ -9,7 +9,8 @@
       "Bash(nohup java:*)",
       "Bash(echo \"Started PID: $!\")",
       "Bash(pip install:*)",
-      "Bash(tasklist)"
+      "Bash(tasklist)",
+      "Bash(timeout 25 npm run dev)"
     ]
   }
 }

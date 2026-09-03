@@ -126,7 +126,7 @@
             <p class="text-gray-600 mb-4">{{ $t('about.partners.desc') }}</p>
             <div v-if="partnersStats" class="grid grid-cols-3 gap-4">
               <div class="text-center p-4 bg-gray-50 rounded-lg">
-                <div class="text-2xl font-bold text-blue-600">{{ partnersStats.institutions }}</div>
+                <div class="text-2xl font-bold text-blue-600">50+</div>
                 <div class="text-sm text-gray-500">Research Institutions</div>
               </div>
               <div class="text-center p-4 bg-gray-50 rounded-lg">
@@ -205,7 +205,11 @@ const qualifications = computed(() => {
 const partnersStats = computed(() => {
   if (!companyInfo.value?.partnersStatsJson) return null
   try {
-    return JSON.parse(companyInfo.value.partnersStatsJson)
+    const stats = JSON.parse(companyInfo.value.partnersStatsJson)
+    if (stats.institutions) {
+      stats.institutions = stats.institutions + '+'
+    }
+    return stats
   } catch {
     return null
   }

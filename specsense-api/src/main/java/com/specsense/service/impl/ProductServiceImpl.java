@@ -151,21 +151,11 @@ public class ProductServiceImpl implements ProductService {
         if (product.getImageUrls() == null || product.getImageUrls().trim().isEmpty()) {
             product.setImageUrls(null);
         }
-        if (product.getPdfUrls() == null || product.getPdfUrls().trim().isEmpty()) {
-            product.setPdfUrls(null);
-        }
+
         if (product.getDownloadPdfUrl() == null || product.getDownloadPdfUrl().trim().isEmpty()) {
             product.setDownloadPdfUrl(null);
         }
-        if (product.getDetailedSpecs() == null || product.getDetailedSpecs().trim().isEmpty()) {
-            product.setDetailedSpecs(null);
-        }
-        if (product.getAlibabaImages() == null || product.getAlibabaImages().trim().isEmpty()) {
-            product.setAlibabaImages(null);
-        }
-        if (product.getExternalImages() == null || product.getExternalImages().trim().isEmpty()) {
-            product.setExternalImages(null);
-        }
+
     }
 
     @Override
@@ -202,11 +192,9 @@ public class ProductServiceImpl implements ProductService {
         if ("zh".equals(locale)) {
             dto.setNameZh(product.getNameZh());
             dto.setDescriptionZh(product.getDescriptionZh());
-            dto.setDetailDescZh(product.getDetailDescZh());
         } else {
             dto.setNameEn(product.getNameEn());
             dto.setDescriptionEn(product.getDescriptionEn());
-            dto.setDetailDescEn(product.getDetailDescEn());
         }
 
         // Parse specs JSON
@@ -217,19 +205,6 @@ public class ProductServiceImpl implements ProductService {
                     new TypeReference<Map<String, String>>() {}
                 );
                 dto.setSpecs(specs);
-            } catch (Exception e) {
-                // Ignore parsing errors
-            }
-        }
-
-        // Parse detailed specs JSON (independent from specs)
-        if (product.getDetailedSpecs() != null && !product.getDetailedSpecs().isEmpty()) {
-            try {
-                Map<String, String> detailedSpecs = objectMapper.readValue(
-                    product.getDetailedSpecs(),
-                    new TypeReference<Map<String, String>>() {}
-                );
-                dto.setDetailedSpecs(detailedSpecs);
             } catch (Exception e) {
                 // Ignore parsing errors
             }
@@ -248,47 +223,11 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        // Parse PDF URLs JSON array
-        if (product.getPdfUrls() != null && !product.getPdfUrls().isEmpty()) {
-            try {
-                List<String> pdfUrls = objectMapper.readValue(
-                    product.getPdfUrls(),
-                    new TypeReference<List<String>>() {}
-                );
-                dto.setPdfUrls(pdfUrls);
-            } catch (Exception e) {
-                // Ignore parsing errors
-            }
-        }
-
         // Single download PDF URL
         dto.setDownloadPdfUrl(product.getDownloadPdfUrl());
 
-        // Parse alibaba images JSON array (max 10)
-        if (product.getAlibabaImages() != null && !product.getAlibabaImages().isEmpty()) {
-            try {
-                List<String> alibabaImages = objectMapper.readValue(
-                    product.getAlibabaImages(),
-                    new TypeReference<List<String>>() {}
-                );
-                dto.setAlibabaImages(alibabaImages);
-            } catch (Exception e) {
-                // Ignore parsing errors
-            }
-        }
-
-        // Parse external images JSON array of {url, link}
-        if (product.getExternalImages() != null && !product.getExternalImages().isEmpty()) {
-            try {
-                List<com.specsense.model.dto.ExternalImageItem> externalImages = objectMapper.readValue(
-                    product.getExternalImages(),
-                    new TypeReference<List<com.specsense.model.dto.ExternalImageItem>>() {}
-                );
-                dto.setExternalImages(externalImages);
-            } catch (Exception e) {
-                // Ignore parsing errors
-            }
-        }
+        // Set overview modules JSON
+        dto.setOverviewModules(product.getOverviewModules());
 
         // Set highlights and applications
         dto.setHighlights(product.getHighlights());

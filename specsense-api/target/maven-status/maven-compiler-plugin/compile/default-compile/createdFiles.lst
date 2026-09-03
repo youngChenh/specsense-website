@@ -16,7 +16,6 @@ com\specsense\mapper\ProductMapper.class
 com\specsense\mapper\BannerMapper.class
 com\specsense\controller\BrandController.class
 com\specsense\service\ContactService.class
-com\specsense\service\impl\ProductServiceImpl$6.class
 com\specsense\model\entity\CompanyInfo.class
 com\specsense\service\impl\BrandServiceImpl.class
 com\specsense\model\entity\AdminUser.class

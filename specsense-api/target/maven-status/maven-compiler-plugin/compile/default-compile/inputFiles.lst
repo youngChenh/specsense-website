@@ -9,6 +9,7 @@ D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\sp
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\mapper\BrandMapper.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\vo\LoginVO.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\NavigationController.java
+D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\dto\ProductSearchResultDTO.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\impl\NavigationMenuServiceImpl.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\ContactController.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\BannerService.java
@@ -52,6 +53,7 @@ D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\sp
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\mapper\BannerMapper.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\AdminService.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\ProductController.java
+D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\dto\ExternalImageItem.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\AdminController.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\vo\Result.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\dto\ApplicationDTO.java

@@ -4,6 +4,7 @@ import com.specsense.config.JwtConfig;
 import com.specsense.model.dto.ApplicationDTO;
 import com.specsense.model.dto.CategoryDTO;
 import com.specsense.model.dto.ProductDTO;
+import com.specsense.model.vo.PageResult;
 import com.specsense.model.vo.Result;
 import com.specsense.model.entity.*;
 import com.specsense.service.*;

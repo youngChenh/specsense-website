@@ -85,22 +85,18 @@ public interface ProductMapper {
     List<Product> findFeatured(@Param("limit") int limit);
 
     @Insert("INSERT INTO product (category_id, name_en, name_zh, slug, description_en, description_zh, " +
-            "image_url, image_urls, alibaba_images, external_images, pdf_urls, download_pdf_url, " +
-            "detail_desc_en, detail_desc_zh, specs_json, detailed_specs, " +
+            "image_url, image_urls, download_pdf_url, specs_json, overview_modules, " +
             "featured, sort_order, del_flag, highlights, applications) " +
             "VALUES (#{categoryId}, #{nameEn}, #{nameZh}, #{slug}, #{descriptionEn}, #{descriptionZh}, " +
-            "#{imageUrl}, #{imageUrls}, #{alibabaImages}, #{externalImages}, #{pdfUrls}, #{downloadPdfUrl}, " +
-            "#{detailDescEn}, #{detailDescZh}, #{specsJson}, #{detailedSpecs}, " +
+            "#{imageUrl}, #{imageUrls}, #{downloadPdfUrl}, #{specsJson}, #{overviewModules}, " +
             "#{featured}, #{sortOrder}, 0, #{highlights}, #{applications})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Product product);
 
     @Update("UPDATE product SET category_id = #{categoryId}, name_en = #{nameEn}, name_zh = #{nameZh}, " +
             "slug = #{slug}, description_en = #{descriptionEn}, description_zh = #{descriptionZh}, " +
-            "image_url = #{imageUrl}, image_urls = #{imageUrls}, alibaba_images = #{alibabaImages}, " +
-            "external_images = #{externalImages}, pdf_urls = #{pdfUrls}, download_pdf_url = #{downloadPdfUrl}, " +
-            "detail_desc_en = #{detailDescEn}, detail_desc_zh = #{detailDescZh}, " +
-            "specs_json = #{specsJson}, detailed_specs = #{detailedSpecs}, " +
+            "image_url = #{imageUrl}, image_urls = #{imageUrls}, download_pdf_url = #{downloadPdfUrl}, " +
+            "specs_json = #{specsJson}, overview_modules = #{overviewModules}, " +
             "featured = #{featured}, sort_order = #{sortOrder}, " +
             "highlights = #{highlights}, applications = #{applications} " +
             "WHERE id = #{id}")

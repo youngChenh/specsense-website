@@ -166,84 +166,80 @@
             </div>
           </div>
 
-          <!-- Row 2: PDF Section -->
-          <div v-if="pdfList.length > 0">
+          <!-- Row 2: Module Overview Section -->
+          <div v-if="productModules.length > 0">
             <div class="flex items-center gap-4 mb-6">
-              <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap cursor-pointer hover:text-blue-600">{{ $t('products.overview') }}</h3>
+              <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap">{{ $t('products.overview') }}</h3>
               <div class="flex-1 h-px bg-gray-200"></div>
             </div>
-            <div ref="pdfContainerRef" class="flex flex-col items-center">
-              <div v-if="pdfLoading" class="flex items-center justify-center h-64">
-                <span class="text-gray-500">{{ $t('products.pdfLoading') }}</span>
-              </div>
-              <div v-else-if="pdfError" class="flex items-center justify-center h-64">
-                <span class="text-red-500">{{ $t('products.pdfError') }}</span>
-              </div>
+            <!-- Module Renderer -->
+            <div class="product-modules">
+              <template v-for="module in productModules" :key="module.id">
+                <!-- Heading Module -->
+                <h2 v-if="module.type === 'heading' && module.level === 1" class="text-2xl font-bold text-gray-900 mb-4">{{ module.content }}</h2>
+                <h3 v-else-if="module.type === 'heading' && module.level === 2" class="text-xl font-bold text-gray-900 mb-3">{{ module.content }}</h3>
+                <h4 v-else-if="module.type === 'heading'" class="text-lg font-semibold text-gray-800 mb-2">{{ module.content }}</h4>
+
+                <!-- Text Module -->
+                <div v-else-if="module.type === 'text'" class="text-gray-700 mb-4 whitespace-pre-line">{{ module.content }}</div>
+
+                <!-- Image Module -->
+                <div v-else-if="module.type === 'image'" class="mb-4" :class="module.align === 'center' ? 'text-center' : module.align === 'right' ? 'text-right' : 'text-left'">
+                  <a v-if="module.link" :href="module.link" target="_blank" rel="noopener noreferrer">
+                    <img :src="getImageUrl(module.url)" :alt="module.alt || ''" class="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity" />
+                  </a>
+                  <img v-else :src="getImageUrl(module.url)" :alt="module.alt || ''" class="max-w-full h-auto rounded-lg" />
+                </div>
+
+                <!-- Table Module -->
+                <div v-else-if="module.type === 'table' && module.tableData && module.tableData.length > 0" class="mb-4 overflow-x-auto">
+                  <table class="w-full border-collapse border border-gray-300">
+                    <tbody>
+                      <tr v-for="(row, ri) in module.tableData" :key="ri">
+                        <td
+                          v-for="(cell, ci) in row"
+                          :key="ci"
+                          class="border border-gray-300 px-4 py-2"
+                          :class="ri === 0 ? 'bg-gray-100 font-semibold' : ''"
+                        >{{ cell }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Two Column Module -->
+                <div v-else-if="module.type === 'two_column'" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                  <div>
+                    <img v-if="module.leftType === 'image' && module.leftImage" :src="getImageUrl(module.leftImage)" class="w-full h-auto rounded-lg" />
+                    <div v-else-if="module.leftType === 'text'" class="text-gray-700">{{ module.leftText }}</div>
+                  </div>
+                  <div>
+                    <img v-if="module.rightType === 'image' && module.rightImage" :src="getImageUrl(module.rightImage)" class="w-full h-auto rounded-lg" />
+                    <div v-else-if="module.rightType === 'text'" class="text-gray-700">{{ module.rightText }}</div>
+                  </div>
+                </div>
+
+                <!-- Downloads Module -->
+                <div v-else-if="module.type === 'downloads'" class="mb-4 flex flex-wrap gap-3">
+                  <a
+                    v-for="(item, idx) in module.items"
+                    :key="idx"
+                    :href="getFullUrl(item.url)"
+                    download
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    {{ item.label }}
+                  </a>
+                </div>
+              </template>
             </div>
           </div>
 
-          <!-- Row 3: Detail Sections (after PDF) -->
+          <!-- Row 3: Detail Sections (after Overview) -->
           <div class="space-y-10 mt-10">
-            <!-- 1) Product description text -->
-            <div v-if="displayDetailDesc">
-              <div class="flex items-center gap-4 mb-6">
-                <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap">{{ $t('products.detailDescription') }}</h3>
-                <div class="flex-1 h-px bg-gray-200"></div>
-              </div>
-              <div class="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-line" v-html="displayDetailDesc"></div>
-            </div>
-
-            <!-- 2) Detailed specs table -->
-            <div v-if="product.detailedSpecs && Object.keys(product.detailedSpecs).length > 0">
-              <div class="flex items-center gap-4 mb-6">
-                <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap">{{ $t('products.detailedSpecs') }}</h3>
-                <div class="flex-1 h-px bg-gray-200"></div>
-              </div>
-              <div class="bg-gray-50 rounded-xl overflow-hidden">
-                <table class="w-full">
-                  <tbody>
-                    <tr v-for="(value, key) in product.detailedSpecs" :key="key" class="border-b border-gray-200 last:border-0">
-                      <td class="py-3 px-4 font-medium text-gray-600 w-1/3">{{ key }}</td>
-                      <td class="py-3 px-4 text-gray-900">{{ value }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- 3) Alibaba images (max 10) -->
-            <div v-if="alibabaImages.length > 0">
-              <div class="flex items-center gap-4 mb-6">
-                <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap">{{ $t('products.alibabaImages') }}</h3>
-                <div class="flex-1 h-px bg-gray-200"></div>
-              </div>
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                <div v-for="(img, idx) in alibabaImages" :key="idx" class="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
-                  <img :src="getImageUrl(img)" :alt="`Alibaba image ${idx + 1}`" class="w-full h-40 object-cover" />
-                </div>
-              </div>
-            </div>
-
-            <!-- 4) External images with links -->
-            <div v-if="externalImages.length > 0">
-              <div class="flex items-center gap-4 mb-6">
-                <h3 class="text-lg font-semibold text-gray-700 whitespace-nowrap">{{ $t('products.externalImages') }}</h3>
-                <div class="flex-1 h-px bg-gray-200"></div>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <a
-                  v-for="(item, idx) in externalImages"
-                  :key="idx"
-                  :href="item.link || '#'"
-                  :target="item.link ? '_blank' : '_self'"
-                  rel="noopener noreferrer"
-                  class="group block bg-gray-50 rounded-xl overflow-hidden border border-gray-100 hover:border-blue-400 transition-colors"
-                >
-                  <img :src="getImageUrl(item.url)" :alt="`External image ${idx + 1}`" class="w-full h-44 object-cover group-hover:opacity-90" />
-                  <div v-if="item.link" class="px-3 py-2 text-xs text-blue-600 truncate">{{ item.link }}</div>
-                </a>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -318,16 +314,6 @@ const localePath = useLocalePath()
 const config = useRuntimeConfig()
 const { getImageUrl } = useImageUrl()
 
-// Load PDF.js from CDN
-useHead({
-  script: [
-    {
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
-      async: true,
-    },
-  ],
-})
-
 const showInquiryModal = ref(false)
 const lightboxOpen = ref(false)
 const lightboxImage = ref('')
@@ -385,10 +371,6 @@ function onCarouselHover(entering: boolean) {
 }
 const loading = ref(true)
 const product = ref<any>(null)
-const pdfLoading = ref(false)
-const pdfError = ref(false)
-const pdfPageCount = ref(0)
-const pdfContainerRef = ref<HTMLDivElement | null>(null)
 
 const displayName = computed(() => {
   if (!product.value) return ''
@@ -409,25 +391,17 @@ const displayHighlights = computed(() => {
   return (product.value.highlights || '').replace(/\n/g, '<br>')
 })
 
-const displayDetailDesc = computed(() => {
-  if (!product.value) return ''
-  const raw = locale.value === 'zh'
-    ? (product.value.detailDescZh || product.value.detailDescEn || '')
-    : (product.value.detailDescEn || product.value.detailDescZh || '')
-  return (raw || '').replace(/\n/g, '<br>')
+const productModules = computed(() => {
+  if (!product.value) return []
+  const val = product.value.overviewModules
+  if (Array.isArray(val)) return val
+  if (typeof val === 'string' && val) {
+    try { return JSON.parse(val) } catch { return [] }
+  }
+  return []
 })
 
 const downloadPdfUrl = computed(() => product.value?.downloadPdfUrl || '')
-
-const alibabaImages = computed(() => {
-  if (!product.value) return []
-  return (product.value.alibabaImages || []).slice(0, 10)
-})
-
-const externalImages = computed(() => {
-  if (!product.value) return []
-  return product.value.externalImages || []
-})
 
 const allImages = computed(() => {
   if (!product.value) return []
@@ -446,115 +420,14 @@ const getFullUrl = (url: string) => {
   return `${base}${strUrl}`
 }
 
-const pdfList = computed(() => {
-  if (!product.value) return []
-  const val = product.value.pdfUrls
-  if (Array.isArray(val)) return val
-  if (typeof val === 'string' && val) {
-    try { return JSON.parse(val) } catch { return [] }
-  }
-  return []
-})
-
-async function waitForPdfJs(): Promise<boolean> {
-  // @ts-ignore
-  const pdfjs = window.pdfjsLib
-  if (pdfjs) return true
-
-  return new Promise((resolve) => {
-    const checkInterval = setInterval(() => {
-      // @ts-ignore
-      if (window.pdfjsLib) {
-        clearInterval(checkInterval)
-        resolve(true)
-      }
-    }, 100)
-
-    // Timeout after 10 seconds
-    setTimeout(() => {
-      clearInterval(checkInterval)
-      resolve(false)
-    }, 10000)
-  })
-}
-
-async function renderPdf(url: string) {
-  pdfLoading.value = true
-  pdfError.value = false
-  try {
-    const loaded = await waitForPdfJs()
-    if (!loaded) {
-      pdfError.value = true
-      return
-    }
-
-    const pdfUrl = getFullUrl(url)
-    console.log('Loading PDF from:', pdfUrl)
-    // @ts-ignore
-    const pdfjs = window.pdfjsLib
-    pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
-    const loadingTask = pdfjs.getDocument(pdfUrl)
-    const pdf = await loadingTask.promise
-    console.log('PDF loaded, pages:', pdf.numPages)
-    pdfPageCount.value = pdf.numPages
-
-    // Wait for next tick to ensure container is rendered
-    await nextTick()
-    await nextTick()
-
-    if (!pdfContainerRef.value) {
-      console.error('Container ref not found')
-      pdfError.value = true
-      return
-    }
-
-    // Clear previous canvases (keep loading/error divs)
-    const existingCanvases = pdfContainerRef.value.querySelectorAll('canvas')
-    existingCanvases.forEach(c => c.remove())
-
-    const scale = 4.0
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i)
-      const viewport = page.getViewport({ scale })
-
-      // Create canvas
-      const canvas = document.createElement('canvas')
-      canvas.width = viewport.width
-      canvas.height = viewport.height
-      canvas.className = 'w-full mb-2 block'
-      pdfContainerRef.value.appendChild(canvas)
-
-      const context = canvas.getContext('2d')
-      if (!context) continue
-      await page.render({ canvasContext: context, viewport }).promise
-      console.log(`Page ${i} rendered`)
-    }
-  } catch (e) {
-    console.error('PDF render error:', e)
-    pdfError.value = true
-  } finally {
-    pdfLoading.value = false
-  }
-}
-
 async function fetchProduct() {
   loading.value = true
-  pdfPageCount.value = 0
-  // Clear previous PDF canvases
-  if (pdfContainerRef.value) {
-    pdfContainerRef.value.querySelectorAll('canvas').forEach(c => c.remove())
-  }
   const slug = route.params.slug as string
   try {
     product.value = await api.fetchProduct(slug, locale.value)
     carouselIndex.value = 0
     if (allImages.value.length > 1) {
       startCarouselAutoplay()
-    }
-    // Render PDF if available
-    if (product.value?.pdfUrls?.length > 0) {
-      await nextTick()
-      renderPdf(product.value.pdfUrls[0])
     }
   } catch (error) {
     console.error('Failed to fetch product:', error)

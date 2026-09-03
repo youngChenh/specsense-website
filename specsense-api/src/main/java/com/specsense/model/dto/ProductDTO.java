@@ -15,13 +15,8 @@ public class ProductDTO {
     private String descriptionZh;
     private String imageUrl;
     private List<String> imageUrls;
-    private List<String> pdfUrls;
     private String downloadPdfUrl;
-    private String detailDescEn;
-    private String detailDescZh;
-    private Map<String, String> detailedSpecs;
-    private List<String> alibabaImages;
-    private List<ExternalImageItem> externalImages;
+    private String overviewModules;
     private Map<String, String> specs;
     private Boolean featured;
     private Integer sortOrder;
