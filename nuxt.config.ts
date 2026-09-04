@@ -16,7 +16,7 @@ export default defineNuxtConfig({
   },
 
   site: {
-    url: process.env.NUXT_PUBLIC_SITE_URL || 'https://www.specsense.com',
+    url: process.env.NUXT_PUBLIC_SITE_URL || 'https://www.spesense.com',
     name: 'SpeSense',
   },
 

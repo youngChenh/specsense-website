@@ -61,13 +61,13 @@
           <el-input v-model="form.email" placeholder="info@example.com" />
         </el-form-item>
         <el-form-item label="电话">
-          <el-input v-model="form.phone" placeholder="+86 400-888-8888" />
+          <el-input v-model="form.phone" placeholder="+86 17582492026" />
         </el-form-item>
         <el-form-item label="地址(英文)">
-          <el-input v-model="form.addressEn" placeholder="Company address in English" />
+          <el-input v-model="form.addressEn" placeholder="No. 9 Yuhe Road, Guitang Subdistrict, Yuhua District, Changsha City" />
         </el-form-item>
         <el-form-item label="地址(中文)">
-          <el-input v-model="form.addressZh" placeholder="公司地址中文" />
+          <el-input v-model="form.addressZh" placeholder="长沙市雨花区圭塘街道雨河路9号" />
         </el-form-item>
         <el-form-item :label="$t('admin.values')">
           <el-input v-model="form.valuesJson" type="textarea" rows="4" placeholder='["Value1", "Value2"]' />
