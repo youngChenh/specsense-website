@@ -205,6 +205,9 @@
                   <template v-else-if="module.type === 'image'">
                     <span class="font-bold">图片:</span> {{ module.url || '未设置' }}
                   </template>
+                  <template v-else-if="module.type === 'multi_image'">
+                    <span class="font-bold">多图片:</span> {{ module.urls?.length || 0 }} 张图片
+                  </template>
                   <template v-else-if="module.type === 'table'">
                     <span class="font-bold">表格:</span> {{ module.rows }}行 × {{ module.cols }}列
                   </template>
@@ -298,6 +301,33 @@
             </el-form-item>
           </el-form>
 
+          <!-- Multi Image Module -->
+          <el-form v-else-if="editingModule?.type === 'multi_image'" :model="editingModule" label-width="100px">
+            <el-form-item label="多图片">
+              <el-upload
+                :action="`${config.public.apiBase}/api/admin/upload`"
+                :headers="headers"
+                :show-file-list="false"
+                :on-success="handleMultiImageModuleUpload"
+                :before-upload="beforeImageUpload"
+                accept="image/*"
+                multiple
+              >
+                <el-button type="primary" plain size="small">上传图片</el-button>
+              </el-upload>
+              <div v-if="editingModule.urls && editingModule.urls.length > 0" class="flex flex-wrap gap-2 mt-2">
+                <div v-for="(url, idx) in editingModule.urls" :key="idx" class="relative w-20 h-20 rounded border overflow-hidden group">
+                  <img :src="getFullImageUrl(url)" class="w-full h-full object-cover" />
+                  <button
+                    @click="removeMultiImageModuleUrl(idx)"
+                    class="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                  >×</button>
+                </div>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">支持多张图片上传，点击×删除</p>
+            </el-form-item>
+          </el-form>
+
           <!-- Table Module -->
           <el-form v-else-if="editingModule?.type === 'table'" :model="editingModule" label-width="100px">
             <el-form-item label="表格尺寸">
@@ -309,6 +339,15 @@
             </el-form-item>
             <el-form-item label="表头">
               <el-input v-model="editingModule.header" placeholder="输入表头，用逗号分隔，如：名称,值,说明" />
+            </el-form-item>
+            <el-form-item label="从Word粘贴">
+              <div
+                class="paste-area border-2 border-dashed border-gray-300 rounded p-4 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                @click="openPasteModal"
+              >
+                <p class="text-gray-500">点击此处粘贴Word表格</p>
+                <p class="text-xs text-gray-400 mt-1">支持从Word/WPS复制带表格内容粘贴</p>
+              </div>
             </el-form-item>
             <div v-if="editingModule.tableData" class="table-edit-wrapper border rounded p-2 max-h-60 overflow-auto">
               <table class="w-full text-sm border-collapse">
@@ -415,6 +454,25 @@
           </template>
         </el-dialog>
 
+        <!-- Paste Table Modal -->
+        <el-dialog v-model="showPasteModal" title="粘贴Word表格" width="600px">
+          <div class="space-y-4">
+            <p class="text-sm text-gray-500">请在下方文本框中粘贴从Word复制的表格内容（包含HTML格式）</p>
+            <el-input
+              v-model="pasteContent"
+              type="textarea"
+              :rows="10"
+              placeholder="直接粘贴Word表格内容..."
+              @paste.native="handlePaste"
+            />
+            <p class="text-xs text-gray-400">提示：复制Word中的表格后，直接粘贴即可</p>
+          </div>
+          <template #footer>
+            <el-button @click="showPasteModal = false">取消</el-button>
+            <el-button type="primary" @click="parsePastedTable">解析并导入</el-button>
+          </template>
+        </el-dialog>
+
         <!-- Download PDF (single) -->
         <el-form-item label="下载PDF（独立）">
           <div class="flex items-center gap-4">
@@ -487,6 +545,8 @@ const headers = ref({})
 // Module Editor
 const showModuleDialog = ref(false)
 const showModuleEditDialog = ref(false)
+const showPasteModal = ref(false)
+const pasteContent = ref('')
 const editingModuleIndex = ref(-1)
 const editingModule = ref(null)
 
@@ -494,6 +554,7 @@ const moduleTypes = [
   { value: 'heading', name: '标题', icon: '📌', desc: '大标题、副标题' },
   { value: 'text', name: '文字', icon: '📝', desc: '段落文字' },
   { value: 'image', name: '图片', icon: '🖼️', desc: '单张图片' },
+  { value: 'multi_image', name: '多图片', icon: '🖼️🖼️', desc: '多张图片展示' },
   { value: 'table', name: '表格', icon: '📊', desc: '参数表格' },
   { value: 'two_column', name: '双栏', icon: '📐', desc: '左右分栏布局' },
   { value: 'downloads', name: '下载', icon: '📥', desc: '下载文件按钮' },
@@ -514,6 +575,8 @@ const createModule = (type) => {
       return { ...base, content: '' }
     case 'image':
       return { ...base, url: '', alt: '', link: '', align: 'center' }
+    case 'multi_image':
+      return { ...base, urls: [] }
     case 'table':
       return { ...base, rows: 3, cols: 3, header: '', tableData: [] }
     case 'two_column':
@@ -594,6 +657,100 @@ const initTableData = (module) => {
   }
 }
 
+const openPasteModal = () => {
+  pasteContent.value = ''
+  showPasteModal.value = true
+}
+
+const handlePaste = (event) => {
+  // Handle paste event to detect HTML table
+  const clipboardData = event.clipboardData || window.clipboardData
+  if (!clipboardData) return
+
+  const html = clipboardData.getData('text/html')
+  const text = clipboardData.getData('text/plain')
+
+  if (html) {
+    pasteContent.value = html
+  } else if (text) {
+    pasteContent.value = text
+  }
+}
+
+const parsePastedTable = () => {
+  if (!editingModule.value || !pasteContent.value) {
+    ElMessage.warning('请先粘贴表格内容')
+    return
+  }
+
+  try {
+    // Create a temporary DOM element to parse HTML
+    const tempDiv = document.createElement('div')
+    tempDiv.innerHTML = pasteContent.value
+
+    // Find table element
+    const table = tempDiv.querySelector('table')
+    if (!table) {
+      ElMessage.warning('未检测到表格，请确保复制的是Word表格内容')
+      return
+    }
+
+    // Parse table rows
+    const rows = table.querySelectorAll('tr')
+    if (rows.length === 0) {
+      ElMessage.warning('表格为空')
+      return
+    }
+
+    const tableData = []
+    let maxCols = 0
+
+    rows.forEach((row) => {
+      const cells = row.querySelectorAll('td, th')
+      const rowData = []
+      cells.forEach((cell) => {
+        // Strip HTML tags and get text content
+        const text = cell.textContent?.trim() || ''
+        rowData.push(text)
+      })
+      if (rowData.length > maxCols) {
+        maxCols = rowData.length
+      }
+      tableData.push(rowData)
+    })
+
+    // Update rows and cols
+    editingModule.value.rows = tableData.length
+    editingModule.value.cols = maxCols
+
+    // Normalize all rows to have the same number of columns
+    const normalizedData = tableData.map((row) => {
+      while (row.length < maxCols) {
+        row.push('')
+      }
+      return row.slice(0, maxCols)
+    })
+
+    editingModule.value.tableData = normalizedData
+
+    // Extract header from first row if it looks like a header
+    if (normalizedData.length > 0) {
+      editingModule.value.header = normalizedData[0].join(',')
+      // If first row is header, remove it from data and shift rows up
+      if (rows[0]?.querySelector('th')) {
+        editingModule.value.tableData = normalizedData.slice(1)
+        editingModule.value.rows = normalizedData.length - 1
+      }
+    }
+
+    showPasteModal.value = false
+    ElMessage.success('表格导入成功')
+  } catch (error) {
+    console.error('Parse error:', error)
+    ElMessage.error('解析表格失败，请确保复制的是有效的表格内容')
+  }
+}
+
 const handleModuleImageUpload = (response) => {
   if (response.code === 200 && response.data) {
     const url = typeof response.data === 'string' ? response.data : response.data.url
@@ -603,6 +760,27 @@ const handleModuleImageUpload = (response) => {
     ElMessage.success(t('admin.uploadSuccess'))
   } else {
     ElMessage.error(response.message || t('admin.uploadFailed'))
+  }
+}
+
+const handleMultiImageModuleUpload = (response) => {
+  if (response.code === 200 && response.data) {
+    const url = typeof response.data === 'string' ? response.data : response.data.url
+    if (url && editingModule.value) {
+      if (!editingModule.value.urls) {
+        editingModule.value.urls = []
+      }
+      editingModule.value.urls.push(url)
+    }
+    ElMessage.success(t('admin.uploadSuccess'))
+  } else {
+    ElMessage.error(response.message || t('admin.uploadFailed'))
+  }
+}
+
+const removeMultiImageModuleUrl = (index) => {
+  if (editingModule.value && editingModule.value.urls) {
+    editingModule.value.urls.splice(index, 1)
   }
 }
 
@@ -1015,7 +1193,8 @@ const saveProduct = async () => {
     await $fetch(url, { method, headers: headers.value, body })
     ElMessage.success(t('admin.saveSuccess'))
     showDialog.value = false
-    fetchData()
+    await fetchData()
+    await nextTick()
   } catch (error) {
     ElMessage.error(t('admin.saveFailed') + ': ' + (error.data?.message || error.message || ''))
   }

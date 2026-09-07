@@ -191,6 +191,18 @@
                   <img v-else :src="getImageUrl(module.url)" :alt="module.alt || ''" class="max-w-full h-auto rounded-lg" />
                 </div>
 
+                <!-- Multi Image Module -->
+                <div v-else-if="module.type === 'multi_image' && module.urls && module.urls.length > 0" class="mb-4">
+                  <div class="flex flex-wrap gap-4">
+                    <img
+                      v-for="(url, idx) in module.urls"
+                      :key="idx"
+                      :src="getImageUrl(url)"
+                      class="max-w-full h-auto rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+                    />
+                  </div>
+                </div>
+
                 <!-- Table Module -->
                 <div v-else-if="module.type === 'table' && module.tableData && module.tableData.length > 0" class="mb-4 overflow-x-auto">
                   <table class="w-full border-collapse border border-gray-300">
