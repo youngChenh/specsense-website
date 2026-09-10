@@ -1,55 +1,63 @@
 export default defineSitemapEventHandler(async () => {
   const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase as string
-  const now = new Date().toISOString()
+  const apiBase = config.apiBase as string
 
   const staticUrls = [
-    { loc: '/', changefreq: 'daily', priority: 1.0, lastmod: now },
-    { loc: '/products', changefreq: 'daily', priority: 0.9, lastmod: now },
-    { loc: '/applications', changefreq: 'weekly', priority: 0.8, lastmod: now },
-    { loc: '/services', changefreq: 'weekly', priority: 0.7, lastmod: now },
-    { loc: '/downloads', changefreq: 'weekly', priority: 0.7, lastmod: now },
-    { loc: '/brands', changefreq: 'weekly', priority: 0.8, lastmod: now },
-    { loc: '/news', changefreq: 'daily', priority: 0.8, lastmod: now },
-    { loc: '/about', changefreq: 'monthly', priority: 0.6, lastmod: now },
-    { loc: '/contact', changefreq: 'monthly', priority: 0.6, lastmod: now },
+    { loc: '/', changefreq: 'daily', priority: 1.0 },
+    { loc: '/products', changefreq: 'daily', priority: 0.9 },
+    { loc: '/applications', changefreq: 'weekly', priority: 0.8 },
+    { loc: '/services', changefreq: 'weekly', priority: 0.7 },
+    { loc: '/brands', changefreq: 'weekly', priority: 0.8 },
+    { loc: '/news', changefreq: 'daily', priority: 0.8 },
+    { loc: '/about', changefreq: 'monthly', priority: 0.6 },
+    { loc: '/contact', changefreq: 'monthly', priority: 0.6 },
   ]
 
   const dynamicUrls: Array<{ loc: string; lastmod?: string; changefreq?: string; priority?: number }> = []
 
-  async function safeFetch<T = any>(path: string, timeoutMs = 15000): Promise<T | null> {
+  async function fetchData(path: string): Promise<any> {
     try {
-      const ctrl = new AbortController()
-      const t = setTimeout(() => ctrl.abort(), timeoutMs)
-      const res = await fetch(`${apiBase}${path}`, { signal: ctrl.signal })
-      clearTimeout(t)
-      if (!res.ok) return null
-      const json: any = await res.json()
-      return json?.code === 200 ? json.data : null
+      const json: any = await $fetch(`${apiBase}${path}`, { timeout: 15000, retry: 0 })
+      if (json?.code !== 200 || !json.data) throw new Error('Invalid sitemap source response')
+      return json.data
     } catch {
-      return null
+      // Let the sitemap module see the failure instead of accepting an empty catalog.
+      throw createError({ statusCode: 503, statusMessage: 'Sitemap source temporarily unavailable' })
     }
   }
 
-  const productsData: any = await safeFetch('/api/products?page=1&pageSize=1000&locale=en')
-  if (productsData?.data) {
+  const seen = new Set<string>()
+  const pageSize = 100
+  let loaded = 0
+  for (let page = 1; ; page++) {
+    const productsData = await fetchData(`/api/products?page=${page}&pageSize=${pageSize}&locale=en`)
+    if (!Array.isArray(productsData.data) || !Number.isSafeInteger(productsData.total) || productsData.total < 0) {
+      throw createError({ statusCode: 503, statusMessage: 'Invalid product sitemap data' })
+    }
+    const previousSize = seen.size
     for (const p of productsData.data) {
-      if (p.slug) {
+      if (p.slug && !seen.has(p.slug)) {
+        seen.add(p.slug)
         dynamicUrls.push({
-          loc: `/products/${p.slug}`,
+          loc: `/products/${encodeURIComponent(p.slug)}`,
           changefreq: 'weekly',
           priority: 0.7,
         })
       }
     }
+    loaded += productsData.data.length
+    if (loaded >= productsData.total) break
+    if (!productsData.data.length || seen.size === previousSize) {
+      throw createError({ statusCode: 503, statusMessage: 'Incomplete product sitemap data' })
+    }
   }
 
-  const newsData: any = await safeFetch('/api/news/latest?limit=100&locale=en')
+  const newsData = await fetchData('/api/news/latest?limit=100&locale=en')
   if (Array.isArray(newsData)) {
     for (const n of newsData) {
       if (n.slug) {
         dynamicUrls.push({
-          loc: `/news/${n.slug}`,
+          loc: `/news/${encodeURIComponent(n.slug)}`,
           changefreq: 'monthly',
           priority: 0.6,
         })

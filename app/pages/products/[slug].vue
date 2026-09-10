@@ -381,8 +381,17 @@ function onCarouselHover(entering: boolean) {
     resumeTimeout = setTimeout(startCarouselAutoplay, 2000)
   }
 }
-const loading = ref(true)
-const product = ref<any>(null)
+const { data: product, status, error: productError } = await useAsyncData(
+  computed(() => `product:${route.params.slug}:${locale.value}`),
+  () => api.fetchProduct(route.params.slug as string, locale.value),
+)
+const loading = computed(() => status.value === 'pending')
+if (productError.value) {
+  throw createError({
+    statusCode: productError.value.statusCode === 404 ? 404 : 503,
+    statusMessage: productError.value.statusCode === 404 ? 'Product not found' : 'Product temporarily unavailable',
+  })
+}
 
 const displayName = computed(() => {
   if (!product.value) return ''
@@ -432,28 +441,16 @@ const getFullUrl = (url: string) => {
   return `${base}${strUrl}`
 }
 
-async function fetchProduct() {
-  loading.value = true
-  const slug = route.params.slug as string
-  try {
-    product.value = await api.fetchProduct(slug, locale.value)
-    carouselIndex.value = 0
-    if (allImages.value.length > 1) {
-      startCarouselAutoplay()
-    }
-  } catch (error) {
-    console.error('Failed to fetch product:', error)
-    product.value = null
-  } finally {
-    loading.value = false
-  }
-}
-
-watch(locale, () => {
+function resetCarousel() {
   stopCarouselAutoplay()
   if (resumeTimeout) { clearTimeout(resumeTimeout); resumeTimeout = null }
-  fetchProduct()
-})
+  carouselIndex.value = 0
+  lightboxOpen.value = false
+  if (allImages.value.length > 1) startCarouselAutoplay()
+}
+
+// Timers and DOM listeners belong to the browser; data fetching also runs on SSR.
+if (import.meta.client) watch(product, resetCarousel)
 
 watch(lightboxOpen, (open) => {
   if (open) {
@@ -466,11 +463,11 @@ watch(lightboxOpen, (open) => {
 function handleLightboxKeydown(e: KeyboardEvent) {
   if (e.key === 'ArrowLeft') prevLightbox()
   if (e.key === 'ArrowRight') nextLightbox()
-  if (e.key === 'Escape') lightboxOpen = false
+  if (e.key === 'Escape') lightboxOpen.value = false
 }
 
 onMounted(() => {
-  fetchProduct()
+  resetCarousel()
 })
 
 onUnmounted(() => {
@@ -478,4 +475,43 @@ onUnmounted(() => {
   if (resumeTimeout) { clearTimeout(resumeTimeout); resumeTimeout = null }
   document.removeEventListener('keydown', handleLightboxKeydown)
 })
+
+const canonical = computed(() => new URL(
+  `/products/${encodeURIComponent(product.value?.slug || String(route.params.slug))}`,
+  config.public.siteUrl,
+).href)
+const seoDescription = computed(() => {
+  const description = displayDescription.value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+  return (description || `${displayName.value} — ${product.value?.categoryName || product.value?.categoryKey || 'SpeSense'}`).slice(0, 160)
+})
+const seoImages = computed(() => allImages.value.map((url: string) => new URL(getImageUrl(url), config.public.siteUrl).href))
+
+useSeoMeta({
+  title: () => `${displayName.value} | SpeSense`,
+  description: () => seoDescription.value,
+  ogTitle: () => `${displayName.value} | SpeSense`,
+  ogDescription: () => seoDescription.value,
+  ogUrl: () => canonical.value,
+  ogImage: () => seoImages.value[0],
+})
+useHead(() => ({
+  link: [{ rel: 'canonical', href: canonical.value }],
+  script: product.value ? [{
+    key: 'product-jsonld',
+    type: 'application/ld+json',
+    innerHTML: JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      '@id': `${canonical.value}#product`,
+      name: displayName.value,
+      description: displayDescription.value,
+      url: canonical.value,
+      image: seoImages.value.length ? seoImages.value : undefined,
+      category: product.value.categoryName || product.value.categoryKey,
+      additionalProperty: Object.entries(product.value.specs || {}).map(([name, value]) => ({
+        '@type': 'PropertyValue', name, value,
+      })),
+    }).replace(/</g, '\\u003c'),
+  }] : [],
+}))
 </script>

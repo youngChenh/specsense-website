@@ -32,7 +32,7 @@
           <!-- Error State -->
           <div v-else-if="error" class="text-center py-20 bg-white rounded-lg">
             <p class="text-red-500 text-lg mb-4">{{ error }}</p>
-            <button @click="fetchProducts" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <button @click="() => fetchProducts()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
               Retry
             </button>
           </div>
@@ -76,29 +76,34 @@
           <!-- Pagination -->
           <div v-if="!loading && !error && totalProducts > pageSize" class="mt-12 flex justify-center">
             <nav class="flex items-center gap-2">
-              <button
-                class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50"
-                :disabled="currentPage === 1"
-                @click="currentPage--"
+              <NuxtLink
+                class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50"
+                :class="{ 'opacity-50 pointer-events-none': currentPage === 1 }"
+                :aria-disabled="currentPage === 1"
+                :tabindex="currentPage === 1 ? -1 : undefined"
+                :to="pageLink(Math.max(1, currentPage - 1))"
               >
                 Previous
-              </button>
-              <button
+              </NuxtLink>
+              <NuxtLink
                 v-for="page in totalPages"
                 :key="page"
                 class="px-4 py-2 border rounded-md"
                 :class="currentPage === page ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-50'"
-                @click="currentPage = page"
+                :aria-current="currentPage === page ? 'page' : undefined"
+                :to="pageLink(page)"
               >
                 {{ page }}
-              </button>
-              <button
-                class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50"
-                :disabled="currentPage === totalPages"
-                @click="currentPage++"
+              </NuxtLink>
+              <NuxtLink
+                class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50"
+                :class="{ 'opacity-50 pointer-events-none': currentPage === totalPages }"
+                :aria-disabled="currentPage === totalPages"
+                :tabindex="currentPage === totalPages ? -1 : undefined"
+                :to="pageLink(Math.min(totalPages, currentPage + 1))"
               >
                 Next
-              </button>
+              </NuxtLink>
             </nav>
           </div>
         </div>
@@ -111,34 +116,46 @@
 const route = useRoute()
 const { t, locale } = useI18n()
 const config = useRuntimeConfig()
+const api = useApi()
 
-const selectedCategory = ref((route.query.category as string) || 'all')
-const searchQuery = ref((route.query.q as string) || '')
-const currentPage = ref(1)
-const pageSize = ref(12)
-const totalProducts = ref(0)
-const loading = ref(true)
-const error = ref<string | null>(null)
-const products = ref<any[]>([])
-const categories = ref<any[]>([])
-
-// Watch for route changes
-watch(() => route.query.category, (newCategory) => {
-  selectedCategory.value = (newCategory as string) || 'all'
-  currentPage.value = 1
-  fetchProducts()
+const selectedCategory = computed(() => typeof route.query.category === 'string' ? route.query.category || 'all' : 'all')
+const searchQuery = computed(() => typeof route.query.q === 'string' ? route.query.q : '')
+const currentPage = computed(() => {
+  const page = Number(route.query.page)
+  return Number.isSafeInteger(page) && page > 0 ? page : 1
 })
-
-watch(() => route.query.q, (newQuery) => {
-  searchQuery.value = (newQuery as string) || ''
-  currentPage.value = 1
-  fetchProducts()
+const pageSize = 12
+const productKey = computed(() => JSON.stringify(['products', selectedCategory.value, searchQuery.value.trim(), currentPage.value, locale.value]))
+const { data: productPage, status, error: productError, refresh: fetchProducts } = await useAsyncData(productKey, async () => {
+  const result: any = await api.fetchProducts({
+    page: currentPage.value,
+    pageSize,
+    category: selectedCategory.value === 'all' ? undefined : selectedCategory.value,
+    keyword: searchQuery.value.trim() || undefined,
+    locale: locale.value,
+  })
+  if (result?.code !== 200 || !Array.isArray(result.data?.data)) {
+    throw createError({ statusCode: 502, statusMessage: 'Failed to load products' })
+  }
+  return result.data
 })
+const { data: categories } = await useAsyncData(
+  computed(() => `product-categories:${locale.value}`),
+  () => api.fetchCategories(locale.value),
+  { default: () => [] },
+)
+const products = computed<any[]>(() => productPage.value?.data || [])
+const totalProducts = computed(() => productPage.value?.total || 0)
+const loading = computed(() => status.value === 'pending')
+const error = computed(() => productError.value ? 'Failed to load products. Please try again.' : null)
+if (import.meta.server && productError.value) {
+  const event = useRequestEvent()
+  if (event) setResponseStatus(event, 503)
+}
 
-// Watch for page changes
-watch(currentPage, () => {
-  fetchProducts()
-})
+function pageLink(page: number) {
+  return { path: route.path, query: { ...route.query, page: page > 1 ? String(page) : undefined } }
+}
 
 // Build sidebar categories from API categories
 const sidebarCategories = computed(() => {
@@ -158,21 +175,14 @@ const sidebarCategories = computed(() => {
 })
 
 function handleCategoryChange(category: string) {
-  selectedCategory.value = category
-  currentPage.value = 1
   const query: Record<string, string> = {}
   if (category !== 'all') query.category = category
   if (searchQuery.value) query.q = searchQuery.value
   navigateTo({ query })
-  fetchProducts()
 }
 
 function clearFilters() {
-  selectedCategory.value = 'all'
-  searchQuery.value = ''
-  currentPage.value = 1
   navigateTo({ query: {} })
-  fetchProducts()
 }
 
 function getCategoryName(key: string): string {
@@ -197,68 +207,19 @@ function getCategoryName(key: string): string {
   return key
 }
 
-async function fetchProducts() {
-  loading.value = true
-  error.value = null
-  try {
-    const categoryParam = selectedCategory.value === 'all' ? undefined : selectedCategory.value
-    const keywordParam = searchQuery.value.trim() || undefined
-    const url = `${config.public.apiBase}/api/products`
-    const params: Record<string, any> = {
-      page: currentPage.value,
-      pageSize: pageSize.value,
-      locale: locale.value,
-    }
-    if (categoryParam) {
-      params.category = categoryParam
-    }
-    if (keywordParam) {
-      params.keyword = keywordParam
-    }
-
-    const response = await fetch(url + '?' + new URLSearchParams(params))
-    const result = await response.json()
-
-    // Handle API response structure: { code, message, data: { data: [], total, page, pageSize } }
-    if (result.code === 200 && result.data) {
-      products.value = result.data.data || []
-      totalProducts.value = result.data.total || 0
-    } else {
-      products.value = []
-      totalProducts.value = 0
-    }
-  } catch (err: any) {
-    console.error('Failed to fetch products:', err)
-    error.value = err.message || 'Failed to load products'
-    products.value = []
-  } finally {
-    loading.value = false
-  }
-}
-
-async function fetchCategories() {
-  try {
-    const url = `${config.public.apiBase}/api/categories`
-    const params = { locale: locale.value }
-
-    const response = await fetch(url + '?' + new URLSearchParams(params))
-    const result = await response.json()
-
-    if (result.code === 200 && result.data) {
-      categories.value = result.data || []
-    } else {
-      categories.value = []
-    }
-  } catch (err) {
-    console.error('Failed to fetch categories:', err)
-    categories.value = []
-  }
-}
-
-const totalPages = computed(() => Math.ceil(totalProducts.value / pageSize.value))
-
-onMounted(() => {
-  fetchCategories()
-  fetchProducts()
+const totalPages = computed(() => Math.ceil(totalProducts.value / pageSize))
+const seoTitle = computed(() => `${selectedCategory.value === 'all' ? t('products.title') : getCategoryName(selectedCategory.value)}${currentPage.value > 1 ? ` - ${currentPage.value}` : ''} | SpeSense`)
+const canonical = computed(() => {
+  const url = new URL('/products', config.public.siteUrl)
+  if (selectedCategory.value !== 'all') url.searchParams.set('category', selectedCategory.value)
+  if (searchQuery.value.trim()) url.searchParams.set('q', searchQuery.value.trim())
+  if (currentPage.value > 1) url.searchParams.set('page', String(currentPage.value))
+  return url.href
 })
+useSeoMeta({
+  title: () => seoTitle.value,
+  description: () => `${selectedCategory.value === 'all' ? t('products.title') : getCategoryName(selectedCategory.value)} — ${t('products.subtitle')}`,
+  robots: () => searchQuery.value.trim() || productError.value ? 'noindex, follow' : 'index, follow',
+})
+useHead(() => ({ link: [{ rel: 'canonical', href: canonical.value }] }))
 </script>

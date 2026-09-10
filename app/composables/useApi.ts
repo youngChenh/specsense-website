@@ -1,6 +1,6 @@
 export const useApi = () => {
   const config = useRuntimeConfig()
-  const baseUrl = config.public.apiBase
+  const baseUrl = import.meta.server ? config.apiBase : config.public.apiBase
 
   const getHeaders = () => {
     const headers = {
@@ -13,6 +13,8 @@ export const useApi = () => {
   const fetchCategories = async (locale = 'en') => {
     const data = await $fetch(`${baseUrl}/api/categories`, {
       params: { locale },
+      timeout: 15000,
+      retry: 0,
     })
     return (data as any)?.data || []
   }
@@ -23,14 +25,18 @@ export const useApi = () => {
     pageSize?: number
     category?: string
     featured?: boolean
+    keyword?: string
     locale?: string
   } = {}) => {
     const data = await $fetch(`${baseUrl}/api/products`, {
+      timeout: 15000,
+      retry: 0,
       params: {
         page: params.page || 1,
         pageSize: params.pageSize || 12,
         category: params.category,
         featured: params.featured,
+        keyword: params.keyword,
         locale: params.locale || 'en',
       },
     })
@@ -38,10 +44,18 @@ export const useApi = () => {
   }
 
   const fetchProduct = async (slug: string, locale = 'en') => {
-    const data = await $fetch(`${baseUrl}/api/products/${encodeURIComponent(slug)}`, {
+    const data: any = await $fetch(`${baseUrl}/api/products/${encodeURIComponent(slug)}`, {
       params: { locale },
+      timeout: 15000,
+      retry: 0,
     })
-    return (data as any)?.data
+    if (data?.code === 404 || (data?.code === 200 && !data.data)) {
+      throw createError({ statusCode: 404, statusMessage: 'Product not found' })
+    }
+    if (data?.code !== 200) {
+      throw createError({ statusCode: 502, statusMessage: 'Failed to load product' })
+    }
+    return data.data
   }
 
   const fetchFeaturedProducts = async (limit = 4, locale = 'en') => {

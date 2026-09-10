@@ -56,7 +56,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'SpeSense - Photoelectric Instrument Solutions',
+      title: 'Spectrometer & Sensor Manufacturer | SpeSense Technologies',
       htmlAttrs: {
         lang: 'zh',
       },
@@ -76,7 +76,10 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    // Absolute backend URL for SSR; Docker overrides this with http://api:8080/specsense.
+    apiBase: 'http://localhost:8080/specsense',
     public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://www.spesense.com',
       apiBase: process.env.NUXT_PUBLIC_API_BASE || (process.env.NODE_ENV === 'production' ? '/specsense' : 'http://localhost:8080/specsense'),
     },
   },

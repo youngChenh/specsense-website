@@ -1,5 +1,5 @@
 <template>
-  <NuxtLink :to="localePath(`/products/${product.slug}`)" class="group">
+  <NuxtLink :to="localePath(`/products/${encodeURIComponent(product.slug)}`)" class="group">
     <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
       <div class="bg-gray-200 overflow-hidden flex-shrink-0">
         <img
