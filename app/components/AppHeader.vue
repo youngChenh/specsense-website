@@ -96,6 +96,23 @@
             {{ locale.name }}
           </button>
         </div>
+
+        <!-- Search -->
+        <form @submit.prevent="handleSearch" class="flex items-center ml-2">
+          <div class="relative">
+            <input
+              v-model="searchQuery"
+              type="text"
+              :placeholder="$t('products.search') || 'Search'"
+              class="w-36 px-3 py-1.5 pr-8 text-sm border border-gray-300 rounded-full focus:outline-none focus:border-blue-500 focus:w-48 transition-all duration-200"
+            />
+            <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          </div>
+        </form>
       </div>
 
       <!-- Mobile menu button -->
@@ -216,6 +233,15 @@ const activeMenu = ref<string | null>(null)
 const expandedMobileMenu = ref<string | null>(null)
 const leaveTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const currentLocale = computed(() => locale.value)
+const searchQuery = ref('')
+
+const handleSearch = () => {
+  const q = searchQuery.value.trim()
+  if (q) {
+    navigateTo(localePath(`/products?search=${encodeURIComponent(q)}`))
+    searchQuery.value = ''
+  }
+}
 
 const availableLocales = computed(() => {
   const allLocales = Array.isArray(locales.value) ? locales.value : []
