@@ -238,7 +238,7 @@ const searchQuery = ref('')
 const handleSearch = () => {
   const q = searchQuery.value.trim()
   if (q) {
-    navigateTo(localePath(`/products?search=${encodeURIComponent(q)}`))
+    navigateTo(localePath(`/products?q=${encodeURIComponent(q)}`))
     searchQuery.value = ''
   }
 }
