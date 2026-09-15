@@ -235,10 +235,22 @@ const leaveTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const currentLocale = computed(() => locale.value)
 const searchQuery = ref('')
 
-const handleSearch = () => {
+const handleSearch = async () => {
   const q = searchQuery.value.trim()
-  if (q) {
-    navigateTo(localePath(`/products?q=${encodeURIComponent(q)}`))
+  if (!q) return
+  try {
+    const response = await $fetch<any>(`${config.public.apiBase}/api/products/search`, {
+      params: { q, locale: locale.value }
+    })
+    const data = response?.data
+    const query: Record<string, string> = { q }
+    if (data?.categoryKey) {
+      query.category = data.categoryKey
+    }
+    await navigateTo({ path: localePath('/products'), query })
+  } catch {
+    await navigateTo({ path: localePath('/products'), query: { q } })
+  } finally {
     searchQuery.value = ''
   }
 }
