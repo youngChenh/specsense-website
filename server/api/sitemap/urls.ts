@@ -13,7 +13,7 @@ export default defineSitemapEventHandler(async () => {
     { loc: '/contact', changefreq: 'monthly', priority: 0.6 },
   ]
 
-  const dynamicUrls: Array<{ loc: string; lastmod?: string; changefreq?: string; priority?: number }> = []
+  const dynamicUrls: Array<{ loc: string; _encoded: boolean; lastmod?: string; changefreq?: string; priority?: number }> = []
 
   async function fetchData(path: string): Promise<any> {
     try {
@@ -40,6 +40,8 @@ export default defineSitemapEventHandler(async () => {
         seen.add(p.slug)
         dynamicUrls.push({
           loc: `/products/${encodeURIComponent(p.slug)}`,
+          // Slugs are already encoded as path segments; prevent %20 becoming %2520.
+          _encoded: true,
           changefreq: 'weekly',
           priority: 0.7,
         })
@@ -58,6 +60,7 @@ export default defineSitemapEventHandler(async () => {
       if (n.slug) {
         dynamicUrls.push({
           loc: `/news/${encodeURIComponent(n.slug)}`,
+          _encoded: true,
           changefreq: 'monthly',
           priority: 0.6,
         })

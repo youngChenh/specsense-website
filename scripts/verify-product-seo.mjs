@@ -17,6 +17,9 @@ const catalog = Array.from({ length: 105 }, (_, index) => ({
   imageUrl: '/uploads/spectrometer.png',
   specs: { 'Wavelength range': '200–1100 nm' },
 }))
+// Real catalog slugs can contain spaces or Chinese characters.
+catalog[1].slug = 'SM-3001B '
+catalog[2].slug = '光栅单色仪'
 let failProducts = false
 const requests = []
 const backend = createServer((req, res) => {
@@ -41,6 +44,8 @@ const backend = createServer((req, res) => {
     if (!data) code = 404
   } else if (url.pathname === '/specsense/api/categories') {
     data = [{ key: 'spectrometer', nameEn: 'Spectrometers', nameZh: '光谱仪', children: [] }]
+  } else if (url.pathname === '/specsense/api/news/latest') {
+    data = [{ slug: 'Fiber Optic Spectrometers Explained' }]
   }
   res.end(JSON.stringify({ code, data }))
 })
@@ -163,6 +168,18 @@ try {
     assert.match(xml, /<loc>https:\/\/www.spesense.com\/products\/sm-3001b<\/loc>/)
     assert.match(xml, /<loc>https:\/\/www.spesense.com\/products\/spectrometer-105<\/loc>/)
   })
+  check('sitemap encodes spaces and Chinese slugs exactly once', () => {
+    for (const product of [catalog[1], catalog[2]]) {
+      assert.ok(xml.includes(`<loc>https://www.spesense.com/products/${encodeURIComponent(product.slug)}</loc>`))
+    }
+    assert.ok(xml.includes('<loc>https://www.spesense.com/news/Fiber%20Optic%20Spectrometers%20Explained</loc>'))
+    assert.doesNotMatch(xml, /%2520|%25E5/)
+  })
+  for (const product of [catalog[1], catalog[2]]) {
+    const path = new URL([...xml.matchAll(/<loc>(.*?)<\/loc>/g)].find(match => match[1].endsWith(encodeURIComponent(product.slug)))[1]).pathname
+    response = await get(path)
+    check(`sitemap URL resolves to a product: ${product.slug}`, () => assert.equal(response.status, 200))
+  }
 
   failProducts = true
   response = await get('/products/sm-3001b')

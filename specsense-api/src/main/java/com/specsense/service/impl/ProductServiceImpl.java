@@ -225,6 +225,7 @@ public class ProductServiceImpl implements ProductService {
 
         // Single download PDF URL
         dto.setDownloadPdfUrl(product.getDownloadPdfUrl());
+        dto.setDownloadPdfName(product.getDownloadPdfName());
 
         // Set overview modules JSON
         dto.setOverviewModules(product.getOverviewModules());

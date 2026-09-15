@@ -153,8 +153,8 @@
                 </button>
                 <a
                   v-if="downloadPdfUrl"
-                  :href="getFullUrl(downloadPdfUrl)"
-                  download
+                  :href="`${getFullUrl(downloadPdfUrl)}${downloadPdfName ? '?name=' + encodeURIComponent(downloadPdfName) : ''}`"
+                  :download="downloadPdfName"
                   class="flex-1 px-6 py-4 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                 >
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -423,6 +423,7 @@ const productModules = computed(() => {
 })
 
 const downloadPdfUrl = computed(() => product.value?.downloadPdfUrl || '')
+const downloadPdfName = computed(() => product.value?.downloadPdfName || '')
 
 const allImages = computed(() => {
   if (!product.value) return []

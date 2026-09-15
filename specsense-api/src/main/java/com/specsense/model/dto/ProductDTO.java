@@ -16,6 +16,7 @@ public class ProductDTO {
     private String imageUrl;
     private List<String> imageUrls;
     private String downloadPdfUrl;
+    private String downloadPdfName;
     private String overviewModules;
     private Map<String, String> specs;
     private Boolean featured;

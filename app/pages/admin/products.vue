@@ -496,8 +496,8 @@
             <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
             </svg>
-            <span class="text-gray-600 truncate flex-1">{{ getFileName(form.downloadPdfUrl) }}</span>
-            <button @click="form.downloadPdfUrl = ''" class="text-red-500 hover:text-red-700">×</button>
+            <span class="text-gray-600 truncate flex-1">{{ form.downloadPdfName || getFileName(form.downloadPdfUrl) }}</span>
+            <button @click="form.downloadPdfUrl = ''; form.downloadPdfName = ''" class="text-red-500 hover:text-red-700">×</button>
           </div>
         </el-form-item>
 
@@ -883,6 +883,7 @@ const form = reactive({
   imageUrls: [],
   modules: [],
   downloadPdfUrl: '',
+  downloadPdfName: '',
   specs: [],
   featured: false,
   sortOrder: 0,
@@ -1017,6 +1018,7 @@ const editProduct = (row) => {
     imageUrls: parseJsonArray(row.imageUrls),
     modules: parseModules(row.overviewModules),
     downloadPdfUrl: row.downloadPdfUrl || '',
+    downloadPdfName: row.downloadPdfName || '',
     specs: parseSpecs(row.specs),
     featured: row.featured || false,
     sortOrder: row.sortOrder || 0,
@@ -1112,8 +1114,9 @@ const handleDownloadPdfSuccess = (response) => {
   uploading.value = false
   uploadPercentage.value = 0
   if (response.code === 200 && response.data) {
-    const url = typeof response.data === 'string' ? response.data : response.data.url
-    if (url) form.downloadPdfUrl = url
+    const data = typeof response.data === 'string' ? { url: response.data } : response.data
+    if (data.url) form.downloadPdfUrl = data.url
+    if (data.originalFilename) form.downloadPdfName = data.originalFilename
     ElMessage.success(t('admin.uploadSuccess'))
   } else {
     ElMessage.error(response.message || t('admin.uploadFailed'))

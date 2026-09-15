@@ -91,10 +91,10 @@ public interface ProductMapper {
     List<Product> findFeatured(@Param("limit") int limit);
 
     @Insert("INSERT INTO product (category_id, name_en, name_zh, slug, description_en, description_zh, " +
-            "image_url, image_urls, download_pdf_url, specs_json, overview_modules, " +
+            "image_url, image_urls, download_pdf_url, download_pdf_name, specs_json, overview_modules, " +
             "featured, sort_order, del_flag, highlights, applications) " +
             "VALUES (#{categoryId}, #{nameEn}, #{nameZh}, #{slug}, #{descriptionEn}, #{descriptionZh}, " +
-            "#{imageUrl}, #{imageUrls}, #{downloadPdfUrl}, #{specsJson}, #{overviewModules}, " +
+            "#{imageUrl}, #{imageUrls}, #{downloadPdfUrl}, #{downloadPdfName}, #{specsJson}, #{overviewModules}, " +
             "#{featured}, #{sortOrder}, 0, #{highlights}, #{applications})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Product product);
@@ -102,6 +102,7 @@ public interface ProductMapper {
     @Update("UPDATE product SET category_id = #{categoryId}, name_en = #{nameEn}, name_zh = #{nameZh}, " +
             "slug = #{slug}, description_en = #{descriptionEn}, description_zh = #{descriptionZh}, " +
             "image_url = #{imageUrl}, image_urls = #{imageUrls}, download_pdf_url = #{downloadPdfUrl}, " +
+            "download_pdf_name = #{downloadPdfName}, " +
             "specs_json = #{specsJson}, overview_modules = #{overviewModules}, " +
             "featured = #{featured}, sort_order = #{sortOrder}, " +
             "highlights = #{highlights}, applications = #{applications} " +

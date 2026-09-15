@@ -16,6 +16,7 @@ public class Product {
     private String imageUrl;
     private String imageUrls;
     private String downloadPdfUrl;
+    private String downloadPdfName;
     private String specsJson;
     private Boolean featured;
     private Integer sortOrder;
