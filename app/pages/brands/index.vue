@@ -21,7 +21,6 @@
           />
           <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-black/20 to-transparent"></div>
         </div>
-
         <!-- Carousel Indicators -->
         <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
           <button
@@ -32,7 +31,6 @@
             :class="currentBrandSlide === index ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/80'"
           ></button>
         </div>
-
         <!-- Carousel Arrows -->
         <button
           @click="prevBrandSlide"
@@ -209,28 +207,26 @@ const categories = ref<any[]>([])
 const selectedCategory = ref('all')
 
 // Brand carousel data
-const brandCarouselSlides = ref<any[]>([])
+
 const currentBrandSlide = ref(0)
 let brandCarouselInterval: NodeJS.Timeout | null = null
 let brandCarouselResumeTimeout: NodeJS.Timeout | null = null
 const isBrandCarouselHovering = ref(false)
-
-async function fetchBrandBanners() {
-  try {
-    const response = await fetch(`${config.public.apiBase}/api/banners?locale=${locale.value}`)
-    const result = await response.json()
-    if (result.code === 200 && result.data) {
-      brandCarouselSlides.value = result.data.map((banner: any) => ({
-        image: getFullImageUrl(banner.imageUrl),
-        title: banner.title,
-        subtitle: banner.subtitle,
-      }))
-    }
-  } catch (error) {
-    console.error('Failed to fetch banners:', error)
+// 图片数组，使用你指定的路径
+const brandCarouselSlides = ref([
+  {
+    image: '/banner_1.png',
+    title: 'Contact Us'
+  },
+  {
+    image: '/banner_2.png',
+    title: 'Contact Us'
+  },
+  {
+    image: '/banner_3.png',
+    title: 'Contact Us'
   }
-}
-
+])
 function nextBrandSlide() {
   if (brandCarouselSlides.value.length === 0) return
   currentBrandSlide.value = (currentBrandSlide.value + 1) % brandCarouselSlides.value.length
@@ -357,7 +353,6 @@ async function fetchCategories() {
 onMounted(() => {
   fetchCategories()
   fetchBrands()
-  fetchBrandBanners()
   startBrandCarouselAutoPlay()
 })
 
