@@ -9,6 +9,9 @@ public class AdminUser {
     private String username;
     private String passwordHash;
     private String role;
+    private String displayName;
+    private Integer status;
+    private Integer resetRequested;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

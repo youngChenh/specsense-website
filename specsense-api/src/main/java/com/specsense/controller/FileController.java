@@ -3,7 +3,6 @@ package com.specsense.controller;
 import com.specsense.config.JwtConfig;
 import com.specsense.model.vo.FileUploadVO;
 import com.specsense.model.vo.Result;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -38,17 +37,7 @@ public class FileController {
     }
 
     private boolean authenticate(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return false;
-        }
-        String token = authHeader.substring(7);
-        try {
-            Claims claims = jwtConfig.parseToken(token);
-            return claims != null;
-        } catch (Exception e) {
-            return false;
-        }
+        return jwtConfig.authenticateAny(request);
     }
 
     @PostMapping("/upload")

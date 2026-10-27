@@ -5,7 +5,7 @@
       <div class="header-content">
         <div class="header-text">
           <h1 class="text-2xl font-bold text-gray-800">{{ $t('admin.dashboard') }}</h1>
-          <p class="text-gray-500 text-sm mt-1">欢迎回来，今天是 {{ currentDate }}</p>
+          <p class="text-gray-500 text-sm mt-1">欢迎回来，{{ currentDate }}。数字来自当前 CRM 和官网留言，不是估算。</p>
         </div>
         <div class="header-badge">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -15,70 +15,56 @@
       </div>
     </div>
 
-    <!-- Stats Cards -->
     <el-row :gutter="20" class="mb-6">
       <el-col :span="6">
-        <div class="stat-card stat-card-blue">
-          <div class="stat-icon">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.products }}</div>
-            <div class="stat-label">{{ $t('admin.products') }}</div>
-          </div>
-          <div class="stat-trend trend-up">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-            </svg>
-            <span>12%</span>
-          </div>
-        </div>
-      </el-col>
-      <el-col :span="6">
-        <div class="stat-card stat-card-green">
-          <div class="stat-icon">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-            </svg>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.news }}</div>
-            <div class="stat-label">{{ $t('admin.news') }}</div>
-          </div>
-          <div class="stat-trend trend-up">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-            </svg>
-            <span>8%</span>
-          </div>
-        </div>
-      </el-col>
-      <el-col :span="6">
-        <div class="stat-card stat-card-orange">
+        <div class="stat-card stat-card-orange" @click="navigateTo('/admin/crm/inquiries')">
           <div class="stat-icon">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ stats.inquiries }}</div>
-            <div class="stat-label">{{ $t('admin.inquiries') }}</div>
+            <div class="stat-value">{{ crmStats.unassignedCount }}</div>
+            <div class="stat-label">未分配询盘</div>
           </div>
-          <div class="stat-badge">待处理: {{ pendingInquiries }}</div>
         </div>
       </el-col>
       <el-col :span="6">
-        <div class="stat-card stat-card-purple">
+        <div class="stat-card stat-card-blue" @click="navigateTo('/admin/crm')">
           <div class="stat-icon">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ stats.categories }}</div>
-            <div class="stat-label">{{ $t('admin.categories') }}</div>
+            <div class="stat-value">{{ crmStats.monthNewInquiries }}</div>
+            <div class="stat-label">本月新增询盘</div>
+          </div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="stat-card stat-card-green" @click="navigateTo('/admin/crm/inquiries')">
+          <div class="stat-icon">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ crmStats.pendingFollowCount }}</div>
+            <div class="stat-label">待跟进</div>
+          </div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="stat-card stat-card-purple" @click="navigateTo('/admin/inquiries')">
+          <div class="stat-icon">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ stats.inquiries }}</div>
+            <div class="stat-label">官网留言</div>
           </div>
         </div>
       </el-col>
@@ -129,27 +115,29 @@
                 <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
-                <span class="font-semibold">最新询盘</span>
+                <span class="font-semibold">待分配询盘</span>
               </div>
-              <el-button type="primary" text size="small" @click="navigateTo('/admin/inquiries')">查看全部</el-button>
+              <el-button type="primary" text size="small" @click="navigateTo('/admin/crm/inquiries')">去分配</el-button>
             </div>
           </template>
           <div class="inquiry-list">
-            <div v-for="inquiry in recentInquiries" :key="inquiry.id" class="inquiry-item">
+            <div
+              v-for="inquiry in unassignedInquiries"
+              :key="inquiry.id"
+              class="inquiry-item"
+              @click="navigateTo(`/admin/crm/inquiries/${inquiry.id}`)"
+            >
               <div class="inquiry-avatar">
-                {{ inquiry.name?.charAt(0) || 'U' }}
+                {{ inquiry.customerName?.charAt(0) || 'U' }}
               </div>
               <div class="inquiry-content">
-                <div class="inquiry-name">{{ inquiry.name }}</div>
-                <div class="inquiry-company">{{ inquiry.company || '未填写公司' }}</div>
+                <div class="inquiry-name">{{ inquiry.customerName }}</div>
+                <div class="inquiry-company">{{ inquiry.contactName || '未填联系人' }} · {{ sourceLabel(inquiry.source) }}</div>
               </div>
-              <div class="inquiry-time">{{ formatDate(inquiry.createdAt) }}</div>
+              <div class="inquiry-time">{{ inquiry.inquiryDate || formatDate(inquiry.createdAt) }}</div>
             </div>
-            <div v-if="recentInquiries.length === 0" class="text-center text-gray-400 py-8">
-              <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-              </svg>
-              <p>暂无询盘</p>
+            <div v-if="unassignedInquiries.length === 0" class="text-center text-gray-400 py-8">
+              <p>暂无未分配询盘</p>
             </div>
           </div>
         </el-card>
@@ -194,13 +182,13 @@
               </div>
               <span>管理分类</span>
             </div>
-            <div class="action-item" @click="navigateTo('/admin/inquiries')">
+            <div class="action-item" @click="navigateTo('/admin/crm/inquiries')">
               <div class="action-icon bg-orange-100 text-orange-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <span>查看询盘</span>
+              <span>询盘跟进</span>
             </div>
           </div>
         </el-card>
@@ -243,12 +231,15 @@
 </template>
 
 <script setup>
+import { sourceLabel, useCrmApi } from '~/composables/useCrm'
+
 definePageMeta({
   layout: 'admin',
 })
 
 const { t } = useI18n()
 const config = useRuntimeConfig()
+const crmApi = useCrmApi()
 
 const stats = reactive({
   products: 0,
@@ -257,8 +248,12 @@ const stats = reactive({
   categories: 0,
 })
 
-const pendingInquiries = ref(0)
-const recentInquiries = ref([])
+const crmStats = reactive({
+  unassignedCount: 0,
+  monthNewInquiries: 0,
+  pendingFollowCount: 0,
+})
+const unassignedInquiries = ref([])
 const recentProducts = ref([])
 
 const currentDate = ref('')
@@ -285,6 +280,11 @@ onMounted(async () => {
     navigateTo('/admin/login')
     return
   }
+  const role = localStorage.getItem('admin_role') || ''
+  if (role !== 'admin' && role !== 'editor') {
+    navigateTo('/admin/crm')
+    return
+  }
 
   // Set current date
   const now = new Date()
@@ -298,11 +298,12 @@ onMounted(async () => {
   const headers = { Authorization: `Bearer ${token}` }
 
   try {
-    const [products, news, inquiries, categories] = await Promise.all([
+    const [products, news, inquiries, categories, crmDash] = await Promise.all([
       $fetch(`${config.public.apiBase}/api/admin/products`, { headers }),
       $fetch(`${config.public.apiBase}/api/admin/news`, { headers }),
       $fetch(`${config.public.apiBase}/api/admin/inquiries`, { headers }),
       $fetch(`${config.public.apiBase}/api/admin/categories`, { headers }),
+      crmApi.dashboard().catch(() => ({ data: {} })),
     ])
 
     stats.products = products.data?.length || 0
@@ -310,11 +311,12 @@ onMounted(async () => {
     stats.inquiries = inquiries.data?.length || 0
     stats.categories = categories.data?.length || 0
 
-    // Recent inquiries
-    recentInquiries.value = (inquiries.data || []).slice(0, 5)
-    pendingInquiries.value = (inquiries.data || []).filter(i => !i.replied).length
+    const dash = crmDash.data || {}
+    crmStats.unassignedCount = dash.unassignedCount || 0
+    crmStats.monthNewInquiries = dash.monthNewInquiries || 0
+    crmStats.pendingFollowCount = dash.pendingFollowCount || 0
+    unassignedInquiries.value = dash.unassignedInquiries || []
 
-    // Recent products
     recentProducts.value = (products.data || []).slice(0, 5)
 
     // Build category data from categories
@@ -387,6 +389,7 @@ const editProduct = (row) => {
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 .stat-card:hover {
   transform: translateY(-2px);
@@ -556,6 +559,7 @@ const editProduct = (row) => {
   background: #f9fafb;
   border-radius: 10px;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 .inquiry-item:hover {
   background: #f3f4f6;

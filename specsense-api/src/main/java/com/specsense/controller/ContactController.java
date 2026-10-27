@@ -3,6 +3,7 @@ package com.specsense.controller;
 import com.specsense.model.vo.Result;
 import com.specsense.model.entity.ContactInquiry;
 import com.specsense.service.ContactService;
+import com.specsense.service.CrmService;
 import com.specsense.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +20,18 @@ public class ContactController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private CrmService crmService;
+
     @PostMapping
     public Result<String> submit(@Valid @RequestBody ContactInquiry inquiry) {
         // Save to database
         contactService.submit(inquiry);
+        try {
+            crmService.ingestWebsiteInquiry(inquiry);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Send email notification
         try {

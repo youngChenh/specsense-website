@@ -12,7 +12,50 @@
             <span class="logo-text">SpeSense</span>
           </div>
         </div>
-        <el-menu :default-active="currentMenu" router class="admin-menu">
+        <el-menu :default-active="activeMenu" :default-openeds="cmsOpened" router class="admin-menu" @select="asideOpen = false">
+          <div class="menu-section">CRM</div>
+          <el-menu-item index="/admin/crm">
+            <span class="menu-icon">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13h8V3H3v10zm10 8h8V3h-8v18zM3 21h8v-6H3v6z" />
+              </svg>
+            </span>
+            <span>看板</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/crm/customers">
+            <span class="menu-icon">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </span>
+            <span>客户</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/crm/inquiries">
+            <span class="menu-icon">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </span>
+            <span>询盘跟进</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/crm/users" v-if="showCms || isManager">
+            <span class="menu-icon">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197" />
+              </svg>
+            </span>
+            <span>用户</span>
+          </el-menu-item>
+
+          <el-sub-menu index="cms" v-if="showCms">
+            <template #title>
+              <span class="menu-icon">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </span>
+              <span>网站内容</span>
+            </template>
           <el-menu-item index="/admin">
             <span class="menu-icon">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -109,6 +152,7 @@
             </span>
             <span>导航菜单</span>
           </el-menu-item>
+          </el-sub-menu>
           <el-menu-item @click="logout" class="logout-item">
             <span class="menu-icon">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -120,16 +164,31 @@
         </el-menu>
       </el-aside>
       <el-container>
-        <el-header height="50px" class="admin-header">
-          <el-tabs v-model="activeTab" type="card" @tab-remove="removeTab" @tab-click="handleTabClick">
-            <el-tab-pane
-              v-for="tab in tabs"
-              :key="tab.name"
-              :label="tab.title"
-              :name="tab.name"
-              :closable="tab.name !== 'dashboard'"
-            />
-          </el-tabs>
+        <el-header height="56px" class="admin-header">
+          <div class="header-left">
+            <div class="header-title">{{ currentTitle }}</div>
+            <div class="header-tabs">
+              <button
+                v-for="tab in tabs"
+                :key="tab.name"
+                class="header-tab"
+                :class="{ active: activeTab === tab.name }"
+                @click="goTab(tab)"
+              >
+                {{ tab.title }}
+                <span
+                  v-if="tab.name !== 'dashboard' && tab.name !== 'crm'"
+                  class="tab-close"
+                  @click.stop="removeTab(tab.name)"
+                >×</span>
+              </button>
+            </div>
+          </div>
+          <div class="header-right">
+            <span class="header-role">{{ roleLabel }}</span>
+            <span class="header-user">{{ displayName }}</span>
+            <button class="header-logout" type="button" @click="logout">退出</button>
+          </div>
         </el-header>
         <el-main class="admin-main">
           <NuxtPage :key="route.path" />
@@ -143,34 +202,84 @@
 </template>
 
 <script setup>
+import { getAdminRole } from '~/composables/useCrm'
+
 const { locale, setLocale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const isLoggedIn = ref(false)
 const token = ref(null)
-const activeTab = ref('dashboard')
+const adminRole = ref('')
+const displayName = ref('')
+const currentTitle = computed(() => resolveTab(route.path)?.title || '管理后台')
+const roleLabel = computed(() => {
+  const role = adminRole.value
+  if (role === 'sales') return '销售'
+  if (role === 'manager') return '管理层'
+  if (role === 'editor') return '编辑'
+  return '管理员'
+})
+const isManager = computed(() => {
+  const role = adminRole.value
+  return !role || role === 'manager' || role === 'admin'
+})
+const showCms = computed(() => {
+  const role = adminRole.value
+  return !role || role === 'admin' || role === 'editor'
+})
+const activeTab = ref('crm')
 const tabs = ref([
-  { name: 'dashboard', title: '仪表盘', path: '/admin' }
+  { name: 'crm', title: 'CRM 看板', path: '/admin/crm' }
 ])
 
 const activeMenu = computed(() => route.path)
+const cmsOpened = []
+const cmsPaths = [
+  '/admin', '/admin/categories', '/admin/products', '/admin/news', '/admin/applications',
+  '/admin/services', '/admin/downloads', '/admin/company', '/admin/inquiries',
+  '/admin/brands', '/admin/banners', '/admin/menus',
+]
 
 const tabNameMap = {
-  '/admin': { name: 'dashboard', title: '仪表盘' },
-  '/admin/categories': { name: 'categories', title: '分类管理' },
-  '/admin/products': { name: 'products', title: '产品管理' },
-  '/admin/news': { name: 'news', title: '新闻管理' },
-  '/admin/applications': { name: 'applications', title: '应用管理' },
-  '/admin/services': { name: 'services', title: '服务管理' },
-  '/admin/downloads': { name: 'downloads', title: '下载管理' },
-  '/admin/company': { name: 'company', title: '公司信息' },
-  '/admin/inquiries': { name: 'inquiries', title: '询盘管理' },
-  '/admin/brands': { name: 'brands', title: '代理品牌' },
-  '/admin/menus': { name: 'menus', title: '导航菜单' }
+  '/admin': { name: 'dashboard', title: '仪表盘', path: '/admin' },
+  '/admin/crm': { name: 'crm', title: 'CRM 看板', path: '/admin/crm' },
+  '/admin/crm/customers': { name: 'crm-customers', title: '客户管理', path: '/admin/crm/customers' },
+  '/admin/crm/inquiries': { name: 'crm-inquiries', title: '询盘跟进', path: '/admin/crm/inquiries' },
+  '/admin/crm/users': { name: 'crm-users', title: '用户管理', path: '/admin/crm/users' },
+  '/admin/categories': { name: 'categories', title: '分类管理', path: '/admin/categories' },
+  '/admin/products': { name: 'products', title: '产品管理', path: '/admin/products' },
+  '/admin/news': { name: 'news', title: '新闻管理', path: '/admin/news' },
+  '/admin/applications': { name: 'applications', title: '应用管理', path: '/admin/applications' },
+  '/admin/services': { name: 'services', title: '服务管理', path: '/admin/services' },
+  '/admin/downloads': { name: 'downloads', title: '下载管理', path: '/admin/downloads' },
+  '/admin/company': { name: 'company', title: '公司信息', path: '/admin/company' },
+  '/admin/inquiries': { name: 'inquiries', title: '官网留言', path: '/admin/inquiries' },
+  '/admin/brands': { name: 'brands', title: '代理品牌', path: '/admin/brands' },
+  '/admin/banners': { name: 'banners', title: '轮播图管理', path: '/admin/banners' },
+  '/admin/menus': { name: 'menus', title: '导航菜单', path: '/admin/menus' }
+}
+
+const resolveTab = (path) => {
+  if (tabNameMap[path]) return tabNameMap[path]
+  if (path.startsWith('/admin/crm/customers/')) return { name: 'crm-customer-detail', title: '客户详情', path }
+  if (path.startsWith('/admin/crm/inquiries/')) return { name: 'crm-inquiry-detail', title: '询盘详情', path }
+  return null
+}
+
+const guardRoute = (path) => {
+  if (!showCms.value && cmsPaths.includes(path)) {
+    navigateTo('/admin/crm')
+    return false
+  }
+  if (!isManager.value && path.startsWith('/admin/crm/users')) {
+    navigateTo('/admin/crm')
+    return false
+  }
+  return true
 }
 
 const openTab = (path) => {
-  const tabInfo = tabNameMap[path]
+  const tabInfo = resolveTab(path)
   if (!tabInfo) return
 
   const existing = tabs.value.find(t => t.name === tabInfo.name)
@@ -180,12 +289,8 @@ const openTab = (path) => {
   activeTab.value = tabInfo.name
 }
 
-const handleTabClick = (tab) => {
-  const tabName = typeof tab === 'string' ? tab : tab?.props?.name
-  const entry = Object.entries(tabNameMap).find(([path, info]) => info.name === tabName)
-  if (entry) {
-    router.push(entry[0])
-  }
+const goTab = (tab) => {
+  if (tab?.path) router.push(tab.path)
 }
 
 const removeTab = (name) => {
@@ -202,13 +307,16 @@ const removeTab = (name) => {
   }
 }
 
-// Sync tab when route changes
 watch(() => route.path, (path) => {
-  const tabInfo = tabNameMap[path]
+  if (!guardRoute(path)) return
+  const tabInfo = resolveTab(path)
   if (tabInfo) {
     const existing = tabs.value.find(t => t.name === tabInfo.name)
     if (!existing) {
       tabs.value.push(tabInfo)
+    } else if (tabInfo.path) {
+      existing.path = tabInfo.path
+      existing.title = tabInfo.title
     }
     activeTab.value = tabInfo.name
   }
@@ -217,11 +325,12 @@ watch(() => route.path, (path) => {
 onMounted(async () => {
   if (import.meta.client) {
     token.value = localStorage.getItem('admin_token')
+    adminRole.value = getAdminRole()
+    displayName.value = localStorage.getItem('admin_username') || '未登录'
     isLoggedIn.value = !!token.value
     await setLocale('zh')
-
-    // Initialize tab from current route
-    const tabInfo = tabNameMap[route.path]
+    if (!guardRoute(route.path)) return
+    const tabInfo = resolveTab(route.path)
     if (tabInfo) {
       activeTab.value = tabInfo.name
       if (!tabs.value.find(t => t.name === tabInfo.name)) {
@@ -234,6 +343,9 @@ onMounted(async () => {
 const logout = () => {
   if (import.meta.client) {
     localStorage.removeItem('admin_token')
+    localStorage.removeItem('admin_role')
+    localStorage.removeItem('admin_user_id')
+    localStorage.removeItem('admin_username')
   }
   isLoggedIn.value = false
   navigateTo('/admin/login')
@@ -249,6 +361,15 @@ const logout = () => {
   background: linear-gradient(180deg, #1e1e3f 0%, #1a1a2e 100%) !important;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
   border-right: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-y: auto;
+  height: 100vh;
+}
+.menu-section {
+  padding: 16px 20px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.38);
 }
 .aside-header {
   padding: 20px 16px;
@@ -302,6 +423,24 @@ const logout = () => {
   color: white !important;
   border-left: 3px solid #667eea;
 }
+:deep(.el-sub-menu__title) {
+  height: 48px;
+  line-height: 48px;
+  color: rgba(255, 255, 255, 0.65) !important;
+  margin: 8px 8px 4px;
+  border-radius: 10px;
+  padding-left: 16px !important;
+}
+:deep(.el-sub-menu__title:hover) {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: white !important;
+}
+:deep(.el-sub-menu .el-menu) {
+  background: transparent !important;
+}
+:deep(.el-sub-menu .el-menu-item) {
+  padding-left: 28px !important;
+}
 .menu-icon {
   display: flex;
   align-items: center;
@@ -316,41 +455,105 @@ const logout = () => {
   margin-top: 40px;
 }
 .admin-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+  background: #fff;
+  border-bottom: 1px solid #eef0f4;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
 }
-.admin-header :deep(.el-tabs) {
-  width: 100%;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+  flex: 1;
 }
-.admin-header :deep(.el-tabs__header) {
-  margin-bottom: 0;
+.header-title {
+  flex-shrink: 0;
+  font-size: 15px;
+  font-weight: 650;
+  color: #1f2937;
 }
-.admin-header :deep(.el-tabs__nav-wrap)::after {
-  display: none;
+.header-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  min-width: 0;
 }
-.admin-header :deep(.el-tabs__item) {
-  height: 50px;
-  line-height: 50px;
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 500;
-  border: none;
-  font-size: 14px;
+.header-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
 }
-.admin-header :deep(.el-tabs__item.is-active) {
-  color: #fff;
+.header-tab:hover {
+  background: #eaeef5;
+  color: #374151;
+}
+.header-tab.active {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #4338ca;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 8px 8px 0 0;
 }
-.admin-header :deep(.el-tabs__nav) {
-  border: none;
+.tab-close {
+  font-style: normal;
+  font-size: 16px;
+  line-height: 1;
+  color: #9ca3af;
 }
-.admin-header :deep(.el-tabs__content) {
-  display: none;
+.tab-close:hover {
+  color: #ef4444;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.header-role {
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  line-height: 24px;
+  font-weight: 600;
+}
+.header-user {
+  font-size: 13px;
+  color: #4b5563;
+}
+.header-logout {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #4b5563;
+  font-size: 13px;
+  cursor: pointer;
+}
+.header-logout:hover {
+  background: #f9fafb;
+  color: #111827;
 }
 .admin-main {
   background: #f5f7fa;
   padding: 24px;
-  min-height: calc(100vh - 50px);
+  min-height: calc(100vh - 56px);
 }
 </style>

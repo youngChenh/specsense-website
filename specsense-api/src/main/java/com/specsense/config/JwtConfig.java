@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,5 +67,34 @@ public class JwtConfig {
 
     public boolean validateToken(String token, String username) {
         return (getUsernameFromToken(token).equals(username) && !isTokenExpired(token));
+    }
+
+    public Claims parseBearer(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        try {
+            return parseToken(authHeader.substring(7));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public boolean authenticateAny(HttpServletRequest request) {
+        return parseBearer(request) != null;
+    }
+
+    public boolean authenticateCms(HttpServletRequest request) {
+        Claims claims = parseBearer(request);
+        if (claims == null) {
+            return false;
+        }
+        Object role = claims.get("role");
+        if (role == null) {
+            return true;
+        }
+        String r = role.toString();
+        return "admin".equalsIgnoreCase(r) || "editor".equalsIgnoreCase(r);
     }
 }

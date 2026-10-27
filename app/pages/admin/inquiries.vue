@@ -1,6 +1,5 @@
 <template>
   <div class="page-container">
-    <!-- Page Header -->
     <div class="page-header mb-6">
       <div class="header-content">
         <div class="header-icon">
@@ -9,13 +8,22 @@
           </svg>
         </div>
         <div class="header-text">
-          <h1 class="text-2xl font-bold text-gray-800">{{ $t('admin.inquiries') }}</h1>
-          <p class="text-gray-500 text-sm mt-1">管理客户询盘信息</p>
+          <h1 class="text-2xl font-bold text-gray-800">官网留言</h1>
+          <p class="text-gray-500 text-sm mt-1">网站联系表提交的原始留言。销售跟进请到 CRM「询盘跟进」。</p>
         </div>
       </div>
+      <el-button type="primary" @click="navigateTo('/admin/crm/inquiries')">去询盘跟进</el-button>
     </div>
 
-    <!-- Search & Filter -->
+    <el-alert
+      class="mb-4"
+      type="info"
+      show-icon
+      :closable="false"
+      title="这里不是销售跟进台"
+      description="官网每提交一条留言，会自动生成 CRM 客户和询盘（默认未分配）。请在详情里点「去 CRM 跟进」，或到侧栏 CRM → 询盘跟进分配销售。"
+    />
+
     <el-card shadow="never" class="main-card mb-4">
       <div class="flex flex-wrap gap-4 items-center">
         <el-input
@@ -47,24 +55,45 @@
             {{ new Date(row.createdAt).toLocaleString() }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.actions')" width="100">
+        <el-table-column :label="$t('admin.actions')" width="200">
           <template #default="{ row }">
+            <el-button size="small" text type="primary" @click="openDetail(row)">详情</el-button>
+            <el-button size="small" text type="primary" @click="goCrm(row)">去跟进</el-button>
             <el-button size="small" text type="danger" @click="remove(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
+
+    <el-dialog v-model="showDetail" title="官网留言详情" width="560px">
+      <el-descriptions v-if="current" :column="1" border>
+        <el-descriptions-item :label="$t('admin.name')">{{ current.name }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('contact.form.email')">{{ current.email }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('contact.form.company')">{{ current.company || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('contact.form.product')">{{ current.product || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('admin.date')">{{ current.createdAt ? new Date(current.createdAt).toLocaleString() : '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('admin.message')">{{ current.message }}</el-descriptions-item>
+      </el-descriptions>
+      <template #footer>
+        <el-button @click="showDetail = false">关闭</el-button>
+        <el-button type="primary" :loading="jumping" @click="goCrm(current)">去 CRM 跟进</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
+import { useCrmApi } from '~/composables/useCrm'
+
 definePageMeta({
   layout: 'admin',
 })
 
 const { t } = useI18n()
 const config = useRuntimeConfig()
+const crm = useCrmApi()
 const headers = ref({})
+const jumping = ref(false)
 
 onMounted(() => {
   if (!import.meta.client) return
@@ -78,6 +107,35 @@ onMounted(() => {
 
 const data = ref([])
 const searchKeyword = ref('')
+const showDetail = ref(false)
+const current = ref(null)
+
+const openDetail = (row) => {
+  current.value = row
+  showDetail.value = true
+}
+
+const goCrm = async (row) => {
+  const target = row || current.value
+  if (!target) return
+  jumping.value = true
+  try {
+    const res = await crm.byWebsiteInquiry(target.id, target.email)
+    const inquiry = res.data
+    showDetail.value = false
+    if (inquiry?.id) {
+      navigateTo(`/admin/crm/inquiries/${inquiry.id}`)
+      return
+    }
+    ElMessage.info('未找到对应 CRM 询盘，已打开跟进列表')
+    navigateTo({ path: '/admin/crm/inquiries', query: { keyword: target.email || target.company || '' } })
+  } catch (e) {
+    showDetail.value = false
+    navigateTo({ path: '/admin/crm/inquiries', query: { keyword: target.email || target.company || '' } })
+  } finally {
+    jumping.value = false
+  }
+}
 
 const displayData = computed(() => {
   if (!searchKeyword.value) return data.value

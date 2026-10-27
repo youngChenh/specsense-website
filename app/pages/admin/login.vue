@@ -1,72 +1,50 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
-    <!-- Decorative circles -->
-    <div class="absolute top-20 left-20 w-64 h-64 bg-blue-400 rounded-full opacity-10 blur-3xl"></div>
-    <div class="absolute bottom-20 right-20 w-96 h-96 bg-indigo-400 rounded-full opacity-10 blur-3xl"></div>
-    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-300 rounded-full opacity-5 blur-3xl"></div>
-
-    <div class="relative w-full max-w-md mx-4">
-      <!-- Logo and Title -->
-      <div class="text-center mb-8">
-        <img src="/logo.jpg" alt="SpeSense" class="inline-flex items-center justify-center h-16 w-auto object-contain rounded-2xl shadow-lg mb-4" />
-        <h1 class="text-3xl font-bold text-white mb-2">SpeSense</h1>
-        <p class="text-blue-200">{{ $t('admin.loginTitle') }}</p>
+  <div class="login-page">
+    <div class="login-panel">
+      <div class="brand">
+        <img src="/logo.jpg" alt="SpeSense" class="brand-logo" />
+        <div>
+          <div class="brand-name">SpeSense</div>
+          <div class="brand-sub">后台管理</div>
+        </div>
       </div>
+      <h1 class="headline">客户、询盘与官网内容<br />在同一处管理</h1>
+      <p class="lead">销售跟进线索，管理员维护网站。登录后按角色进入对应工作台。</p>
+      <ul class="points">
+        <li>CRM 看板、客户与询盘跟进</li>
+        <li>产品、新闻与品牌内容发布</li>
+      </ul>
+    </div>
 
-      <!-- Login Card -->
-      <div class="bg-white rounded-2xl shadow-2xl p-8 backdrop-blur-sm bg-opacity-95">
-        <el-form @submit.prevent="handleLogin" class="space-y-5">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('admin.username') }}</label>
-            <el-input
-              v-model="form.username"
-              size="large"
-              :placeholder="$t('admin.pleaseEnter') + $t('admin.username')"
-              class="login-input"
-            >
-              <template #prefix>
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </template>
-            </el-input>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('admin.password') }}</label>
-            <el-input
-              v-model="form.password"
-              type="password"
-              size="large"
-              :placeholder="$t('admin.pleaseEnter') + $t('admin.password')"
-              show-password
-              class="login-input"
-            >
-              <template #prefix>
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </template>
-            </el-input>
-          </div>
-
-          <el-button
-            type="primary"
+    <div class="login-form-wrap">
+      <div class="login-card">
+        <h2>{{ $t('admin.loginTitle') }}</h2>
+        <p class="hint">使用后台账号继续</p>
+        <el-form @submit.prevent="handleLogin" class="form">
+          <label>{{ $t('admin.username') }}</label>
+          <el-input
+            v-model="form.username"
             size="large"
-            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 border-0 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
-            @click="handleLogin"
-            :loading="loading"
-          >
-            <span v-if="!loading" class="font-medium">{{ $t('admin.loginBtn') }}</span>
-            <span v-else>...</span>
+            :placeholder="$t('admin.pleaseEnter') + $t('admin.username')"
+            class="login-input"
+            @keyup.enter="handleLogin"
+          />
+          <label>{{ $t('admin.password') }}</label>
+          <el-input
+            v-model="form.password"
+            type="password"
+            size="large"
+            show-password
+            :placeholder="$t('admin.pleaseEnter') + $t('admin.password')"
+            class="login-input"
+            @keyup.enter="handleLogin"
+          />
+          <el-button class="submit" size="large" :loading="loading" @click="handleLogin">
+            {{ $t('admin.loginBtn') }}
           </el-button>
         </el-form>
+        <p class="copy">© 2026 SpeSense Technologies</p>
       </div>
-
-      <!-- Footer -->
-      <p class="text-center text-blue-200 text-sm mt-6">
-        © 2026 SpeSense Technologies
-      </p>
     </div>
   </div>
 </template>
@@ -100,9 +78,13 @@ const handleLogin = async () => {
     if (response.code === 200 && response.data) {
       if (import.meta.client) {
         localStorage.setItem('admin_token', response.data.token)
+        localStorage.setItem('admin_role', response.data.role || '')
+        localStorage.setItem('admin_username', response.data.username || form.username)
+        if (response.data.userId) localStorage.setItem('admin_user_id', String(response.data.userId))
       }
       ElMessage.success(t('admin.loginSuccess'))
-      navigateTo('/admin')
+      const role = response.data.role || ''
+      navigateTo(role === 'admin' || role === 'editor' ? '/admin' : '/admin/crm')
     } else {
       ElMessage.error(response.message || t('admin.loginFailed'))
     }
@@ -115,11 +97,139 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-.login-input :deep(.el-input__wrapper) {
-  padding: 4px 15px;
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  background: #f5f7fa;
+}
+.login-panel {
+  padding: 56px 64px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(102, 126, 234, 0.28), transparent 42%),
+    linear-gradient(180deg, #1e1e3f 0%, #1a1a2e 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+.brand-logo {
+  height: 44px;
+  width: auto;
   border-radius: 10px;
+  object-fit: contain;
+}
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.brand-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+.headline {
+  font-size: 34px;
+  line-height: 1.25;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.lead {
+  max-width: 420px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+.points {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+  line-height: 2;
+  padding-left: 18px;
+}
+.login-form-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+.login-card {
+  width: 100%;
+  max-width: 380px;
+}
+.login-card h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+.hint {
+  color: #6b7280;
+  margin-bottom: 28px;
+  font-size: 14px;
+}
+.form label {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+.form label + .login-input {
+  margin-bottom: 18px;
+}
+.login-input :deep(.el-input__wrapper) {
+  border-radius: 10px;
+  padding: 4px 14px;
+  box-shadow: 0 0 0 1px #e5e7eb inset;
+}
+.login-input :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px #6366f1 inset;
 }
 .login-input :deep(.el-input__inner) {
-  height: 40px;
+  height: 42px;
+}
+.submit {
+  width: 100%;
+  margin-top: 8px;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  background: #4f46e5;
+  color: #fff;
+  font-weight: 600;
+}
+.submit:hover {
+  background: #4338ca;
+  color: #fff;
+}
+.copy {
+  margin-top: 28px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+@media (max-width: 900px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+  .login-panel {
+    padding: 32px 24px 28px;
+    min-height: auto;
+  }
+  .headline {
+    font-size: 26px;
+  }
+  .lead, .points {
+    display: none;
+  }
+  .brand {
+    margin-bottom: 0;
+  }
 }
 </style>

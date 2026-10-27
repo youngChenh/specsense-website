@@ -26,12 +26,15 @@ public class AdminServiceImpl implements AdminService {
         if (user == null) {
             throw new RuntimeException("User not found");
         }
+        if (user.getStatus() != null && user.getStatus() == 0) {
+            throw new RuntimeException("账号已停用");
+        }
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new RuntimeException("Invalid password");
         }
 
         String token = jwtConfig.generateToken(username, user.getId(), user.getRole());
-        return new LoginVO(token, username, user.getRole());
+        return new LoginVO(token, username, user.getRole(), user.getId());
     }
 
     @Override

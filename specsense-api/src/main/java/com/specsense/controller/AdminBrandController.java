@@ -7,7 +7,6 @@ import com.specsense.model.entity.BrandCategory;
 import com.specsense.model.dto.BrandDTO;
 import com.specsense.service.BrandService;
 import com.specsense.service.BrandCategoryService;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,17 +27,7 @@ public class AdminBrandController {
     private JwtConfig jwtConfig;
 
     private boolean authenticate(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return false;
-        }
-        String token = authHeader.substring(7);
-        try {
-            Claims claims = jwtConfig.parseToken(token);
-            return claims != null;
-        } catch (Exception e) {
-            return false;
-        }
+        return jwtConfig.authenticateCms(request);
     }
 
     // Brand Category CRUD

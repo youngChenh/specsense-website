@@ -8,7 +8,6 @@ import com.specsense.model.vo.PageResult;
 import com.specsense.model.vo.Result;
 import com.specsense.model.entity.*;
 import com.specsense.service.*;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,17 +49,7 @@ public class AdminCrudController {
     private JwtConfig jwtConfig;
 
     private boolean authenticate(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return false;
-        }
-        String token = authHeader.substring(7);
-        try {
-            Claims claims = jwtConfig.parseToken(token);
-            return claims != null;
-        } catch (Exception e) {
-            return false;
-        }
+        return jwtConfig.authenticateCms(request);
     }
 
     // Category CRUD
