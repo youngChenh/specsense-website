@@ -19,6 +19,7 @@ public class CrmImportRow {
     private String contactTitle;
     private String contactEmail;
     private String contactPhone;
+    private List<String> contactEmails = new ArrayList<String>();
     private List<String> errors = new ArrayList<String>();
     private List<CrmDuplicateMatch> duplicates = new ArrayList<CrmDuplicateMatch>();
     /** skip | merge | create */

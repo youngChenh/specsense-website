@@ -4,35 +4,38 @@ import com.specsense.crm.CrmAuth;
 import com.specsense.mapper.AdminUserMapper;
 import com.specsense.mapper.CrmContactMapper;
 import com.specsense.mapper.CrmCustomerMapper;
+import com.specsense.mapper.CrmAfterSaleMapper;
 import com.specsense.mapper.CrmFollowUpMapper;
 import com.specsense.mapper.CrmInquiryMapper;
+import com.specsense.mapper.CrmOrderMapper;
 import com.specsense.model.dto.CrmDuplicateMatch;
 import com.specsense.model.dto.CrmImportRow;
 import com.specsense.model.entity.ContactInquiry;
 import com.specsense.model.entity.CrmContact;
 import com.specsense.model.entity.CrmCustomer;
+import com.specsense.model.entity.CrmAfterSale;
 import com.specsense.model.entity.CrmFollowUp;
 import com.specsense.model.entity.CrmInquiry;
+import com.specsense.model.entity.CrmOrder;
 import com.specsense.model.vo.PageResult;
 import com.specsense.service.CrmService;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -49,7 +52,7 @@ public class CrmServiceImpl implements CrmService {
     private static final List<String> FUNNEL_STAGES = Arrays.asList("NEW", "FOLLOWING", "QUOTED", "NEGOTIATING");
     private static final List<String> SOURCES = Arrays.asList("website", "exhibition", "outbound", "existing", "social");
     private static final String[] TEMPLATE_HEADERS = {
-            "客户名称", "国家/地区", "官网", "行业", "地址", "线索来源", "备注", "联系人姓名", "职位", "邮箱", "电话"
+            "国家", "联系人", "电子邮件", "客户名称", "网站", "行业", "描述", "公司地址", "电话", "手机", "备注"
     };
 
     @Autowired
@@ -61,6 +64,10 @@ public class CrmServiceImpl implements CrmService {
     @Autowired
     private CrmFollowUpMapper followUpMapper;
     @Autowired
+    private CrmOrderMapper orderMapper;
+    @Autowired
+    private CrmAfterSaleMapper afterSaleMapper;
+    @Autowired
     private AdminUserMapper adminUserMapper;
 
     private void assertCanAccessCustomer(Long customerId, CrmAuth.User user) {
@@ -71,6 +78,118 @@ public class CrmServiceImpl implements CrmService {
         if (!user.isManager() && (customer.getOwnerId() == null || !customer.getOwnerId().equals(user.getUserId()))) {
             throw new CrmAuth.AuthException(403, "无权访问该客户");
         }
+    }
+
+    private void assertCanAccessOwned(Long ownerId, Long customerId, CrmAuth.User user, String missing) {
+        if (user.isManager()) {
+            return;
+        }
+        if (ownerId != null && ownerId.equals(user.getUserId())) {
+            return;
+        }
+        if (customerId != null) {
+            assertCanAccessCustomer(customerId, user);
+            return;
+        }
+        throw new CrmAuth.AuthException(403, missing);
+    }
+
+    private void assertCanAccessOrder(CrmOrder order, CrmAuth.User user) {
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        assertCanAccessOwned(order.getOwnerId(), order.getCustomerId(), user, "无权访问该订单");
+    }
+
+    private void assertCanAccessAfterSale(CrmAfterSale item, CrmAuth.User user) {
+        if (item == null) {
+            throw new RuntimeException("售后记录不存在");
+        }
+        assertCanAccessOwned(item.getOwnerId(), item.getCustomerId(), user, "无权访问该售后记录");
+    }
+
+    private void prepareOrder(CrmOrder order, CrmAuth.User user, CrmOrder existing) {
+        if (order.getCustomerId() != null) {
+            assertCanAccessCustomer(order.getCustomerId(), user);
+        }
+        if (user.isSales() || order.getOwnerId() == null) {
+            order.setOwnerId(existing != null && existing.getOwnerId() != null && user.isSales()
+                    ? existing.getOwnerId() : user.getUserId());
+        }
+        if (order.getOrderDate() == null) {
+            order.setOrderDate(LocalDate.now());
+        }
+        if (isBlank(order.getCurrency())) {
+            order.setCurrency("USD");
+        }
+        if (order.getQuantity() == null) {
+            order.setQuantity(BigDecimal.ONE);
+        }
+        if (order.getTaxIncluded() == null) {
+            order.setTaxIncluded(0);
+        }
+        fillOrderProfit(order);
+    }
+
+    private void prepareAfterSale(CrmAfterSale item, CrmAuth.User user, CrmAfterSale existing) {
+        if (item.getOrderId() != null) {
+            CrmOrder order = orderMapper.findById(item.getOrderId());
+            if (order != null) {
+                if (item.getCustomerId() == null) {
+                    item.setCustomerId(order.getCustomerId());
+                }
+                if (isBlank(item.getSupplierName())) {
+                    item.setSupplierName(order.getSupplierName());
+                }
+                if (isBlank(item.getModel())) {
+                    item.setModel(order.getModel());
+                }
+            }
+        }
+        if (item.getCustomerId() != null) {
+            assertCanAccessCustomer(item.getCustomerId(), user);
+        }
+        if (isBlank(item.getSupplierName()) || isBlank(item.getModel()) || isBlank(item.getProblem())) {
+            throw new RuntimeException("供应商、型号和问题描述不能为空");
+        }
+        if (user.isSales() || item.getOwnerId() == null) {
+            item.setOwnerId(existing != null && existing.getOwnerId() != null && user.isSales()
+                    ? existing.getOwnerId() : user.getUserId());
+        }
+        if (item.getResolved() == null) {
+            item.setResolved(0);
+        }
+        if (item.getNeedChangeSupplier() == null) {
+            item.setNeedChangeSupplier(0);
+        }
+        if (item.getResolved() != null && item.getResolved() == 1 && item.getResolvedAt() == null) {
+            item.setResolvedAt(LocalDate.now());
+        }
+    }
+
+    private void fillOrderProfit(CrmOrder order) {
+        BigDecimal sell = nz(order.getSellPrice());
+        BigDecimal profit = sell.subtract(nz(order.getPurchasePrice()))
+                .subtract(nz(order.getFreight()))
+                .subtract(nz(order.getInsurance()))
+                .subtract(nz(order.getBankFee()));
+        order.setGrossProfit(profit);
+        if (sell.compareTo(BigDecimal.ZERO) == 0) {
+            order.setGrossMargin(BigDecimal.ZERO);
+        } else {
+            order.setGrossMargin(profit.multiply(new BigDecimal("100")).divide(sell, 2, RoundingMode.HALF_UP));
+        }
+    }
+
+    private BigDecimal nz(BigDecimal v) {
+        return v == null ? BigDecimal.ZERO : v;
+    }
+
+    private long toLong(Object v) {
+        if (v instanceof Number) {
+            return ((Number) v).longValue();
+        }
+        return 0L;
     }
 
     private Long resolveOwnerFilter(Long filterOwnerId, CrmAuth.User user) {
@@ -314,6 +433,99 @@ public class CrmServiceImpl implements CrmService {
     }
 
     @Override
+    public PageResult<List<CrmOrder>> listOrders(String keyword, String incoterm, Long filterOwnerId, Long customerId,
+                                                 int page, int pageSize, CrmAuth.User user) {
+        Long ownerId = resolveOwnerFilter(filterOwnerId, user);
+        int offset = (page - 1) * pageSize;
+        List<CrmOrder> list = orderMapper.search(keyword, incoterm, ownerId, customerId, offset, pageSize);
+        long total = orderMapper.countSearch(keyword, incoterm, ownerId, customerId);
+        return new PageResult<List<CrmOrder>>(total, page, pageSize, list);
+    }
+
+    @Override
+    public CrmOrder getOrder(Long id, CrmAuth.User user) {
+        CrmOrder order = orderMapper.findById(id);
+        assertCanAccessOrder(order, user);
+        return order;
+    }
+
+    @Override
+    public CrmOrder createOrder(CrmOrder order, CrmAuth.User user) {
+        prepareOrder(order, user, null);
+        orderMapper.insert(order);
+        if (isBlank(order.getOrderNo())) {
+            order.setOrderNo("O" + order.getId());
+            orderMapper.update(order);
+        }
+        return orderMapper.findById(order.getId());
+    }
+
+    @Override
+    public void updateOrder(CrmOrder order, CrmAuth.User user) {
+        CrmOrder existing = getOrder(order.getId(), user);
+        prepareOrder(order, user, existing);
+        orderMapper.update(order);
+    }
+
+    @Override
+    public void deleteOrder(Long id, CrmAuth.User user) {
+        getOrder(id, user);
+        orderMapper.delete(id);
+    }
+
+    @Override
+    public PageResult<List<CrmAfterSale>> listAfterSales(String keyword, Integer resolved, Long filterOwnerId, Long customerId,
+                                                         int page, int pageSize, CrmAuth.User user) {
+        Long ownerId = resolveOwnerFilter(filterOwnerId, user);
+        int offset = (page - 1) * pageSize;
+        List<CrmAfterSale> list = afterSaleMapper.search(keyword, resolved, ownerId, customerId, offset, pageSize);
+        long total = afterSaleMapper.countSearch(keyword, resolved, ownerId, customerId);
+        return new PageResult<List<CrmAfterSale>>(total, page, pageSize, list);
+    }
+
+    @Override
+    public CrmAfterSale getAfterSale(Long id, CrmAuth.User user) {
+        CrmAfterSale item = afterSaleMapper.findById(id);
+        assertCanAccessAfterSale(item, user);
+        return item;
+    }
+
+    @Override
+    public CrmAfterSale createAfterSale(CrmAfterSale item, CrmAuth.User user) {
+        prepareAfterSale(item, user, null);
+        afterSaleMapper.insert(item);
+        return afterSaleMapper.findById(item.getId());
+    }
+
+    @Override
+    public void updateAfterSale(CrmAfterSale item, CrmAuth.User user) {
+        CrmAfterSale existing = getAfterSale(item.getId(), user);
+        prepareAfterSale(item, user, existing);
+        afterSaleMapper.update(item);
+    }
+
+    @Override
+    public void deleteAfterSale(Long id, CrmAuth.User user) {
+        getAfterSale(id, user);
+        afterSaleMapper.delete(id);
+    }
+
+    @Override
+    public List<Map<String, Object>> afterSaleStats(CrmAuth.User user) {
+        List<Map<String, Object>> rows = afterSaleMapper.statsBySupplierModel(user.scopedOwnerId());
+        if (rows == null) {
+            return new ArrayList<Map<String, Object>>();
+        }
+        for (Map<String, Object> row : rows) {
+            long open = toLong(row.get("openCount"));
+            long issues = toLong(row.get("issueCount"));
+            long flags = toLong(row.get("changeFlagCount"));
+            row.put("suggestChange", flags > 0 || (issues >= 3 && open >= 2));
+        }
+        return rows;
+    }
+
+    @Override
     public Map<String, Object> dashboard(CrmAuth.User user) {
         Long ownerId = user.scopedOwnerId();
         Map<String, Object> data = new HashMap<String, Object>();
@@ -350,6 +562,8 @@ public class CrmServiceImpl implements CrmService {
         data.put("unassignedCount", user.isManager() ? inquiryMapper.countUnassigned() : 0L);
         data.put("pendingFollowCount", inquiryMapper.countPendingFollow(ownerId));
         data.put("unassignedInquiries", user.isManager() ? inquiryMapper.findUnassigned(8) : java.util.Collections.emptyList());
+        data.put("orderCount", orderMapper.count(ownerId));
+        data.put("openAfterSaleCount", afterSaleMapper.countOpen(ownerId));
         return data;
     }
 
@@ -384,17 +598,40 @@ public class CrmServiceImpl implements CrmService {
             } else if (!isBlank(row.getSource())) {
                 row.setSource(normalizeSource(row.getSource()));
             }
-            if (!isBlank(row.getContactEmail()) && !row.getContactEmail().contains("@")) {
-                row.getErrors().add("邮箱格式不正确");
+            List<String> emails = row.getContactEmails() != null ? row.getContactEmails() : splitEmails(row.getContactEmail());
+            row.setContactEmails(emails);
+            for (String email : emails) {
+                if (!email.contains("@")) {
+                    row.getErrors().add("邮箱格式不正确：" + email);
+                }
             }
-            List<CrmCustomer> dups = customerMapper.findDuplicates(row.getName(), row.getWebsite(), row.getContactEmail(), row.getContactPhone(), null);
-            for (CrmCustomer d : dups) {
+            java.util.LinkedHashMap<Long, CrmCustomer> dupMap = new java.util.LinkedHashMap<Long, CrmCustomer>();
+            if (emails.isEmpty()) {
+                List<CrmCustomer> dups = customerMapper.findDuplicates(row.getName(), row.getWebsite(), null, row.getContactPhone(), null);
+                if (dups != null) {
+                    for (CrmCustomer d : dups) {
+                        dupMap.put(d.getId(), d);
+                    }
+                }
+            } else {
+                for (String email : emails) {
+                    List<CrmCustomer> dups = customerMapper.findDuplicates(row.getName(), row.getWebsite(), email, row.getContactPhone(), null);
+                    if (dups == null) {
+                        continue;
+                    }
+                    for (CrmCustomer d : dups) {
+                        dupMap.put(d.getId(), d);
+                    }
+                }
+            }
+            for (CrmCustomer d : dupMap.values()) {
                 CrmDuplicateMatch match = new CrmDuplicateMatch();
                 match.setId(d.getId());
                 match.setName(d.getName());
                 match.setCountry(d.getCountry());
                 match.setWebsite(d.getWebsite());
-                match.setReason(buildReason(d, row.getName(), row.getWebsite(), row.getContactEmail(), row.getContactPhone()));
+                String firstEmail = emails.isEmpty() ? row.getContactEmail() : emails.get(0);
+                match.setReason(buildReason(d, row.getName(), row.getWebsite(), firstEmail, row.getContactPhone()));
                 row.getDuplicates().add(match);
             }
             if (!row.getDuplicates().isEmpty()) {
@@ -452,15 +689,7 @@ public class CrmServiceImpl implements CrmService {
                     created++;
                 }
             }
-            if (!isBlank(row.getContactName()) || !isBlank(row.getContactEmail()) || !isBlank(row.getContactPhone())) {
-                CrmContact contact = new CrmContact();
-                contact.setCustomerId(customerId);
-                contact.setName(isBlank(row.getContactName()) ? "未命名" : row.getContactName());
-                contact.setTitle(row.getContactTitle());
-                contact.setEmail(row.getContactEmail());
-                contact.setPhone(row.getContactPhone());
-                contactMapper.insert(contact);
-            }
+            importContacts(customerId, row);
         }
         Map<String, Object> result = new HashMap<String, Object>();
         result.put("created", created);
@@ -497,6 +726,8 @@ public class CrmServiceImpl implements CrmService {
         contactMapper.moveToCustomer(fromId, toId);
         inquiryMapper.moveToCustomer(fromId, toId);
         followUpMapper.moveToCustomer(fromId, toId);
+        orderMapper.moveToCustomer(fromId, toId);
+        afterSaleMapper.moveToCustomer(fromId, toId);
         String mergedAttach = joinJson(to.getAttachments(), from.getAttachments());
         to.setAttachments(mergedAttach);
         if (isBlank(to.getCountry())) to.setCountry(from.getCountry());
@@ -513,8 +744,8 @@ public class CrmServiceImpl implements CrmService {
             List<String[]> rows = new ArrayList<String[]>();
             rows.add(TEMPLATE_HEADERS);
             rows.add(new String[]{
-                    "ABC Instruments", "Germany", "https://example.com", "实验室", "",
-                    "官网", "", "John Smith", "Purchasing", "john@example.com", "+49-000"
+                    "Germany", "John Smith", "john@example.com、sales@example.com", "ABC Instruments",
+                    "https://example.com", "实验室", "光电仪器代理", "Berlin", "+49-111", "+49-222", "展会认识"
             });
             writeSimpleXlsx(response, "crm-import-template.xlsx", "customers", rows);
         } catch (Exception e) {
@@ -648,51 +879,315 @@ public class CrmServiceImpl implements CrmService {
         }
     }
 
+    private void importContacts(Long customerId, CrmImportRow row) {
+        List<String> emails = row.getContactEmails();
+        if (emails == null || emails.isEmpty()) {
+            emails = splitEmails(row.getContactEmail());
+        }
+        if (isBlank(row.getContactName()) && isBlank(row.getContactPhone()) && emails.isEmpty()) {
+            return;
+        }
+        java.util.Set<String> have = new java.util.HashSet<String>();
+        List<CrmContact> existing = contactMapper.findByCustomerId(customerId);
+        if (existing != null) {
+            for (CrmContact c : existing) {
+                if (!isBlank(c.getEmail())) {
+                    have.add(norm(c.getEmail()));
+                }
+            }
+        }
+        String name = isBlank(row.getContactName()) ? "未命名" : row.getContactName();
+        if (emails.isEmpty()) {
+            emails = java.util.Collections.singletonList("");
+        }
+        for (String email : emails) {
+            if (!isBlank(email) && have.contains(norm(email))) {
+                continue;
+            }
+            CrmContact contact = new CrmContact();
+            contact.setCustomerId(customerId);
+            contact.setName(name);
+            contact.setTitle(row.getContactTitle());
+            contact.setEmail(isBlank(email) ? null : email);
+            contact.setPhone(row.getContactPhone());
+            contactMapper.insert(contact);
+            if (!isBlank(email)) {
+                have.add(norm(email));
+            }
+        }
+    }
+
+    private List<String> splitEmails(String raw) {
+        List<String> list = new ArrayList<String>();
+        if (isBlank(raw)) {
+            return list;
+        }
+        String[] parts = raw.split("[、，,;；\\n]+");
+        java.util.LinkedHashSet<String> seen = new java.util.LinkedHashSet<String>();
+        for (String part : parts) {
+            if (part == null) {
+                continue;
+            }
+            String email = part.trim();
+            if (email.isEmpty()) {
+                continue;
+            }
+            String key = email.toLowerCase();
+            if (seen.add(key)) {
+                list.add(email);
+            }
+        }
+        return list;
+    }
+
     private List<CrmImportRow> parseExcel(MultipartFile file) {
         List<CrmImportRow> rows = new ArrayList<CrmImportRow>();
-        DataFormatter formatter = new DataFormatter();
         try {
-            Workbook wb = WorkbookFactory.create(file.getInputStream());
-            Sheet sheet = wb.getSheetAt(0);
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                Row excelRow = sheet.getRow(i);
-                if (excelRow == null) {
-                    continue;
-                }
+            List<List<String>> table = readXlsxTable(file.getBytes());
+            if (table.isEmpty()) {
+                return rows;
+            }
+            Map<String, Integer> headers = headerIndex(table.get(0));
+            for (int i = 1; i < table.size(); i++) {
+                List<String> excelRow = table.get(i);
                 CrmImportRow row = new CrmImportRow();
                 row.setRowNum(i + 1);
-                row.setName(cell(excelRow, 0, formatter));
-                row.setCountry(cell(excelRow, 1, formatter));
-                row.setWebsite(cell(excelRow, 2, formatter));
-                row.setIndustry(cell(excelRow, 3, formatter));
-                row.setAddress(cell(excelRow, 4, formatter));
-                row.setSource(cell(excelRow, 5, formatter));
-                row.setRemark(cell(excelRow, 6, formatter));
-                row.setContactName(cell(excelRow, 7, formatter));
-                row.setContactTitle(cell(excelRow, 8, formatter));
-                row.setContactEmail(cell(excelRow, 9, formatter));
-                row.setContactPhone(cell(excelRow, 10, formatter));
+                row.setCountry(col(excelRow, headers, "country", 0));
+                row.setContactName(col(excelRow, headers, "contactName", 1));
+                row.setContactTitle(col(excelRow, headers, "contactTitle", -1));
+                String emailsRaw = col(excelRow, headers, "contactEmail", 2);
+                row.setContactEmail(emailsRaw);
+                row.setContactEmails(splitEmails(emailsRaw));
+                row.setName(col(excelRow, headers, "name", 3));
+                row.setWebsite(col(excelRow, headers, "website", 4));
+                row.setIndustry(col(excelRow, headers, "industry", 5));
+                String description = col(excelRow, headers, "description", 6);
+                row.setAddress(col(excelRow, headers, "address", 7));
+                String landline = col(excelRow, headers, "landline", 8);
+                String mobile = col(excelRow, headers, "mobile", 9);
+                String remark = col(excelRow, headers, "remark", 10);
+                row.setSource(col(excelRow, headers, "source", -1));
+                row.setContactPhone(joinPhone(mobile, landline));
+                row.setRemark(joinRemark(description, remark));
                 if (isBlank(row.getName()) && isBlank(row.getContactName()) && isBlank(row.getContactEmail())) {
                     continue;
                 }
                 rows.add(row);
             }
-            wb.close();
         } catch (Exception e) {
-            throw new RuntimeException("无法解析 Excel，请使用当前模板");
+            throw new RuntimeException("无法解析 Excel，请使用当前模板（.xlsx）。" + (e.getMessage() == null ? "" : e.getMessage()), e);
         }
         return rows;
     }
 
-    private String cell(Row row, int index, DataFormatter formatter) {
-        Cell cell = row.getCell(index);
-        if (cell == null) {
+    private Map<String, Integer> headerIndex(List<String> header) {
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        if (header == null) {
+            return map;
+        }
+        for (int i = 0; i < header.size(); i++) {
+            String key = normalizeHeader(header.get(i));
+            if (!isBlank(key) && !map.containsKey(key)) {
+                map.put(key, i);
+            }
+        }
+        return map;
+    }
+
+    private String normalizeHeader(String raw) {
+        if (raw == null) {
             return "";
         }
-        if (cell.getCellType() == CellType.BLANK) {
+        String s = raw.replace("\uFEFF", "").replace("\n", "").replace(" ", "").trim();
+        if ("国家".equals(s) || "国家/地区".equals(s)) return "country";
+        if ("联系人".equals(s) || "联系人姓名".equals(s)) return "contactName";
+        if ("职位".equals(s)) return "contactTitle";
+        if ("电子邮件".equals(s) || "邮箱".equals(s) || "邮件".equals(s)) return "contactEmail";
+        if ("客户名称".equals(s) || "客户".equals(s)) return "name";
+        if ("网站".equals(s) || "官网".equals(s)) return "website";
+        if ("行业".equals(s)) return "industry";
+        if ("描述".equals(s)) return "description";
+        if ("公司地址".equals(s) || "地址".equals(s)) return "address";
+        if ("电话".equals(s) || "座机".equals(s)) return "landline";
+        if ("手机".equals(s) || "手机号".equals(s)) return "mobile";
+        if ("备注".equals(s)) return "remark";
+        if ("线索来源".equals(s) || "来源".equals(s)) return "source";
+        return s;
+    }
+
+    private String col(List<String> row, Map<String, Integer> headers, String key, int fallback) {
+        Integer idx = headers.get(key);
+        if (idx == null) {
+            idx = fallback;
+        }
+        if (idx == null || idx < 0 || row == null || idx >= row.size()) {
             return "";
         }
-        return formatter.formatCellValue(cell).trim();
+        String v = row.get(idx);
+        return v == null ? "" : v.trim();
+    }
+
+    private List<List<String>> readXlsxTable(byte[] zipBytes) throws IOException {
+        Map<String, String> parts = unzipText(zipBytes);
+        String sheetXml = null;
+        for (Map.Entry<String, String> e : parts.entrySet()) {
+            String name = e.getKey().replace('\\', '/');
+            if (name.startsWith("xl/worksheets/") && name.endsWith(".xml")) {
+                sheetXml = e.getValue();
+                if (name.endsWith("sheet1.xml")) {
+                    break;
+                }
+            }
+        }
+        if (sheetXml == null) {
+            throw new IOException("xlsx 中没有工作表");
+        }
+        List<String> shared = parseSharedStrings(parts.get("xl/sharedStrings.xml"));
+        return parseSheetRows(sheetXml, shared);
+    }
+
+    private Map<String, String> unzipText(byte[] zipBytes) throws IOException {
+        Map<String, String> parts = new HashMap<String, String>();
+        ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes));
+        ZipEntry entry;
+        while ((entry = zis.getNextEntry()) != null) {
+            if (entry.isDirectory()) {
+                continue;
+            }
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] buf = new byte[4096];
+            int n;
+            while ((n = zis.read(buf)) >= 0) {
+                bos.write(buf, 0, n);
+            }
+            parts.put(entry.getName(), bos.toString("UTF-8"));
+        }
+        zis.close();
+        return parts;
+    }
+
+    private List<String> parseSharedStrings(String xml) {
+        List<String> list = new ArrayList<String>();
+        if (xml == null) {
+            return list;
+        }
+        Matcher si = Pattern.compile("(?s)<si>(.*?)</si>").matcher(xml);
+        while (si.find()) {
+            StringBuilder sb = new StringBuilder();
+            Matcher t = Pattern.compile("(?s)<t[^>]*>(.*?)</t>").matcher(si.group(1));
+            while (t.find()) {
+                sb.append(xmlUnescape(t.group(1)));
+            }
+            list.add(sb.toString());
+        }
+        return list;
+    }
+
+    private List<List<String>> parseSheetRows(String xml, List<String> shared) {
+        List<List<String>> table = new ArrayList<List<String>>();
+        Matcher rowM = Pattern.compile("(?s)<row[^>]*>(.*?)</row>").matcher(xml);
+        while (rowM.find()) {
+            List<String> cells = new ArrayList<String>();
+            Matcher cellM = Pattern.compile("(?s)<c([^>]*)>(.*?)</c>|<c([^/>]*)/>").matcher(rowM.group(1));
+            while (cellM.find()) {
+                String attrs = cellM.group(1) != null ? cellM.group(1) : cellM.group(3);
+                String inner = cellM.group(2) == null ? "" : cellM.group(2);
+                String ref = attr(attrs, "r");
+                int idx = colIndex(ref);
+                while (cells.size() <= idx) {
+                    cells.add("");
+                }
+                cells.set(idx, cellText(attr(attrs, "t"), inner, shared));
+            }
+            boolean empty = true;
+            for (String c : cells) {
+                if (c != null && !c.trim().isEmpty()) {
+                    empty = false;
+                    break;
+                }
+            }
+            if (!empty) {
+                table.add(cells);
+            }
+        }
+        return table;
+    }
+
+    private String cellText(String type, String inner, List<String> shared) {
+        if ("inlineStr".equals(type)) {
+            Matcher t = Pattern.compile("(?s)<t[^>]*>(.*?)</t>").matcher(inner);
+            StringBuilder sb = new StringBuilder();
+            while (t.find()) {
+                sb.append(xmlUnescape(t.group(1)));
+            }
+            return sb.toString();
+        }
+        Matcher v = Pattern.compile("(?s)<v[^>]*>(.*?)</v>").matcher(inner);
+        String raw = v.find() ? xmlUnescape(v.group(1).trim()) : "";
+        if ("s".equals(type)) {
+            try {
+                int i = Integer.parseInt(raw);
+                if (i >= 0 && i < shared.size()) {
+                    return shared.get(i);
+                }
+            } catch (NumberFormatException ignored) {
+            }
+            return raw;
+        }
+        return raw;
+    }
+
+    private String attr(String attrs, String name) {
+        if (attrs == null) {
+            return "";
+        }
+        Matcher m = Pattern.compile(name + "=\"([^\"]*)\"").matcher(attrs);
+        return m.find() ? m.group(1) : "";
+    }
+
+    private int colIndex(String ref) {
+        if (ref == null) {
+            return 0;
+        }
+        int n = 0;
+        for (int i = 0; i < ref.length(); i++) {
+            char ch = ref.charAt(i);
+            if (ch >= 'A' && ch <= 'Z') {
+                n = n * 26 + (ch - 'A' + 1);
+            } else if (ch >= 'a' && ch <= 'z') {
+                n = n * 26 + (ch - 'a' + 1);
+            } else {
+                break;
+            }
+        }
+        return Math.max(0, n - 1);
+    }
+
+    private String xmlUnescape(String s) {
+        if (s == null) {
+            return "";
+        }
+        return s.replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"").replace("&apos;", "'").replace("&amp;", "&");
+    }
+
+    private String joinPhone(String mobile, String landline) {
+        if (!isBlank(mobile) && !isBlank(landline) && !norm(mobile).equals(norm(landline))) {
+            return mobile + " / " + landline;
+        }
+        if (!isBlank(mobile)) {
+            return mobile;
+        }
+        return n(landline);
+    }
+
+    private String joinRemark(String description, String remark) {
+        if (!isBlank(description) && !isBlank(remark)) {
+            return description + "\n" + remark;
+        }
+        if (!isBlank(description)) {
+            return description;
+        }
+        return n(remark);
     }
 
     private void writeSimpleXlsx(HttpServletResponse response, String filename, String sheetName, List<String[]> rows) throws IOException {

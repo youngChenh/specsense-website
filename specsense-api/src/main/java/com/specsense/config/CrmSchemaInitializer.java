@@ -106,6 +106,58 @@ public class CrmSchemaInitializer {
                 "INDEX idx_customer (customer_id)" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+        jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS crm_order (" +
+                "id BIGINT PRIMARY KEY AUTO_INCREMENT," +
+                "customer_id BIGINT," +
+                "inquiry_id BIGINT," +
+                "owner_id BIGINT," +
+                "order_no VARCHAR(50)," +
+                "order_date DATE," +
+                "supplier_name VARCHAR(200)," +
+                "product_name VARCHAR(200)," +
+                "model VARCHAR(200)," +
+                "quantity DECIMAL(12,2) DEFAULT 1," +
+                "currency VARCHAR(10) DEFAULT 'USD'," +
+                "purchase_price DECIMAL(14,2) DEFAULT 0," +
+                "sell_price DECIMAL(14,2) DEFAULT 0," +
+                "incoterm VARCHAR(10)," +
+                "freight DECIMAL(14,2) DEFAULT 0," +
+                "insurance DECIMAL(14,2) DEFAULT 0," +
+                "bank_fee DECIMAL(14,2) DEFAULT 0," +
+                "tax_included TINYINT DEFAULT 0," +
+                "invoice_type VARCHAR(20)," +
+                "gross_profit DECIMAL(14,2) DEFAULT 0," +
+                "gross_margin DECIMAL(8,2) DEFAULT 0," +
+                "remark TEXT," +
+                "created_at DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                "updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+                "INDEX idx_customer (customer_id)," +
+                "INDEX idx_owner (owner_id)," +
+                "INDEX idx_supplier (supplier_name)," +
+                "INDEX idx_order_date (order_date)" +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS crm_after_sale (" +
+                "id BIGINT PRIMARY KEY AUTO_INCREMENT," +
+                "customer_id BIGINT," +
+                "order_id BIGINT," +
+                "owner_id BIGINT," +
+                "supplier_name VARCHAR(200)," +
+                "model VARCHAR(200)," +
+                "problem TEXT," +
+                "resolved TINYINT DEFAULT 0," +
+                "resolved_at DATE," +
+                "need_change_supplier TINYINT DEFAULT 0," +
+                "remark TEXT," +
+                "created_at DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                "updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+                "INDEX idx_customer (customer_id)," +
+                "INDEX idx_owner (owner_id)," +
+                "INDEX idx_supplier (supplier_name)," +
+                "INDEX idx_model (model)," +
+                "INDEX idx_resolved (resolved)" +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
         log.info("CRM schema ensured");
     }
 

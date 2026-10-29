@@ -5,8 +5,10 @@ import com.specsense.model.dto.CrmImportRow;
 import com.specsense.model.entity.CrmContact;
 import com.specsense.model.entity.CrmCustomer;
 import com.specsense.model.entity.ContactInquiry;
+import com.specsense.model.entity.CrmAfterSale;
 import com.specsense.model.entity.CrmFollowUp;
 import com.specsense.model.entity.CrmInquiry;
+import com.specsense.model.entity.CrmOrder;
 import com.specsense.model.vo.PageResult;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,6 +57,30 @@ public interface CrmService {
     List<CrmFollowUp> listFollowUps(Long customerId, Long inquiryId, CrmAuth.User user);
 
     CrmFollowUp createFollowUp(CrmFollowUp followUp, CrmAuth.User user);
+
+    PageResult<List<CrmOrder>> listOrders(String keyword, String incoterm, Long filterOwnerId, Long customerId,
+                                          int page, int pageSize, CrmAuth.User user);
+
+    CrmOrder getOrder(Long id, CrmAuth.User user);
+
+    CrmOrder createOrder(CrmOrder order, CrmAuth.User user);
+
+    void updateOrder(CrmOrder order, CrmAuth.User user);
+
+    void deleteOrder(Long id, CrmAuth.User user);
+
+    PageResult<List<CrmAfterSale>> listAfterSales(String keyword, Integer resolved, Long filterOwnerId, Long customerId,
+                                                  int page, int pageSize, CrmAuth.User user);
+
+    CrmAfterSale getAfterSale(Long id, CrmAuth.User user);
+
+    CrmAfterSale createAfterSale(CrmAfterSale item, CrmAuth.User user);
+
+    void updateAfterSale(CrmAfterSale item, CrmAuth.User user);
+
+    void deleteAfterSale(Long id, CrmAuth.User user);
+
+    List<Map<String, Object>> afterSaleStats(CrmAuth.User user);
 
     Map<String, Object> dashboard(CrmAuth.User user);
 

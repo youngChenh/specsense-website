@@ -34,6 +34,20 @@
         </el-card>
       </el-col>
     </el-row>
+    <el-row :gutter="16" class="mb-4">
+      <el-col :xs="24" :sm="12">
+        <el-card shadow="never" class="stat-card" @click="navigateTo('/admin/crm/orders')">
+          <div class="stat-label">订单数量</div>
+          <div class="stat-value">{{ dash.orderCount || 0 }}</div>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :sm="12">
+        <el-card shadow="never" class="stat-card" @click="navigateTo('/admin/crm/after-sales')">
+          <div class="stat-label">未解决售后</div>
+          <div class="stat-value">{{ dash.openAfterSaleCount || 0 }}</div>
+        </el-card>
+      </el-col>
+    </el-row>
 
     <el-card shadow="never" class="main-card mb-4">
       <h2 class="section-title">销售漏斗（不含已关闭）</h2>
@@ -109,7 +123,7 @@ onMounted(async () => {
 .page-header { display:flex; justify-content:space-between; align-items:center; background:#fff; border-radius:12px; padding:20px 24px; }
 .header-content { display:flex; align-items:center; gap:16px; }
 .header-icon { width:48px; height:48px; background:linear-gradient(135deg,#667eea,#764ba2); border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; }
-.stat-card { border:none; border-radius:12px; margin-bottom:12px; }
+.stat-card { border:none; border-radius:12px; margin-bottom:12px; cursor:pointer; }
 .stat-label { color:#6b7280; font-size:13px; }
 .stat-value { font-size:28px; font-weight:700; color:#111827; margin-top:6px; }
 .main-card { border:none; border-radius:12px; }

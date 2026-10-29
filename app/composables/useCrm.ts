@@ -29,10 +29,23 @@ export const CRM_METHODS = [
   { value: 'other', label: '其他' },
 ]
 
+export const CRM_INCOTERMS = [
+  { value: 'EXW', label: 'EXW' },
+  { value: 'FOB', label: 'FOB' },
+  { value: 'CFR', label: 'CFR' },
+  { value: 'CIF', label: 'CIF' },
+]
+
+export const CRM_INVOICE_TYPES = [
+  { value: 'normal', label: '普票' },
+  { value: 'special', label: '专票' },
+]
+
 export const stageLabel = (v?: string) => CRM_STAGES.find(s => s.value === v)?.label || v || '-'
 export const sourceLabel = (v?: string) => CRM_SOURCES.find(s => s.value === v)?.label || v || '-'
 export const methodLabel = (v?: string) => CRM_METHODS.find(s => s.value === v)?.label || v || '-'
 export const statusLabel = (v?: string) => CRM_STATUS.find(s => s.value === v)?.label || v || '-'
+export const invoiceLabel = (v?: string) => CRM_INVOICE_TYPES.find(s => s.value === v)?.label || v || '-'
 
 export const parseAttachments = (raw?: string) => {
   if (!raw) return []
@@ -83,6 +96,17 @@ export const useCrmApi = () => {
     closeInquiry: (id: number) => send(`${base()}/inquiries/${id}/close`, 'PUT'),
     followUps: (params: any) => get(`${base()}/follow-ups`, params),
     createFollowUp: (body: any) => send(`${base()}/follow-ups`, 'POST', body),
+    orders: (params: any) => get(`${base()}/orders`, params),
+    order: (id: number) => get(`${base()}/orders/${id}`),
+    createOrder: (body: any) => send(`${base()}/orders`, 'POST', body),
+    updateOrder: (id: number, body: any) => send(`${base()}/orders/${id}`, 'PUT', body),
+    deleteOrder: (id: number) => send(`${base()}/orders/${id}`, 'DELETE'),
+    afterSales: (params: any) => get(`${base()}/after-sales`, params),
+    afterSale: (id: number) => get(`${base()}/after-sales/${id}`),
+    afterSaleStats: () => get(`${base()}/after-sales/stats`),
+    createAfterSale: (body: any) => send(`${base()}/after-sales`, 'POST', body),
+    updateAfterSale: (id: number, body: any) => send(`${base()}/after-sales/${id}`, 'PUT', body),
+    deleteAfterSale: (id: number) => send(`${base()}/after-sales/${id}`, 'DELETE'),
     users: (all = true) => get(`${base()}/users`, { all }),
     createUser: (body: any) => send(`${base()}/users`, 'POST', body),
     updateUser: (id: number, body: any) => send(`${base()}/users/${id}`, 'PUT', body),

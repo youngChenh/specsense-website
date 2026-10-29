@@ -38,6 +38,22 @@
             </span>
             <span>询盘跟进</span>
           </el-menu-item>
+          <el-menu-item index="/admin/crm/orders">
+            <span class="menu-icon">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5 0h6v6M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </span>
+            <span>订单</span>
+          </el-menu-item>
+          <el-menu-item index="/admin/crm/after-sales">
+            <span class="menu-icon">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+            </span>
+            <span>售后问题</span>
+          </el-menu-item>
           <el-menu-item index="/admin/crm/users" v-if="showCms || isManager">
             <span class="menu-icon">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -245,6 +261,8 @@ const tabNameMap = {
   '/admin/crm': { name: 'crm', title: 'CRM 看板', path: '/admin/crm' },
   '/admin/crm/customers': { name: 'crm-customers', title: '客户管理', path: '/admin/crm/customers' },
   '/admin/crm/inquiries': { name: 'crm-inquiries', title: '询盘跟进', path: '/admin/crm/inquiries' },
+  '/admin/crm/orders': { name: 'crm-orders', title: '订单管理', path: '/admin/crm/orders' },
+  '/admin/crm/after-sales': { name: 'crm-after-sales', title: '售后问题', path: '/admin/crm/after-sales' },
   '/admin/crm/users': { name: 'crm-users', title: '用户管理', path: '/admin/crm/users' },
   '/admin/categories': { name: 'categories', title: '分类管理', path: '/admin/categories' },
   '/admin/products': { name: 'products', title: '产品管理', path: '/admin/products' },

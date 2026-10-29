@@ -75,6 +75,35 @@
       </el-table>
     </el-card>
 
+    <el-card shadow="never" class="main-card mb-4">
+      <div class="flex justify-between mb-3">
+        <h2 class="section-title mb-0">订单</h2>
+        <el-button size="small" type="primary" @click="navigateTo(`/admin/crm/orders?customerId=${id}`)">管理订单</el-button>
+      </div>
+      <el-table :data="orders" size="small">
+        <el-table-column prop="orderNo" label="订单号" width="110" />
+        <el-table-column prop="supplierName" label="供应商" />
+        <el-table-column prop="model" label="型号" width="110" />
+        <el-table-column prop="sellPrice" label="卖出价" width="100" />
+        <el-table-column prop="grossProfit" label="毛利" width="100" />
+      </el-table>
+    </el-card>
+
+    <el-card shadow="never" class="main-card mb-4">
+      <div class="flex justify-between mb-3">
+        <h2 class="section-title mb-0">售后问题</h2>
+        <el-button size="small" type="primary" @click="navigateTo('/admin/crm/after-sales')">登记问题</el-button>
+      </div>
+      <el-table :data="afterSales" size="small">
+        <el-table-column prop="supplierName" label="供应商" />
+        <el-table-column prop="model" label="型号" width="110" />
+        <el-table-column prop="problem" label="问题" show-overflow-tooltip />
+        <el-table-column label="解决" width="80">
+          <template #default="{ row }">{{ row.resolved === 1 ? '是' : '否' }}</template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
     <el-card shadow="never" class="main-card">
       <div class="flex justify-between mb-3">
         <h2 class="section-title mb-0">跟进记录</h2>
@@ -224,6 +253,8 @@ const id = Number(route.params.id)
 const customer = ref(null)
 const contacts = ref([])
 const inquiries = ref([])
+const orders = ref([])
+const afterSales = ref([])
 const follows = ref([])
 const users = ref([])
 const manager = ref(false)
@@ -272,6 +303,8 @@ const load = async () => {
   customer.value = res.data
   contacts.value = (await api.contacts(id)).data || []
   inquiries.value = (await api.inquiries({ customerId: id, page: 1, pageSize: 100 })).data?.data || []
+  orders.value = (await api.orders({ customerId: id, page: 1, pageSize: 50 })).data?.data || []
+  afterSales.value = (await api.afterSales({ customerId: id, page: 1, pageSize: 50 })).data?.data || []
   follows.value = (await api.followUps({ customerId: id })).data || []
 }
 

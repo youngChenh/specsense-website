@@ -4,8 +4,10 @@ import com.specsense.crm.CrmAuth;
 import com.specsense.model.dto.CrmImportRow;
 import com.specsense.model.entity.CrmContact;
 import com.specsense.model.entity.CrmCustomer;
+import com.specsense.model.entity.CrmAfterSale;
 import com.specsense.model.entity.CrmFollowUp;
 import com.specsense.model.entity.CrmInquiry;
+import com.specsense.model.entity.CrmOrder;
 import com.specsense.model.vo.PageResult;
 import com.specsense.model.vo.Result;
 import com.specsense.service.CrmService;
@@ -273,6 +275,125 @@ public class CrmController {
         }
     }
 
+    @GetMapping("/orders")
+    public Result<PageResult<List<CrmOrder>>> orders(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String incoterm,
+            @RequestParam(required = false) Long ownerId,
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            HttpServletRequest request) {
+        try {
+            return Result.success(crmService.listOrders(keyword, incoterm, ownerId, customerId, page, pageSize, crmAuth.requireUser(request)));
+        } catch (Exception e) {
+            return (Result) fail(e);
+        }
+    }
+
+    @GetMapping("/orders/{id}")
+    public Result<CrmOrder> order(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            return Result.success(crmService.getOrder(id, crmAuth.requireUser(request)));
+        } catch (Exception e) {
+            return (Result) fail(e);
+        }
+    }
+
+    @PostMapping("/orders")
+    public Result<CrmOrder> createOrder(@RequestBody CrmOrder order, HttpServletRequest request) {
+        try {
+            return Result.success(crmService.createOrder(order, crmAuth.requireUser(request)));
+        } catch (Exception e) {
+            return (Result) fail(e);
+        }
+    }
+
+    @PutMapping("/orders/{id}")
+    public Result<Void> updateOrder(@PathVariable Long id, @RequestBody CrmOrder order, HttpServletRequest request) {
+        try {
+            order.setId(id);
+            crmService.updateOrder(order, crmAuth.requireUser(request));
+            return Result.success();
+        } catch (Exception e) {
+            return (Result) fail(e);
+        }
+    }
+
+    @DeleteMapping("/orders/{id}")
+    public Result<Void> deleteOrder(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            crmService.deleteOrder(id, crmAuth.requireUser(request));
+            return Result.success();
+        } catch (Exception e) {
+            return (Result) fail(e);
+        }
+    }
+
+    @GetMapping("/after-sales/stats")
+    public Result<?> afterSaleStats(HttpServletRequest request) {
+        try {
+            return Result.success(crmService.afterSaleStats(crmAuth.requireUser(request)));
+        } catch (Exception e) {
+            return fail(e);
+        }
+    }
+
+    @GetMapping("/after-sales")
+    public Result<PageResult<List<CrmAfterSale>>> afterSales(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer resolved,
+            @RequestParam(required = false) Long ownerId,
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int pageSize,
+            HttpServletRequest request) {
+        try {
+            return Result.success(crmService.listAfterSales(keyword, resolved, ownerId, customerId, page, pageSize, crmAuth.requireUser(request)));
+        } catch (Exception e) {
+            return (Result) fail(e);
+        }
+    }
+
+    @GetMapping("/after-sales/{id}")
+    public Result<CrmAfterSale> afterSale(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            return Result.success(crmService.getAfterSale(id, crmAuth.requireUser(request)));
+        } catch (Exception e) {
+            return (Result) fail(e);
+        }
+    }
+
+    @PostMapping("/after-sales")
+    public Result<CrmAfterSale> createAfterSale(@RequestBody CrmAfterSale item, HttpServletRequest request) {
+        try {
+            return Result.success(crmService.createAfterSale(item, crmAuth.requireUser(request)));
+        } catch (Exception e) {
+            return (Result) fail(e);
+        }
+    }
+
+    @PutMapping("/after-sales/{id}")
+    public Result<Void> updateAfterSale(@PathVariable Long id, @RequestBody CrmAfterSale item, HttpServletRequest request) {
+        try {
+            item.setId(id);
+            crmService.updateAfterSale(item, crmAuth.requireUser(request));
+            return Result.success();
+        } catch (Exception e) {
+            return (Result) fail(e);
+        }
+    }
+
+    @DeleteMapping("/after-sales/{id}")
+    public Result<Void> deleteAfterSale(@PathVariable Long id, HttpServletRequest request) {
+        try {
+            crmService.deleteAfterSale(id, crmAuth.requireUser(request));
+            return Result.success();
+        } catch (Exception e) {
+            return (Result) fail(e);
+        }
+    }
+
     @GetMapping("/import/template")
     public void template(HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -288,8 +409,8 @@ public class CrmController {
         try {
             crmAuth.requireManager(request);
             return Result.success(crmService.previewImport(file));
-        } catch (Exception e) {
-            return (Result) fail(e);
+        } catch (Throwable e) {
+            return (Result) fail(e instanceof Exception ? (Exception) e : new RuntimeException(e.getMessage(), e));
         }
     }
 

@@ -124,12 +124,15 @@
     </el-dialog>
 
     <el-dialog v-model="showImport" title="导入预览" width="90%">
-      <p class="text-sm text-gray-500 mb-3">请为疑似重复行选择：跳过 / 合并到已有客户 / 仍作为新客户。新导入客户默认归到管理层。</p>
+      <p class="text-sm text-gray-500 mb-3">多个邮箱请用顿号「、」分隔，会生成多条联系人（姓名、职位、电话相同，邮箱不同）。疑似重复请选择：跳过 / 合并 / 仍作为新客户。</p>
       <el-table :data="importRows" size="small" max-height="420">
         <el-table-column prop="rowNum" label="行" width="60" />
         <el-table-column prop="name" label="客户" min-width="140" />
         <el-table-column prop="country" label="国家" width="90" />
-        <el-table-column prop="contactEmail" label="邮箱" min-width="140" />
+        <el-table-column prop="contactName" label="联系人" width="110" />
+        <el-table-column label="邮箱" min-width="180">
+          <template #default="{ row }">{{ (row.contactEmails && row.contactEmails.length) ? row.contactEmails.join('、') : (row.contactEmail || '-') }}</template>
+        </el-table-column>
         <el-table-column label="错误" min-width="140">
           <template #default="{ row }">{{ (row.errors || []).join('；') || '-' }}</template>
         </el-table-column>
@@ -157,9 +160,21 @@
         </el-table-column>
       </el-table>
       <template #footer>
-        <el-button @click="showImport = false">取消</el-button>
-        <el-button type="primary" @click="commitImport">确认导入</el-button>
+        <el-button :disabled="importing" @click="showImport = false">取消</el-button>
+        <el-button type="primary" :loading="importing" @click="commitImport">确认导入</el-button>
       </template>
+    </el-dialog>
+
+    <el-dialog
+      v-model="showProgress"
+      :title="progressTitle"
+      width="440px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+    >
+      <p class="text-sm text-gray-500 mb-3">{{ progressText }}</p>
+      <el-progress :percentage="progress" :status="progressStatus" :stroke-width="14" />
     </el-dialog>
 
     <input ref="fileInput" type="file" accept=".xlsx" class="hidden" @change="onFile" />
@@ -185,6 +200,73 @@ const dupList = ref([])
 const showImport = ref(false)
 const importRows = ref([])
 const fileInput = ref(null)
+const importing = ref(false)
+const showProgress = ref(false)
+const progress = ref(0)
+const progressTitle = ref('正在导入')
+const progressText = ref('')
+const progressStatus = ref('')
+let progressTimer = null
+
+const setProgress = (pct, text, status = '') => {
+  progress.value = Math.max(0, Math.min(100, Math.round(pct)))
+  if (text) progressText.value = text
+  progressStatus.value = status
+}
+
+const startProgress = (title, text) => {
+  if (progressTimer) clearInterval(progressTimer)
+  progressTimer = null
+  progressTitle.value = title
+  setProgress(0, text, '')
+  showProgress.value = true
+}
+
+const tickUntil = (target, ms = 400) => {
+  if (progressTimer) clearInterval(progressTimer)
+  progressTimer = setInterval(() => {
+    if (progress.value >= target) {
+      clearInterval(progressTimer)
+      progressTimer = null
+      return
+    }
+    setProgress(progress.value + 2)
+  }, ms)
+}
+
+const stopProgress = (ok = true, text = '') => {
+  if (progressTimer) clearInterval(progressTimer)
+  progressTimer = null
+  setProgress(100, text || (ok ? '完成' : '失败'), ok ? 'success' : 'exception')
+}
+
+const postJson = (url, body, onUpload) => new Promise((resolve, reject) => {
+  const xhr = new XMLHttpRequest()
+  xhr.open('POST', url)
+  xhr.setRequestHeader('Authorization', api.headers().Authorization || '')
+  if (!(body instanceof FormData)) {
+    xhr.setRequestHeader('Content-Type', 'application/json')
+  }
+  xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable && onUpload) onUpload(e.loaded, e.total)
+  }
+  xhr.onload = () => {
+    let data = null
+    try {
+      data = JSON.parse(xhr.responseText || '{}')
+    } catch {
+      reject(new Error('服务器返回无法解析'))
+      return
+    }
+    if (xhr.status >= 200 && xhr.status < 300 && (!data.code || data.code === 200)) {
+      resolve(data)
+    } else {
+      reject(new Error(data.message || `请求失败（${xhr.status}）`))
+    }
+  }
+  xhr.onerror = () => reject(new Error('网络错误'))
+  xhr.send(body instanceof FormData ? body : JSON.stringify(body))
+})
 
 const load = async () => {
   const res = await api.customers(query)
@@ -267,24 +349,60 @@ const onFile = async (e) => {
   if (!file) return
   const fd = new FormData()
   fd.append('file', file)
-  const res = await $fetch(`${config.public.apiBase}/api/admin/crm/import/preview`, {
-    method: 'POST',
-    headers: { Authorization: api.headers().Authorization },
-    body: fd,
-  })
-  importRows.value = res.data || []
-  showImport.value = true
+  importing.value = true
+  startProgress('解析 Excel', `正在上传 ${file.name}`)
+  tickUntil(50, 200)
+  try {
+    const res = await postJson(`${config.public.apiBase}/api/admin/crm/import/preview`, fd, (loaded, total) => {
+      const pct = total ? Math.round((loaded / total) * 55) : 10
+      setProgress(Math.max(pct, 8), `正在上传 ${file.name}（${Math.round(loaded / 1024)} KB）`)
+      if (loaded >= total) {
+        setProgress(60, '正在解析表格并检查重复客户…')
+        tickUntil(88, 350)
+      }
+    })
+    importRows.value = res.data || []
+    stopProgress(true, `已读取 ${importRows.value.length} 行`)
+    await new Promise(r => setTimeout(r, 400))
+    showProgress.value = false
+    if (!importRows.value.length) {
+      ElMessage.warning('没有读到数据行，请确认用的是当前模板且第二行起有内容')
+      return
+    }
+    showImport.value = true
+  } catch (err) {
+    stopProgress(false, err?.message || '导入预览失败')
+    ElMessage.error(err?.message || '导入预览失败')
+    await new Promise(r => setTimeout(r, 800))
+    showProgress.value = false
+  } finally {
+    importing.value = false
+  }
 }
 
 const commitImport = async () => {
-  const res = await $fetch(`${config.public.apiBase}/api/admin/crm/import/commit`, {
-    method: 'POST',
-    headers: { ...api.headers(), 'Content-Type': 'application/json' },
-    body: importRows.value,
-  })
-  ElMessage.success(`导入完成：新增 ${res.data.created}，合并 ${res.data.merged}，跳过 ${res.data.skipped}`)
-  showImport.value = false
-  load()
+  importing.value = true
+  startProgress('正在导入', `准备写入 ${importRows.value.length} 行`)
+  tickUntil(90, 280)
+  try {
+    const res = await postJson(`${config.public.apiBase}/api/admin/crm/import/commit`, importRows.value)
+    const created = res.data?.created || 0
+    const merged = res.data?.merged || 0
+    const skipped = res.data?.skipped || 0
+    stopProgress(true, `新增 ${created}，合并 ${merged}，跳过 ${skipped}`)
+    ElMessage.success(`导入完成：新增 ${created}，合并 ${merged}，跳过 ${skipped}`)
+    await new Promise(r => setTimeout(r, 500))
+    showProgress.value = false
+    showImport.value = false
+    load()
+  } catch (err) {
+    stopProgress(false, err?.message || '导入失败')
+    ElMessage.error(err?.message || '导入失败')
+    await new Promise(r => setTimeout(r, 800))
+    showProgress.value = false
+  } finally {
+    importing.value = false
+  }
 }
 
 onMounted(async () => {
