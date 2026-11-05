@@ -91,6 +91,8 @@ definePageMeta({
   layout: 'admin',
 })
 
+import { useAdminI18n } from '~/composables/useAdminI18n'
+
 const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})

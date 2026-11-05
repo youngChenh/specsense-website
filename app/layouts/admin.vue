@@ -220,6 +220,8 @@
 <script setup>
 import { getAdminRole } from '~/composables/useCrm'
 
+import { useAdminI18n } from '~/composables/useAdminI18n'
+
 const { t } = useAdminI18n()
 const route = useRoute()
 const router = useRouter()
