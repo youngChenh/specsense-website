@@ -94,6 +94,19 @@ try {
   }
   assert.ok(ready, `Nuxt failed to start: ${serverOutput}`)
 
+  const legacyResponse = await fetch(`${base}/products?category=${encodeURIComponent('光谱仪')}&page=2&q=Spectrometer`, {
+    redirect: 'manual',
+    signal: AbortSignal.timeout(20000),
+  })
+  check('category-name links redirect to the saved key and preserve filters', () => {
+    assert.equal(legacyResponse.status, 302)
+    const target = new URL(legacyResponse.headers.get('location'), base)
+    assert.equal(target.pathname, '/products')
+    assert.equal(target.searchParams.get('category'), 'spectrometer')
+    assert.equal(target.searchParams.get('page'), '2')
+    assert.equal(target.searchParams.get('q'), 'Spectrometer')
+  })
+
   let response = await get('/products?category=spectrometer')
   assert.equal(response.status, 200)
   let html = await response.text()

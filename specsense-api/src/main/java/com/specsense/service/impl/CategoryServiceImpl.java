@@ -113,6 +113,9 @@ public class CategoryServiceImpl implements CategoryService {
         boolean result = categoryMapper.update(category) > 0;
         if (result) {
             cacheService.deleteByPattern("categories:*");
+            // Product responses also contain the category key and name.
+            cacheService.deleteByPattern("products:*");
+            cacheService.deleteByPattern("product:*");
         }
         return result;
     }

@@ -113,12 +113,35 @@
 </template>
 
 <script setup lang="ts">
+import { resolveCategoryKey } from '~/utils/categoryKey'
+
 const route = useRoute()
 const { t, locale } = useI18n()
 const config = useRuntimeConfig()
 const api = useApi()
 
-const selectedCategory = computed(() => typeof route.query.category === 'string' ? route.query.category || 'all' : 'all')
+const { data: categories } = await useAsyncData(
+  computed(() => `product-categories:${locale.value}`),
+  () => api.fetchCategories(locale.value),
+  { default: () => [] },
+)
+const selectedCategory = computed(() => resolveCategoryKey(
+  typeof route.query.category === 'string' ? route.query.category || 'all' : 'all',
+  categories.value,
+))
+
+async function normalizeCategoryUrl() {
+  if (typeof route.query.category === 'string' && route.query.category && route.query.category !== selectedCategory.value) {
+    await navigateTo({
+      path: route.path,
+      query: { ...route.query, category: selectedCategory.value },
+      hash: route.hash,
+    }, { replace: true, redirectCode: 302 })
+  }
+}
+await normalizeCategoryUrl()
+watch([selectedCategory, () => route.query.category], normalizeCategoryUrl)
+
 const searchQuery = computed(() => typeof route.query.q === 'string' ? route.query.q : '')
 const currentPage = computed(() => {
   const page = Number(route.query.page)
@@ -139,11 +162,6 @@ const { data: productPage, status, error: productError, refresh: fetchProducts }
   }
   return result.data
 })
-const { data: categories } = await useAsyncData(
-  computed(() => `product-categories:${locale.value}`),
-  () => api.fetchCategories(locale.value),
-  { default: () => [] },
-)
 const products = computed<any[]>(() => productPage.value?.data || [])
 const totalProducts = computed(() => productPage.value?.total || 0)
 const loading = computed(() => status.value === 'pending')

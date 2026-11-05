@@ -62,7 +62,8 @@
           <el-input v-model="form.nameZh" :placeholder="$t('admin.pleaseEnter') + $t('admin.nameZh')" />
         </el-form-item>
         <el-form-item :label="$t('admin.key')">
-          <el-input v-model="form.key" :disabled="isEdit" :placeholder="$t('admin.pleaseEnter') + $t('admin.key')" />
+          <el-input v-model="form.key" :placeholder="$t('admin.pleaseEnter') + $t('admin.key')" />
+          <p class="text-xs text-gray-500 mt-1">用于产品分类网址，英文链接请填写英文标识，例如 soil-sensors；不会自动翻译分类名称。</p>
         </el-form-item>
         <el-form-item :label="$t('admin.category')">
           <el-select
@@ -85,7 +86,7 @@
       </el-form>
       <template #footer>
         <el-button @click="showDialog = false">{{ $t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="save">{{ $t('admin.save') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="save">{{ $t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -113,6 +114,7 @@ onMounted(() => {
 const treeData = ref([])
 const flatCategories = ref([])
 const showDialog = ref(false)
+const saving = ref(false)
 const isEdit = ref(false)
 const isRoot = ref(false)
 const form = reactive({
@@ -132,19 +134,24 @@ const treeProps = {
 const fetchData = async () => {
   try {
     const response = await $fetch(`${config.public.apiBase}/api/admin/categories/tree`, { headers: headers.value })
+    if (response.code !== 200) throw new Error(response.message)
     treeData.value = response.data || []
-    await fetchFlatCategories()
+    return await fetchFlatCategories()
   } catch (error) {
     ElMessage.error(t('admin.fetchFailed'))
+    return false
   }
 }
 
 const fetchFlatCategories = async () => {
   try {
     const response = await $fetch(`${config.public.apiBase}/api/admin/categories`, { headers: headers.value })
+    if (response.code !== 200) throw new Error(response.message)
     flatCategories.value = response.data || []
+    return true
   } catch (error) {
-    console.error('Failed to fetch flat categories')
+    ElMessage.error(t('admin.fetchFailed'))
+    return false
   }
 }
 
@@ -199,23 +206,31 @@ const edit = (row) => {
 }
 
 const save = async () => {
+  if (saving.value) return
   if (!form.nameEn || !form.key) {
     ElMessage.warning(t('admin.pleaseEnter') + 'nameEn and key')
     return
   }
 
+  saving.value = true
   try {
     const method = isEdit.value ? 'PUT' : 'POST'
     const url = isEdit.value
       ? `${config.public.apiBase}/api/admin/categories/${form.id}`
       : `${config.public.apiBase}/api/admin/categories`
 
-    await $fetch(url, { method, headers: headers.value, body: form })
-    ElMessage.success(t('admin.saveSuccess'))
+    const response = await $fetch(url, { method, headers: headers.value, body: { ...form } })
+    if (response.code !== 200) throw new Error(response.message || t('admin.saveFailed'))
+
+    clearNuxtData(key => key.startsWith('product-categories:') || key.startsWith('["products",') || key.startsWith('product:'))
     showDialog.value = false
-    fetchData()
+    if (await fetchData()) {
+      ElMessage.success(t('admin.saveSuccess'))
+    }
   } catch (error) {
     ElMessage.error(t('admin.saveFailed') + ': ' + (error.message || ''))
+  } finally {
+    saving.value = false
   }
 }
 
