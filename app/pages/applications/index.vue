@@ -92,7 +92,7 @@
 const route = useRoute()
 const localePath = useLocalePath()
 const config = useRuntimeConfig()
-const { locale } = useI18n()
+const locale = useContentLocale()
 
 const activeType = ref((route.query.type as string) || '')
 const appRefs = ref<Record<string, any>>({})

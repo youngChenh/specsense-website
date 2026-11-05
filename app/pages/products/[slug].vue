@@ -320,7 +320,7 @@
 import InquiryModal from '~/components/InquiryModal.vue'
 
 const route = useRoute()
-const { locale } = useI18n()
+const locale = useContentLocale()
 const api = useApi()
 const localePath = useLocalePath()
 const config = useRuntimeConfig()
@@ -478,7 +478,7 @@ onUnmounted(() => {
 })
 
 const canonical = computed(() => new URL(
-  `/products/${encodeURIComponent(product.value?.slug || String(route.params.slug))}`,
+  localePath(`/products/${encodeURIComponent(product.value?.slug || String(route.params.slug))}`),
   config.public.siteUrl,
 ).href)
 const seoDescription = computed(() => {

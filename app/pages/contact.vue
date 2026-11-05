@@ -173,7 +173,8 @@
 </template>
 
 <script setup lang="ts">
-const { t, locale } = useI18n()
+const { t } = useI18n()
+const locale = useContentLocale()
 const config = useRuntimeConfig()
 
 const form = reactive({

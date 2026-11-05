@@ -172,7 +172,7 @@
 
 <script setup lang="ts">
 const config = useRuntimeConfig()
-const { locale } = useI18n()
+const locale = useContentLocale()
 const { getImageUrl } = useImageUrl()
 
 const { data: companyInfo, pending: loading, refresh: refreshCompanyInfo } = await useAsyncData(

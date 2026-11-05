@@ -197,7 +197,8 @@
 
 <script setup lang="ts">
 const route = useRoute()
-const { t, locale } = useI18n()
+const { t } = useI18n()
+const locale = useContentLocale()
 const config = useRuntimeConfig()
 
 const loading = ref(true)

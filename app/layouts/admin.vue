@@ -346,7 +346,7 @@ onMounted(async () => {
     adminRole.value = getAdminRole()
     displayName.value = localStorage.getItem('admin_username') || '未登录'
     isLoggedIn.value = !!token.value
-    await setLocale('zh')
+    await setLocale('cn')
     if (!guardRoute(route.path)) return
     const tabInfo = resolveTab(route.path)
     if (tabInfo) {

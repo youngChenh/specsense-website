@@ -206,7 +206,7 @@
 <script setup lang="ts">
 const localePath = useLocalePath()
 const config = useRuntimeConfig()
-const { locale } = useI18n()
+const locale = useContentLocale()
 
 const activeCategory = ref('all')
 const services = ref<any[]>([])

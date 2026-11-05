@@ -116,7 +116,9 @@
 import { resolveCategoryKey } from '~/utils/categoryKey'
 
 const route = useRoute()
-const { t, locale } = useI18n()
+const localePath = useLocalePath()
+const { t } = useI18n()
+const locale = useContentLocale()
 const config = useRuntimeConfig()
 const api = useApi()
 
@@ -228,7 +230,7 @@ function getCategoryName(key: string): string {
 const totalPages = computed(() => Math.ceil(totalProducts.value / pageSize))
 const seoTitle = computed(() => `${selectedCategory.value === 'all' ? t('products.title') : getCategoryName(selectedCategory.value)}${currentPage.value > 1 ? ` - ${currentPage.value}` : ''} | SpeSense`)
 const canonical = computed(() => {
-  const url = new URL('/products', config.public.siteUrl)
+  const url = new URL(localePath('/products'), config.public.siteUrl)
   if (selectedCategory.value !== 'all') url.searchParams.set('category', selectedCategory.value)
   if (searchQuery.value.trim()) url.searchParams.set('q', searchQuery.value.trim())
   if (currentPage.value > 1) url.searchParams.set('page', String(currentPage.value))

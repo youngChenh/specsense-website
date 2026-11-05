@@ -22,18 +22,24 @@ export default defineNuxtConfig({
 
   i18n: {
     locales: [
-      { code: 'en', name: 'English', file: 'en.json' },
-      { code: 'zh', name: '中文', file: 'zh.json' },
+      { code: 'en', language: 'en', name: 'English', file: 'en.json' },
+      { code: 'cn', language: 'zh-CN', name: '中文', file: 'zh.json' },
     ],
-    defaultLocale: 'zh',
+    defaultLocale: 'en',
+    baseUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://www.spesense.com',
     lazy: true,
     langDir: 'locales/',
-    strategy: 'no_prefix',
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: 'i18n_locale',
-      redirectOn: 'root',
-    },
+    strategy: 'prefix_except_default',
+    detectBrowserLanguage: false,
+    customRoutes: 'config',
+    pages: Object.fromEntries([
+      'admin/index', 'admin/categories', 'admin/brands', 'admin/banners',
+      'admin/applications', 'admin/downloads', 'admin/login', 'admin/company',
+      'admin/inquiries', 'admin/menus', 'admin/news', 'admin/services', 'admin/products',
+      'admin/crm/index', 'admin/crm/users', 'admin/crm/orders/index', 'admin/crm/inquiries/index',
+      'admin/crm/inquiries/[id]', 'admin/crm/customers/index', 'admin/crm/customers/[id]',
+      'admin/crm/after-sales/index',
+    ].map(path => [path, false])),
   },
 
   sitemap: {
@@ -44,6 +50,10 @@ export default defineNuxtConfig({
       '/admin/*',
       '/privacy',
       '/terms',
+      '/cn/privacy',
+      '/cn/terms',
+      '/cn/admin/**',
+      '/cn/admin',
     ],
     sources: [
       '/api/sitemap/urls',
@@ -58,7 +68,7 @@ export default defineNuxtConfig({
     head: {
       title: 'Spectrometer & Sensor Manufacturer | SpeSense Technologies',
       htmlAttrs: {
-        lang: 'zh',
+        lang: 'en',
       },
       meta: [
         { charset: 'utf-8' },

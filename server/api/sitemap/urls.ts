@@ -68,5 +68,5 @@ export default defineSitemapEventHandler(async () => {
     }
   }
 
-  return [...staticUrls, ...dynamicUrls]
+  return [...staticUrls, ...dynamicUrls].map(url => ({ ...url, _i18nTransform: true }))
 })

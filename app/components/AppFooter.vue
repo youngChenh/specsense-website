@@ -97,7 +97,7 @@
 <script setup lang="ts">
 const localePath = useLocalePath()
 const config = useRuntimeConfig()
-const { locale } = useI18n()
+const locale = useContentLocale()
 
 const footerMenus = ref<any[]>([])
 const companyInfo = ref<any>(null)

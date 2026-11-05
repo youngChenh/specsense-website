@@ -118,7 +118,7 @@
 const route = useRoute()
 const localePath = useLocalePath()
 const api = useApi()
-const { locale } = useI18n()
+const locale = useContentLocale()
 const { getImageUrl } = useImageUrl()
 
 const article = ref<any>(null)

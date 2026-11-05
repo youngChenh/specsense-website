@@ -75,8 +75,7 @@ const frontend = spawn(process.execPath, ['.output/server/index.mjs'], {
 frontend.stdout.on('data', data => { serverOutput += data })
 frontend.stderr.on('data', data => { serverOutput += data })
 
-const get = (path, locale = 'en') => fetch(`${base}${path}`, {
-  headers: { cookie: `i18n_locale=${locale}` },
+const get = (path, locale = 'en') => fetch(`${base}${locale === 'zh' ? '/cn' : ''}${path}`, {
   signal: AbortSignal.timeout(20000),
 })
 const withoutScripts = html => html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
@@ -93,6 +92,21 @@ try {
     } catch { await new Promise(resolve => setTimeout(resolve, 200)) }
   }
   assert.ok(ready, `Nuxt failed to start: ${serverOutput}`)
+
+  for (const path of ['/', '/products?category=spectrometer']) {
+    const englishResponse = await fetch(`${base}${path}`, {
+      headers: { cookie: 'i18n_locale=cn', 'accept-language': 'zh-CN,zh;q=0.9' },
+      redirect: 'manual',
+    })
+    const englishMarkup = withoutScripts(await englishResponse.text())
+    check(`unprefixed ${path} stays English despite Chinese browser/cookie`, () => {
+      assert.equal(englishResponse.status, 200)
+      assert.match(englishMarkup, /<html[^>]*lang="en"/)
+    })
+  }
+  const chineseHome = await get('/cn')
+  check('Chinese homepage is available directly at /cn', () => assert.equal(chineseHome.status, 200))
+  assert.match(await chineseHome.text(), /<html[^>]*lang="zh-CN"/)
 
   const legacyResponse = await fetch(`${base}/products?category=${encodeURIComponent('光谱仪')}&page=2&q=Spectrometer`, {
     redirect: 'manual',
@@ -157,8 +171,29 @@ try {
 
   response = await get('/products/sm-3001b', 'zh')
   markup = withoutScripts(await response.text())
-  check('Chinese locale is rendered before JavaScript executes', () => {
+  check('Chinese /cn detail renders localized content, links and canonical before JavaScript', () => {
+    assert.equal(response.status, 200)
     assert.match(markup, /<h1\b[^>]*>SM-3001B 高分辨率光谱仪<\/h1>/)
+    assert.match(markup, /<html[^>]*lang="zh-CN"/)
+    assert.match(markup, /href="\/cn\/products"/)
+    assert.match(markup, /rel="canonical"[^>]*href="https:\/\/www.spesense.com\/cn\/products\/sm-3001b"/)
+    assert.equal((markup.match(/rel="canonical"/g) || []).length, 1)
+    assert.ok(requests.some(url => url.pathname.endsWith('/products/sm-3001b') && url.searchParams.get('locale') === 'zh'))
+  })
+  response = await get('/products?category=spectrometer&page=2', 'zh')
+  markup = withoutScripts(await response.text())
+  check('Chinese category pagination and product links retain /cn', () => {
+    assert.equal(response.status, 200)
+    assert.match(markup, /href="\/cn\/products\/spectrometer-13"/)
+    assert.match(markup, /href="\/cn\/products\?category=spectrometer(?:&amp;|&)page=3"/)
+    assert.match(markup, /rel="canonical"[^>]*href="https:\/\/www.spesense.com\/cn\/products\?category=spectrometer(?:&amp;|&)page=2"/)
+  })
+  const chineseLegacy = await fetch(`${base}/cn/products?category=${encodeURIComponent('光谱仪')}`, { redirect: 'manual' })
+  check('Chinese legacy category redirect retains /cn', () => {
+    assert.equal(chineseLegacy.status, 302)
+    const target = new URL(chineseLegacy.headers.get('location'), base)
+    assert.equal(target.pathname, '/cn/products')
+    assert.equal(target.searchParams.get('category'), 'spectrometer')
   })
   response = await get('/products/missing-product')
   check('missing product returns HTTP 404', () => assert.equal(response.status, 404))
@@ -180,6 +215,11 @@ try {
   check('public sitemap XML includes first and last product URLs', () => {
     assert.match(xml, /<loc>https:\/\/www.spesense.com\/products\/sm-3001b<\/loc>/)
     assert.match(xml, /<loc>https:\/\/www.spesense.com\/products\/spectrometer-105<\/loc>/)
+  })
+  check('sitemap includes Chinese product URLs and language alternatives', () => {
+    assert.ok(xml.includes('<loc>https://www.spesense.com/cn/products/sm-3001b</loc>'))
+    assert.ok(xml.includes('hreflang="zh-CN"'))
+    assert.ok(!xml.includes('/cn/admin'))
   })
   check('sitemap encodes spaces and Chinese slugs exactly once', () => {
     for (const product of [catalog[1], catalog[2]]) {

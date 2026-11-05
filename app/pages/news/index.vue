@@ -133,7 +133,8 @@
 const localePath = useLocalePath()
 const route = useRoute()
 const config = useRuntimeConfig()
-const { locale, t } = useI18n()
+const { t } = useI18n()
+const locale = useContentLocale()
 const { getImageUrl } = useImageUrl()
 
 const activeTab = ref('all')

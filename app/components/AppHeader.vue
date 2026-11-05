@@ -222,8 +222,8 @@
 
 <script setup lang="ts">
 const localePath = useLocalePath()
-const { locale, locales, setLocale } = useI18n()
-const switchLocalePath = useSwitchLocalePath()
+const { locale: routeLocale, locales, setLocale } = useI18n()
+const locale = useContentLocale()
 const route = useRoute()
 const api = useApi()
 const config = useRuntimeConfig()
@@ -232,7 +232,7 @@ const mobileMenuOpen = ref(false)
 const activeMenu = ref<string | null>(null)
 const expandedMobileMenu = ref<string | null>(null)
 const leaveTimer = ref<ReturnType<typeof setTimeout> | null>(null)
-const currentLocale = computed(() => locale.value)
+const currentLocale = computed(() => routeLocale.value)
 const searchQuery = ref('')
 
 const handleSearch = async () => {
@@ -370,8 +370,8 @@ function cancelLeaveTimer() {
   }
 }
 
-function switchLocale(code: string) {
-  setLocale(code)
+async function switchLocale(code: 'en' | 'cn') {
+  await setLocale(code)
   mobileMenuOpen.value = false
 }
 </script>

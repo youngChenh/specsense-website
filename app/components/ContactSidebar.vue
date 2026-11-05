@@ -214,7 +214,7 @@
 <script setup lang="ts">
 import InquiryModal from './InquiryModal.vue'
 
-const { locale } = useI18n()
+const locale = useContentLocale()
 const config = useRuntimeConfig()
 
 // Dropdown states
