@@ -9,7 +9,7 @@
           </svg>
         </div>
         <div class="header-text">
-          <h1 class="text-2xl font-bold text-gray-800">{{ $t('admin.company') }}</h1>
+          <h1 class="text-2xl font-bold text-gray-800">{{ t('admin.company') }}</h1>
           <p class="text-gray-500 text-sm mt-1">管理公司基本信息和内容</p>
         </div>
       </div>
@@ -17,7 +17,7 @@
 
     <el-card shadow="never" class="main-card">
       <el-form :model="form" label-width="140px" class="company-form">
-        <el-form-item :label="$t('admin.imageUrl')">
+        <el-form-item :label="t('admin.imageUrl')">
           <div class="flex items-center gap-4">
             <el-upload
               :action="`${config.public.apiBase}/api/admin/upload`"
@@ -28,9 +28,9 @@
               :before-upload="beforeImageUpload"
               accept="image/*"
             >
-              <el-button type="primary" plain :disabled="uploading">{{ $t('admin.uploadImage') }}</el-button>
+              <el-button type="primary" plain :disabled="uploading">{{ t('admin.uploadImage') }}</el-button>
             </el-upload>
-            <el-input v-model="form.imageUrl" :placeholder="$t('admin.imageUrlPlaceholder')" class="flex-1" />
+            <el-input v-model="form.imageUrl" :placeholder="t('admin.imageUrlPlaceholder')" class="flex-1" />
           </div>
           <div v-if="uploading" class="mt-2">
             <el-progress :percentage="uploadPercentage" :stroke-width="6" />
@@ -51,10 +51,10 @@
         <el-form-item label="公司简介(中文)">
           <el-input v-model="form.descriptionZh" type="textarea" rows="4" />
         </el-form-item>
-        <el-form-item :label="$t('admin.missionEn')">
+        <el-form-item :label="t('admin.missionEn')">
           <el-input v-model="form.missionEn" type="textarea" rows="3" />
         </el-form-item>
-        <el-form-item :label="$t('admin.missionZh')">
+        <el-form-item :label="t('admin.missionZh')">
           <el-input v-model="form.missionZh" type="textarea" rows="3" />
         </el-form-item>
         <el-form-item label="邮箱">
@@ -69,17 +69,17 @@
         <el-form-item label="地址(中文)">
           <el-input v-model="form.addressZh" placeholder="长沙市雨花区圭塘街道雨河路9号" />
         </el-form-item>
-        <el-form-item :label="$t('admin.values')">
+        <el-form-item :label="t('admin.values')">
           <el-input v-model="form.valuesJson" type="textarea" rows="4" placeholder='["Value1", "Value2"]' />
         </el-form-item>
-        <el-form-item :label="$t('admin.timeline')">
+        <el-form-item :label="t('admin.timeline')">
           <el-input v-model="form.timelineJson" type="textarea" rows="4" />
         </el-form-item>
-        <el-form-item :label="$t('admin.stats')">
+        <el-form-item :label="t('admin.stats')">
           <el-input v-model="form.statsJson" type="textarea" rows="2" placeholder='{"key": "value"}' />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="save" class="save-btn">{{ $t('admin.save') }}</el-button>
+          <el-button type="primary" @click="save" class="save-btn">{{ t('admin.save') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -91,7 +91,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { t } = useI18n()
+const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
 

@@ -146,7 +146,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { t } = useI18n()
+const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
 

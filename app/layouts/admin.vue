@@ -78,7 +78,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
             </span>
-            <span>{{ $t('admin.dashboard') }}</span>
+            <span>{{ t('admin.dashboard') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/categories">
             <span class="menu-icon">
@@ -86,7 +86,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
             </span>
-            <span>{{ $t('admin.categories') }}</span>
+            <span>{{ t('admin.categories') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/products">
             <span class="menu-icon">
@@ -94,7 +94,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             </span>
-            <span>{{ $t('admin.products') }}</span>
+            <span>{{ t('admin.products') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/news">
             <span class="menu-icon">
@@ -102,7 +102,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
               </svg>
             </span>
-            <span>{{ $t('admin.news') }}</span>
+            <span>{{ t('admin.news') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/applications">
             <span class="menu-icon">
@@ -110,7 +110,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
               </svg>
             </span>
-            <span>{{ $t('admin.applications') }}</span>
+            <span>{{ t('admin.applications') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/services">
             <span class="menu-icon">
@@ -118,7 +118,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </span>
-            <span>{{ $t('admin.services') }}</span>
+            <span>{{ t('admin.services') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/downloads">
             <span class="menu-icon">
@@ -126,7 +126,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
             </span>
-            <span>{{ $t('admin.downloads') }}</span>
+            <span>{{ t('admin.downloads') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/company">
             <span class="menu-icon">
@@ -134,7 +134,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </span>
-            <span>{{ $t('admin.company') }}</span>
+            <span>{{ t('admin.company') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/inquiries">
             <span class="menu-icon">
@@ -142,7 +142,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
               </svg>
             </span>
-            <span>{{ $t('admin.inquiries') }}</span>
+            <span>{{ t('admin.inquiries') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/brands">
             <span class="menu-icon">
@@ -150,7 +150,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </span>
-            <span>{{ $t('admin.brands') }}</span>
+            <span>{{ t('admin.brands') }}</span>
           </el-menu-item>
           <el-menu-item index="/admin/banners">
             <span class="menu-icon">
@@ -175,7 +175,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </span>
-            <span>{{ $t('admin.logout') }}</span>
+            <span>{{ t('admin.logout') }}</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -220,7 +220,7 @@
 <script setup>
 import { getAdminRole } from '~/composables/useCrm'
 
-const { locale, setLocale } = useI18n()
+const { t } = useAdminI18n()
 const route = useRoute()
 const router = useRouter()
 const isLoggedIn = ref(false)
@@ -346,7 +346,6 @@ onMounted(async () => {
     adminRole.value = getAdminRole()
     displayName.value = localStorage.getItem('admin_username') || '未登录'
     isLoggedIn.value = !!token.value
-    await setLocale('cn')
     if (!guardRoute(route.path)) return
     const tabInfo = resolveTab(route.path)
     if (tabInfo) {

@@ -4,7 +4,7 @@
     <div class="dashboard-header mb-6">
       <div class="header-content">
         <div class="header-text">
-          <h1 class="text-2xl font-bold text-gray-800">{{ $t('admin.dashboard') }}</h1>
+          <h1 class="text-2xl font-bold text-gray-800">{{ t('admin.dashboard') }}</h1>
           <p class="text-gray-500 text-sm mt-1">欢迎回来，{{ currentDate }}。数字来自当前 CRM 和官网留言，不是估算。</p>
         </div>
         <div class="header-badge">
@@ -237,7 +237,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { t } = useI18n()
+const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const crmApi = useCrmApi()
 

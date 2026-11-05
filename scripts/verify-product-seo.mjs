@@ -93,6 +93,18 @@ try {
   }
   assert.ok(ready, `Nuxt failed to start: ${serverOutput}`)
 
+  for (const path of ['/admin/login', '/admin/login?redirect=%2Fadmin%2Fcategories']) {
+    const response = await fetch(`${base}${path}`, { redirect: 'manual' })
+    const markup = withoutScripts(await response.text())
+    check(`admin login renders Chinese form without redirect: ${path}`, () => {
+      assert.equal(response.status, 200)
+      assert.equal(response.headers.get('location'), null)
+      assert.match(markup, /class="login-card"/)
+      assert.match(markup, /管理员登录/)
+      assert.match(markup, /type="password"/)
+    })
+  }
+
   for (const path of ['/', '/products?category=spectrometer']) {
     const englishResponse = await fetch(`${base}${path}`, {
       headers: { cookie: 'i18n_locale=cn', 'accept-language': 'zh-CN,zh;q=0.9' },

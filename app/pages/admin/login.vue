@@ -18,29 +18,29 @@
 
     <div class="login-form-wrap">
       <div class="login-card">
-        <h2>{{ $t('admin.loginTitle') }}</h2>
+        <h2>{{ t('admin.loginTitle') }}</h2>
         <p class="hint">使用后台账号继续</p>
         <el-form @submit.prevent="handleLogin" class="form">
-          <label>{{ $t('admin.username') }}</label>
+          <label>{{ t('admin.username') }}</label>
           <el-input
             v-model="form.username"
             size="large"
-            :placeholder="$t('admin.pleaseEnter') + $t('admin.username')"
+            :placeholder="t('admin.pleaseEnter') + t('admin.username')"
             class="login-input"
             @keyup.enter="handleLogin"
           />
-          <label>{{ $t('admin.password') }}</label>
+          <label>{{ t('admin.password') }}</label>
           <el-input
             v-model="form.password"
             type="password"
             size="large"
             show-password
-            :placeholder="$t('admin.pleaseEnter') + $t('admin.password')"
+            :placeholder="t('admin.pleaseEnter') + t('admin.password')"
             class="login-input"
             @keyup.enter="handleLogin"
           />
           <el-button class="submit" size="large" :loading="loading" @click="handleLogin">
-            {{ $t('admin.loginBtn') }}
+            {{ t('admin.loginBtn') }}
           </el-button>
         </el-form>
         <p class="copy">© 2026 SpeSense Technologies</p>
@@ -54,7 +54,7 @@ definePageMeta({
   layout: false,
 })
 
-const { t } = useI18n()
+const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const form = reactive({
   username: '',

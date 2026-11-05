@@ -9,7 +9,7 @@
           </svg>
         </div>
         <div class="header-text">
-          <h1 class="text-2xl font-bold text-gray-800">{{ $t('admin.products') }}</h1>
+          <h1 class="text-2xl font-bold text-gray-800">{{ t('admin.products') }}</h1>
           <p class="text-gray-500 text-sm mt-1">管理您的产品分类和列表</p>
         </div>
       </div>
@@ -17,7 +17,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        {{ $t('admin.add') }}
+        {{ t('admin.add') }}
       </el-button>
     </div>
 
@@ -46,7 +46,7 @@
                   <span class="text-gray-400 mx-2">/</span>
                   <span class="text-gray-500">{{ data.nameZh }}</span>
                 </span>
-                <el-tag size="small" type="info" effect="light" class="ml-3">{{ data.productCount }} {{ $t('admin.products').toLowerCase() }}</el-tag>
+                <el-tag size="small" type="info" effect="light" class="ml-3">{{ data.productCount }} {{ t('admin.products').toLowerCase() }}</el-tag>
               </template>
               <!-- Product Node -->
               <template v-else>
@@ -85,12 +85,12 @@
     <!-- Product Dialog -->
     <el-dialog
       v-model="showDialog"
-      :title="isEdit ? $t('admin.edit') + ' ' + $t('admin.product') : $t('admin.add') + ' ' + $t('admin.product')"
+      :title="isEdit ? t('admin.edit') + ' ' + t('admin.product') : t('admin.add') + ' ' + t('admin.product')"
       width="800px"
     >
       <el-form :model="form" label-width="120px">
-        <el-form-item :label="$t('admin.category')">
-          <el-select v-model="form.categoryId" :placeholder="$t('admin.pleaseSelect')" class="w-full">
+        <el-form-item :label="t('admin.category')">
+          <el-select v-model="form.categoryId" :placeholder="t('admin.pleaseSelect')" class="w-full">
             <el-option
               v-for="cat in flatCategories"
               :key="cat.id"
@@ -99,22 +99,22 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('admin.nameEn')">
-          <el-input v-model="form.nameEn" :placeholder="$t('admin.pleaseEnter') + $t('admin.nameEn')" />
+        <el-form-item :label="t('admin.nameEn')">
+          <el-input v-model="form.nameEn" :placeholder="t('admin.pleaseEnter') + t('admin.nameEn')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.nameZh')">
-          <el-input v-model="form.nameZh" :placeholder="$t('admin.pleaseEnter') + $t('admin.nameZh')" />
+        <el-form-item :label="t('admin.nameZh')">
+          <el-input v-model="form.nameZh" :placeholder="t('admin.pleaseEnter') + t('admin.nameZh')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.slug')">
-          <el-input v-model="form.slug" :placeholder="$t('admin.pleaseEnter') + $t('admin.slug')" />
+        <el-form-item :label="t('admin.slug')">
+          <el-input v-model="form.slug" :placeholder="t('admin.pleaseEnter') + t('admin.slug')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.descriptionEn')">
-          <el-input v-model="form.descriptionEn" type="textarea" rows="3" :placeholder="$t('admin.pleaseEnter') + $t('admin.descriptionEn')" />
+        <el-form-item :label="t('admin.descriptionEn')">
+          <el-input v-model="form.descriptionEn" type="textarea" rows="3" :placeholder="t('admin.pleaseEnter') + t('admin.descriptionEn')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.descriptionZh')">
-          <el-input v-model="form.descriptionZh" type="textarea" rows="3" :placeholder="$t('admin.pleaseEnter') + $t('admin.descriptionZh')" />
+        <el-form-item :label="t('admin.descriptionZh')">
+          <el-input v-model="form.descriptionZh" type="textarea" rows="3" :placeholder="t('admin.pleaseEnter') + t('admin.descriptionZh')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.imageUrl')">
+        <el-form-item :label="t('admin.imageUrl')">
           <div class="flex items-center gap-4">
             <el-upload
               :action="`${config.public.apiBase}/api/admin/upload`"
@@ -125,9 +125,9 @@
               :before-upload="beforeImageUpload"
               accept="image/*"
             >
-              <el-button type="primary" plain :disabled="uploading">{{ $t('admin.uploadImage') }}</el-button>
+              <el-button type="primary" plain :disabled="uploading">{{ t('admin.uploadImage') }}</el-button>
             </el-upload>
-            <el-input v-model="form.imageUrl" :placeholder="$t('admin.imageUrlPlaceholder')" class="flex-1" />
+            <el-input v-model="form.imageUrl" :placeholder="t('admin.imageUrlPlaceholder')" class="flex-1" />
           </div>
           <div v-if="uploading && uploadType === 'image'" class="mt-2">
             <el-progress :percentage="uploadPercentage" :stroke-width="6" />
@@ -501,20 +501,20 @@
           </div>
         </el-form-item>
 
-        <el-form-item :label="$t('admin.featured')">
+        <el-form-item :label="t('admin.featured')">
           <el-switch v-model="form.featured" />
         </el-form-item>
-        <el-form-item :label="$t('admin.sortOrder')">
+        <el-form-item :label="t('admin.sortOrder')">
           <el-input-number v-model="form.sortOrder" :min="0" />
         </el-form-item>
-        <el-form-item :label="$t('admin.specs')">
+        <el-form-item :label="t('admin.specs')">
           <div class="specs-editor w-full">
             <div v-for="(spec, index) in form.specs" :key="index" class="flex gap-2 mb-2">
-              <el-input v-model="spec.key" :placeholder="$t('admin.specKey')" class="flex-1" />
-              <el-input v-model="spec.value" :placeholder="$t('admin.specValue')" class="flex-1" />
+              <el-input v-model="spec.key" :placeholder="t('admin.specKey')" class="flex-1" />
+              <el-input v-model="spec.value" :placeholder="t('admin.specValue')" class="flex-1" />
               <el-button type="danger" @click="removeSpec(index)" :icon="Delete" circle />
             </div>
-            <el-button type="primary" plain @click="addSpec" :icon="Plus">{{ $t('admin.addSpec') }}</el-button>
+            <el-button type="primary" plain @click="addSpec" :icon="Plus">{{ t('admin.addSpec') }}</el-button>
           </div>
         </el-form-item>
         <el-form-item label="亮点 (Highlights)">
@@ -525,8 +525,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showDialog = false">{{ $t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="saveProduct">{{ $t('admin.save') }}</el-button>
+        <el-button @click="showDialog = false">{{ t('admin.cancel') }}</el-button>
+        <el-button type="primary" @click="saveProduct">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -538,7 +538,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { t } = useI18n()
+const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
 

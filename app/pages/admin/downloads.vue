@@ -9,7 +9,7 @@
           </svg>
         </div>
         <div class="header-text">
-          <h1 class="text-2xl font-bold text-gray-800">{{ $t('admin.downloads') }}</h1>
+          <h1 class="text-2xl font-bold text-gray-800">{{ t('admin.downloads') }}</h1>
           <p class="text-gray-500 text-sm mt-1">管理下载文件资源</p>
         </div>
       </div>
@@ -17,7 +17,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        {{ $t('admin.add') }}
+        {{ t('admin.add') }}
       </el-button>
     </div>
 
@@ -46,21 +46,21 @@
     <el-card shadow="never" class="main-card">
       <el-table :data="displayData" class="admin-table">
         <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="category" :label="$t('admin.category')" width="120">
+        <el-table-column prop="category" :label="t('admin.category')" width="120">
           <template #default="{ row }">
             <el-tag size="small" effect="light">{{ row.category }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="name" :label="$t('admin.nameEn')" />
-        <el-table-column prop="fileSize" :label="$t('admin.fileSize')" width="80" />
-        <el-table-column :label="$t('admin.downloadFile')" width="120">
+        <el-table-column prop="name" :label="t('admin.nameEn')" />
+        <el-table-column prop="fileSize" :label="t('admin.fileSize')" width="80" />
+        <el-table-column :label="t('admin.downloadFile')" width="120">
           <template #default="{ row }">
             <el-button v-if="row.fileUrl" size="small" text type="primary" @click="downloadFile(row.fileUrl, row.originalFilename)">
               下载
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.actions')" width="150">
+        <el-table-column :label="t('admin.actions')" width="150">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="edit(row)">编辑</el-button>
             <el-button size="small" text type="danger" @click="remove(row.id)">删除</el-button>
@@ -69,9 +69,9 @@
       </el-table>
     </el-card>
 
-    <el-dialog v-model="showDialog" :title="isEdit ? $t('admin.edit') + ' ' + $t('admin.download') : $t('admin.add') + ' ' + $t('admin.download')" width="600px">
+    <el-dialog v-model="showDialog" :title="isEdit ? t('admin.edit') + ' ' + t('admin.download') : t('admin.add') + ' ' + t('admin.download')" width="600px">
       <el-form :model="form" label-width="100px">
-        <el-form-item :label="$t('admin.category')">
+        <el-form-item :label="t('admin.category')">
           <el-select v-model="form.category">
             <el-option label="Manuals" value="manuals" />
             <el-option label="Software" value="software" />
@@ -79,19 +79,19 @@
             <el-option label="Catalogs" value="catalogs" />
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('admin.nameEn')">
+        <el-form-item :label="t('admin.nameEn')">
           <el-input v-model="form.nameEn" />
         </el-form-item>
-        <el-form-item :label="$t('admin.nameZh')">
+        <el-form-item :label="t('admin.nameZh')">
           <el-input v-model="form.nameZh" />
         </el-form-item>
-        <el-form-item :label="$t('admin.descriptionEn')">
+        <el-form-item :label="t('admin.descriptionEn')">
           <el-input v-model="form.descriptionEn" type="textarea" rows="2" />
         </el-form-item>
-        <el-form-item :label="$t('admin.descriptionZh')">
+        <el-form-item :label="t('admin.descriptionZh')">
           <el-input v-model="form.descriptionZh" type="textarea" rows="2" />
         </el-form-item>
-        <el-form-item :label="$t('admin.fileUrl')">
+        <el-form-item :label="t('admin.fileUrl')">
           <div class="flex items-center gap-4">
             <el-upload
               :action="`${config.public.apiBase}/api/admin/upload`"
@@ -102,24 +102,24 @@
               :on-progress="handleFileUploadProgress"
               accept=".pdf,.doc,.docx,.xls,.xlsx,.exe,.zip,.rar"
             >
-              <el-button type="primary" plain :disabled="uploading">{{ $t('admin.uploadFile') }}</el-button>
+              <el-button type="primary" plain :disabled="uploading">{{ t('admin.uploadFile') }}</el-button>
             </el-upload>
-            <el-input v-model="form.fileUrl" :placeholder="$t('admin.fileUrlPlaceholder')" class="flex-1" />
+            <el-input v-model="form.fileUrl" :placeholder="t('admin.fileUrlPlaceholder')" class="flex-1" />
           </div>
           <div v-if="uploading" class="mt-2">
             <el-progress :percentage="uploadPercentage" :stroke-width="8" />
           </div>
           <div v-if="form.fileUrl" class="mt-2 text-sm text-gray-500">
-            {{ $t('admin.currentFile') }}: {{ form.fileUrl }}
+            {{ t('admin.currentFile') }}: {{ form.fileUrl }}
           </div>
         </el-form-item>
-        <el-form-item :label="$t('admin.fileSize')">
+        <el-form-item :label="t('admin.fileSize')">
           <el-input v-model="form.fileSize" placeholder="e.g. 2.5MB" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showDialog = false">{{ $t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="save">{{ $t('admin.save') }}</el-button>
+        <el-button @click="showDialog = false">{{ t('admin.cancel') }}</el-button>
+        <el-button type="primary" @click="save">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -130,7 +130,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { t } = useI18n()
+const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
 

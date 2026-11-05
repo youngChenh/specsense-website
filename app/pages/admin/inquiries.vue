@@ -41,21 +41,21 @@
     <el-card shadow="never" class="main-card">
       <el-table :data="displayData" class="admin-table">
         <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="name" :label="$t('admin.name')" />
-        <el-table-column prop="email" :label="$t('contact.form.email')" />
-        <el-table-column prop="company" :label="$t('contact.form.company')" />
-        <el-table-column prop="product" :label="$t('contact.form.product')">
+        <el-table-column prop="name" :label="t('admin.name')" />
+        <el-table-column prop="email" :label="t('contact.form.email')" />
+        <el-table-column prop="company" :label="t('contact.form.company')" />
+        <el-table-column prop="product" :label="t('contact.form.product')">
           <template #default="{ row }">
             <el-tag size="small" effect="light" type="info">{{ row.product || '-' }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="message" :label="$t('admin.message')" show-overflow-tooltip />
-        <el-table-column prop="createdAt" :label="$t('admin.date')" width="150">
+        <el-table-column prop="message" :label="t('admin.message')" show-overflow-tooltip />
+        <el-table-column prop="createdAt" :label="t('admin.date')" width="150">
           <template #default="{ row }">
             {{ new Date(row.createdAt).toLocaleString() }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.actions')" width="200">
+        <el-table-column :label="t('admin.actions')" width="200">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="openDetail(row)">详情</el-button>
             <el-button size="small" text type="primary" @click="goCrm(row)">去跟进</el-button>
@@ -67,12 +67,12 @@
 
     <el-dialog v-model="showDetail" title="官网留言详情" width="560px">
       <el-descriptions v-if="current" :column="1" border>
-        <el-descriptions-item :label="$t('admin.name')">{{ current.name }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('contact.form.email')">{{ current.email }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('contact.form.company')">{{ current.company || '-' }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('contact.form.product')">{{ current.product || '-' }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('admin.date')">{{ current.createdAt ? new Date(current.createdAt).toLocaleString() : '-' }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('admin.message')">{{ current.message }}</el-descriptions-item>
+        <el-descriptions-item :label="t('admin.name')">{{ current.name }}</el-descriptions-item>
+        <el-descriptions-item :label="t('contact.form.email')">{{ current.email }}</el-descriptions-item>
+        <el-descriptions-item :label="t('contact.form.company')">{{ current.company || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('contact.form.product')">{{ current.product || '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('admin.date')">{{ current.createdAt ? new Date(current.createdAt).toLocaleString() : '-' }}</el-descriptions-item>
+        <el-descriptions-item :label="t('admin.message')">{{ current.message }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <el-button @click="showDetail = false">关闭</el-button>
@@ -89,7 +89,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { t } = useI18n()
+const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const crm = useCrmApi()
 const headers = ref({})

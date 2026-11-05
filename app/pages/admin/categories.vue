@@ -9,7 +9,7 @@
           </svg>
         </div>
         <div class="header-text">
-          <h1 class="text-2xl font-bold text-gray-800">{{ $t('admin.categories') }}</h1>
+          <h1 class="text-2xl font-bold text-gray-800">{{ t('admin.categories') }}</h1>
           <p class="text-gray-500 text-sm mt-1">管理产品分类层级结构</p>
         </div>
       </div>
@@ -17,7 +17,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        {{ $t('admin.add') }}
+        {{ t('admin.add') }}
       </el-button>
     </div>
 
@@ -51,24 +51,24 @@
 
     <el-dialog
       v-model="showDialog"
-      :title="isEdit ? $t('admin.edit') + ' ' + $t('admin.category') : $t('admin.add') + ' ' + $t('admin.category')"
+      :title="isEdit ? t('admin.edit') + ' ' + t('admin.category') : t('admin.add') + ' ' + t('admin.category')"
       width="500px"
     >
       <el-form :model="form" label-width="100px">
-        <el-form-item :label="$t('admin.nameEn')">
-          <el-input v-model="form.nameEn" :placeholder="$t('admin.pleaseEnter') + $t('admin.nameEn')" />
+        <el-form-item :label="t('admin.nameEn')">
+          <el-input v-model="form.nameEn" :placeholder="t('admin.pleaseEnter') + t('admin.nameEn')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.nameZh')">
-          <el-input v-model="form.nameZh" :placeholder="$t('admin.pleaseEnter') + $t('admin.nameZh')" />
+        <el-form-item :label="t('admin.nameZh')">
+          <el-input v-model="form.nameZh" :placeholder="t('admin.pleaseEnter') + t('admin.nameZh')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.key')">
-          <el-input v-model="form.key" :placeholder="$t('admin.pleaseEnter') + $t('admin.key')" />
+        <el-form-item :label="t('admin.key')">
+          <el-input v-model="form.key" :placeholder="t('admin.pleaseEnter') + t('admin.key')" />
           <p class="text-xs text-gray-500 mt-1">用于产品分类网址，英文链接请填写英文标识，例如 soil-sensors；不会自动翻译分类名称。</p>
         </el-form-item>
-        <el-form-item :label="$t('admin.category')">
+        <el-form-item :label="t('admin.category')">
           <el-select
             v-model="form.parentId"
-            :placeholder="$t('admin.pleaseSelect')"
+            :placeholder="t('admin.pleaseSelect')"
             clearable
             class="w-full"
           >
@@ -80,13 +80,13 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('admin.sortOrder')">
+        <el-form-item :label="t('admin.sortOrder')">
           <el-input-number v-model="form.sortOrder" :min="0" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showDialog = false">{{ $t('admin.cancel') }}</el-button>
-        <el-button type="primary" :loading="saving" @click="save">{{ $t('admin.save') }}</el-button>
+        <el-button @click="showDialog = false">{{ t('admin.cancel') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="save">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -97,7 +97,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { t, locale } = useI18n()
+const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
 

@@ -85,7 +85,7 @@
                     <span class="text-gray-400 mx-2">/</span>
                     <span class="text-gray-500">{{ data.nameZh }}</span>
                   </span>
-                  <el-tag size="small" type="info" effect="light" class="ml-3">{{ data.brandCount }} {{ $t('admin.brands').toLowerCase() }}</el-tag>
+                  <el-tag size="small" type="info" effect="light" class="ml-3">{{ data.brandCount }} {{ t('admin.brands').toLowerCase() }}</el-tag>
                 </template>
                 <template v-else>
                   <span class="product-label">
@@ -124,38 +124,38 @@
     <!-- Category Dialog -->
     <el-dialog
       v-model="showCategoryDialog"
-      :title="isEditCategory ? $t('admin.edit') + ' ' + $t('admin.category') : $t('admin.add') + ' ' + $t('admin.category')"
+      :title="isEditCategory ? t('admin.edit') + ' ' + t('admin.category') : t('admin.add') + ' ' + t('admin.category')"
       width="500px"
     >
       <el-form :model="categoryForm" label-width="120px">
-        <el-form-item :label="$t('admin.nameEn')">
-          <el-input v-model="categoryForm.nameEn" :placeholder="$t('admin.pleaseEnter') + $t('admin.nameEn')" />
+        <el-form-item :label="t('admin.nameEn')">
+          <el-input v-model="categoryForm.nameEn" :placeholder="t('admin.pleaseEnter') + t('admin.nameEn')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.nameZh')">
-          <el-input v-model="categoryForm.nameZh" :placeholder="$t('admin.pleaseEnter') + $t('admin.nameZh')" />
+        <el-form-item :label="t('admin.nameZh')">
+          <el-input v-model="categoryForm.nameZh" :placeholder="t('admin.pleaseEnter') + t('admin.nameZh')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.key')">
-          <el-input v-model="categoryForm.key" :placeholder="$t('admin.pleaseEnter') + $t('admin.key')" :disabled="isEditCategory" />
+        <el-form-item :label="t('admin.key')">
+          <el-input v-model="categoryForm.key" :placeholder="t('admin.pleaseEnter') + t('admin.key')" :disabled="isEditCategory" />
         </el-form-item>
-        <el-form-item :label="$t('admin.sortOrder')">
+        <el-form-item :label="t('admin.sortOrder')">
           <el-input-number v-model="categoryForm.sortOrder" :min="0" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showCategoryDialog = false">{{ $t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="saveCategory">{{ $t('admin.save') }}</el-button>
+        <el-button @click="showCategoryDialog = false">{{ t('admin.cancel') }}</el-button>
+        <el-button type="primary" @click="saveCategory">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- Brand Dialog -->
     <el-dialog
       v-model="showBrandDialog"
-      :title="isEditBrand ? $t('admin.edit') + ' ' + $t('admin.brand') : $t('admin.add') + ' ' + $t('admin.brand')"
+      :title="isEditBrand ? t('admin.edit') + ' ' + t('admin.brand') : t('admin.add') + ' ' + t('admin.brand')"
       width="800px"
     >
       <el-form :model="brandForm" label-width="120px">
-        <el-form-item :label="$t('admin.category')">
-          <el-select v-model="brandForm.categoryId" :placeholder="$t('admin.pleaseSelect')" class="w-full">
+        <el-form-item :label="t('admin.category')">
+          <el-select v-model="brandForm.categoryId" :placeholder="t('admin.pleaseSelect')" class="w-full">
             <el-option
               v-for="cat in categories"
               :key="cat.id"
@@ -164,16 +164,16 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('admin.nameEn')">
-          <el-input v-model="brandForm.nameEn" :placeholder="$t('admin.pleaseEnter') + $t('admin.nameEn')" />
+        <el-form-item :label="t('admin.nameEn')">
+          <el-input v-model="brandForm.nameEn" :placeholder="t('admin.pleaseEnter') + t('admin.nameEn')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.nameZh')">
-          <el-input v-model="brandForm.nameZh" :placeholder="$t('admin.pleaseEnter') + $t('admin.nameZh')" />
+        <el-form-item :label="t('admin.nameZh')">
+          <el-input v-model="brandForm.nameZh" :placeholder="t('admin.pleaseEnter') + t('admin.nameZh')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.slug')">
-          <el-input v-model="brandForm.slug" :placeholder="$t('admin.pleaseEnter') + $t('admin.slug')" :disabled="isEditBrand" />
+        <el-form-item :label="t('admin.slug')">
+          <el-input v-model="brandForm.slug" :placeholder="t('admin.pleaseEnter') + t('admin.slug')" :disabled="isEditBrand" />
         </el-form-item>
-        <el-form-item :label="$t('admin.logoUrl')">
+        <el-form-item :label="t('admin.logoUrl')">
           <div class="flex items-center gap-4">
             <el-upload
               :action="`${config.public.apiBase}/api/admin/upload`"
@@ -183,33 +183,33 @@
               :before-upload="beforeImageUpload"
               accept="image/*"
             >
-              <el-button type="primary" plain>{{ $t('admin.uploadImage') }}</el-button>
+              <el-button type="primary" plain>{{ t('admin.uploadImage') }}</el-button>
             </el-upload>
-            <el-input v-model="brandForm.logoUrl" :placeholder="$t('admin.imageUrlPlaceholder')" class="flex-1" />
+            <el-input v-model="brandForm.logoUrl" :placeholder="t('admin.imageUrlPlaceholder')" class="flex-1" />
           </div>
           <div v-if="brandForm.logoUrl" class="mt-2">
             <img :src="getFullImageUrl(brandForm.logoUrl)" class="w-32 h-32 object-contain rounded border bg-gray-50" />
           </div>
         </el-form-item>
-        <el-form-item :label="$t('admin.descriptionEn')">
-          <el-input v-model="brandForm.descriptionEn" type="textarea" rows="3" :placeholder="$t('admin.pleaseEnter') + $t('admin.descriptionEn')" />
+        <el-form-item :label="t('admin.descriptionEn')">
+          <el-input v-model="brandForm.descriptionEn" type="textarea" rows="3" :placeholder="t('admin.pleaseEnter') + t('admin.descriptionEn')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.descriptionZh')">
-          <el-input v-model="brandForm.descriptionZh" type="textarea" rows="3" :placeholder="$t('admin.pleaseEnter') + $t('admin.descriptionZh')" />
+        <el-form-item :label="t('admin.descriptionZh')">
+          <el-input v-model="brandForm.descriptionZh" type="textarea" rows="3" :placeholder="t('admin.pleaseEnter') + t('admin.descriptionZh')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.websiteUrl')">
+        <el-form-item :label="t('admin.websiteUrl')">
           <el-input v-model="brandForm.websiteUrl" placeholder="https://" />
         </el-form-item>
-        <el-form-item :label="$t('admin.featured')">
+        <el-form-item :label="t('admin.featured')">
           <el-switch v-model="brandForm.featured" />
         </el-form-item>
-        <el-form-item :label="$t('admin.sortOrder')">
+        <el-form-item :label="t('admin.sortOrder')">
           <el-input-number v-model="brandForm.sortOrder" :min="0" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showBrandDialog = false">{{ $t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="saveBrand">{{ $t('admin.save') }}</el-button>
+        <el-button @click="showBrandDialog = false">{{ t('admin.cancel') }}</el-button>
+        <el-button type="primary" @click="saveBrand">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -220,7 +220,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { t } = useI18n()
+const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
 

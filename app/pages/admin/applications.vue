@@ -9,7 +9,7 @@
           </svg>
         </div>
         <div class="header-text">
-          <h1 class="text-2xl font-bold text-gray-800">{{ $t('admin.applications') }}</h1>
+          <h1 class="text-2xl font-bold text-gray-800">{{ t('admin.applications') }}</h1>
           <p class="text-gray-500 text-sm mt-1">管理应用领域内容</p>
         </div>
       </div>
@@ -17,7 +17,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        {{ $t('admin.add') }}
+        {{ t('admin.add') }}
       </el-button>
     </div>
 
@@ -39,19 +39,19 @@
     <el-card shadow="never" class="main-card">
       <el-table :data="displayData" class="admin-table">
         <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="type" :label="$t('admin.type')" width="120">
+        <el-table-column prop="type" :label="t('admin.type')" width="120">
           <template #default="{ row }">
             <el-tag size="small" effect="light">{{ row.type }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="title" :label="$t('admin.titleEn')" />
-        <el-table-column :label="$t('admin.imageUrl')" width="100">
+        <el-table-column prop="title" :label="t('admin.titleEn')" />
+        <el-table-column :label="t('admin.imageUrl')" width="100">
           <template #default="{ row }">
             <img v-if="row.imageUrl" :src="getFullImageUrl(row.imageUrl)" class="w-12 h-12 object-cover rounded-lg" />
             <span v-else class="text-gray-400">-</span>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.actions')" width="150">
+        <el-table-column :label="t('admin.actions')" width="150">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="edit(row)">编辑</el-button>
             <el-button size="small" text type="danger" @click="remove(row.id)">删除</el-button>
@@ -60,24 +60,24 @@
       </el-table>
     </el-card>
 
-    <el-dialog v-model="showDialog" :title="isEdit ? $t('admin.edit') + ' ' + $t('admin.application') : $t('admin.add') + ' ' + $t('admin.application')" width="700px">
+    <el-dialog v-model="showDialog" :title="isEdit ? t('admin.edit') + ' ' + t('admin.application') : t('admin.add') + ' ' + t('admin.application')" width="700px">
       <el-form :model="form" label-width="100px">
-        <el-form-item :label="$t('admin.type')">
-          <el-input v-model="form.type" :disabled="isEdit" :placeholder="$t('admin.typePlaceholder')" />
+        <el-form-item :label="t('admin.type')">
+          <el-input v-model="form.type" :disabled="isEdit" :placeholder="t('admin.typePlaceholder')" />
         </el-form-item>
-        <el-form-item :label="$t('admin.titleEn')">
+        <el-form-item :label="t('admin.titleEn')">
           <el-input v-model="form.titleEn" />
         </el-form-item>
-        <el-form-item :label="$t('admin.titleZh')">
+        <el-form-item :label="t('admin.titleZh')">
           <el-input v-model="form.titleZh" />
         </el-form-item>
-        <el-form-item :label="$t('admin.descriptionEn')">
+        <el-form-item :label="t('admin.descriptionEn')">
           <el-input v-model="form.descriptionEn" type="textarea" rows="3" />
         </el-form-item>
-        <el-form-item :label="$t('admin.descriptionZh')">
+        <el-form-item :label="t('admin.descriptionZh')">
           <el-input v-model="form.descriptionZh" type="textarea" rows="3" />
         </el-form-item>
-        <el-form-item :label="$t('admin.imageUrl')">
+        <el-form-item :label="t('admin.imageUrl')">
           <div class="flex items-center gap-4">
             <el-upload
               :action="`${config.public.apiBase}/api/admin/upload`"
@@ -88,9 +88,9 @@
               :on-progress="handleImageUploadProgress"
               accept="image/*"
             >
-              <el-button type="primary" plain :disabled="uploading">{{ $t('admin.uploadImage') }}</el-button>
+              <el-button type="primary" plain :disabled="uploading">{{ t('admin.uploadImage') }}</el-button>
             </el-upload>
-            <el-input v-model="form.imageUrl" :placeholder="$t('admin.imageUrlPlaceholder')" class="flex-1" />
+            <el-input v-model="form.imageUrl" :placeholder="t('admin.imageUrlPlaceholder')" class="flex-1" />
           </div>
           <div v-if="uploading" class="mt-2">
             <el-progress :percentage="uploadPercentage" :stroke-width="8" />
@@ -99,8 +99,8 @@
             <img :src="getFullImageUrl(form.imageUrl)" class="w-32 h-32 object-cover rounded border" />
           </div>
         </el-form-item>
-        <el-form-item :label="$t('admin.linkedCategories')">
-          <el-select v-model="form.linkedCategoryKeys" multiple :placeholder="$t('admin.selectCategories')" class="w-full">
+        <el-form-item :label="t('admin.linkedCategories')">
+          <el-select v-model="form.linkedCategoryKeys" multiple :placeholder="t('admin.selectCategories')" class="w-full">
             <el-option
               v-for="cat in categoryOptions"
               :key="cat.key"
@@ -111,8 +111,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showDialog = false">{{ $t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="save">{{ $t('admin.save') }}</el-button>
+        <el-button @click="showDialog = false">{{ t('admin.cancel') }}</el-button>
+        <el-button type="primary" @click="save">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -123,7 +123,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { t } = useI18n()
+const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
 

@@ -39,7 +39,8 @@ export default defineNuxtConfig({
       'admin/crm/index', 'admin/crm/users', 'admin/crm/orders/index', 'admin/crm/inquiries/index',
       'admin/crm/inquiries/[id]', 'admin/crm/customers/index', 'admin/crm/customers/[id]',
       'admin/crm/after-sales/index',
-    ].map(path => [path, false])),
+    // Keep a default-locale route name so client-side locale detection can resolve /admin.
+    ].map(path => [path, { cn: false }])),
   },
 
   sitemap: {

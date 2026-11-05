@@ -9,7 +9,7 @@
           </svg>
         </div>
         <div class="header-text">
-          <h1 class="text-2xl font-bold text-gray-800">{{ $t('admin.news') }}</h1>
+          <h1 class="text-2xl font-bold text-gray-800">{{ t('admin.news') }}</h1>
           <p class="text-gray-500 text-sm mt-1">管理新闻资讯内容</p>
         </div>
       </div>
@@ -17,7 +17,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        {{ $t('admin.add') }}
+        {{ t('admin.add') }}
       </el-button>
     </div>
 
@@ -45,18 +45,18 @@
     <el-card shadow="never" class="main-card">
       <el-table :data="displayData" class="admin-table">
         <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="title" :label="$t('admin.titleEn')" />
-        <el-table-column prop="category" :label="$t('admin.category')" width="120">
+        <el-table-column prop="title" :label="t('admin.titleEn')" />
+        <el-table-column prop="category" :label="t('admin.category')" width="120">
           <template #default="{ row }">
             <el-tag size="small" effect="light">{{ row.category }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="publishedAt" :label="$t('admin.publishedAt')" width="120">
+        <el-table-column prop="publishedAt" :label="t('admin.publishedAt')" width="120">
           <template #default="{ row }">
             {{ row.publishedAt ? new Date(row.publishedAt).toLocaleDateString() : '' }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('admin.actions')" width="150">
+        <el-table-column :label="t('admin.actions')" width="150">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="edit(row)">编辑</el-button>
             <el-button size="small" text type="danger" @click="remove(row.id)">删除</el-button>
@@ -65,31 +65,31 @@
       </el-table>
     </el-card>
 
-    <el-dialog v-model="showDialog" :title="isEdit ? $t('admin.edit') + ' ' + $t('admin.news') : $t('admin.add') + ' ' + $t('admin.news')" width="900px">
+    <el-dialog v-model="showDialog" :title="isEdit ? t('admin.edit') + ' ' + t('admin.news') : t('admin.add') + ' ' + t('admin.news')" width="900px">
       <el-form :model="form" label-width="100px">
-        <el-form-item :label="$t('admin.category')">
+        <el-form-item :label="t('admin.category')">
           <el-select v-model="form.category">
             <el-option label="Company" value="company" />
             <el-option label="Industry" value="industry" />
             <el-option label="Technology" value="technology" />
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('admin.titleEn')">
+        <el-form-item :label="t('admin.titleEn')">
           <el-input v-model="form.titleEn" />
         </el-form-item>
-        <el-form-item :label="$t('admin.titleZh')">
+        <el-form-item :label="t('admin.titleZh')">
           <el-input v-model="form.titleZh" />
         </el-form-item>
-        <el-form-item :label="$t('admin.slug')">
+        <el-form-item :label="t('admin.slug')">
           <el-input v-model="form.slug" />
         </el-form-item>
-        <el-form-item :label="$t('admin.descriptionEn')">
+        <el-form-item :label="t('admin.descriptionEn')">
           <el-input v-model="form.excerptEn" type="textarea" rows="2" />
         </el-form-item>
-        <el-form-item :label="$t('admin.descriptionZh')">
+        <el-form-item :label="t('admin.descriptionZh')">
           <el-input v-model="form.excerptZh" type="textarea" rows="2" />
         </el-form-item>
-        <el-form-item :label="$t('admin.content') + ' (EN)'">
+        <el-form-item :label="t('admin.content') + ' (EN)'">
           <div class="editor-wrapper">
             <QuillEditor
               ref="enQuillRef"
@@ -103,7 +103,7 @@
             />
           </div>
         </el-form-item>
-        <el-form-item :label="$t('admin.content') + ' (ZH)'">
+        <el-form-item :label="t('admin.content') + ' (ZH)'">
           <div class="editor-wrapper">
             <QuillEditor
               ref="zhQuillRef"
@@ -117,7 +117,7 @@
             />
           </div>
         </el-form-item>
-        <el-form-item :label="$t('admin.imageUrl')">
+        <el-form-item :label="t('admin.imageUrl')">
           <div class="flex items-center gap-4">
             <el-upload
               :action="`${config.public.apiBase}/api/admin/upload`"
@@ -128,9 +128,9 @@
               :before-upload="beforeImageUpload"
               accept="image/*"
             >
-              <el-button type="primary" plain :disabled="uploading">{{ $t('admin.uploadImage') }}</el-button>
+              <el-button type="primary" plain :disabled="uploading">{{ t('admin.uploadImage') }}</el-button>
             </el-upload>
-            <el-input v-model="form.imageUrl" :placeholder="$t('admin.imageUrlPlaceholder')" class="flex-1" />
+            <el-input v-model="form.imageUrl" :placeholder="t('admin.imageUrlPlaceholder')" class="flex-1" />
           </div>
           <div v-if="uploading" class="mt-2">
             <el-progress :percentage="uploadPercentage" :stroke-width="6" />
@@ -139,13 +139,13 @@
             <img :src="getFullImageUrl(form.imageUrl)" class="w-32 h-32 object-cover rounded border" />
           </div>
         </el-form-item>
-        <el-form-item :label="$t('admin.publishedAt')">
+        <el-form-item :label="t('admin.publishedAt')">
           <el-date-picker v-model="form.publishedAt" type="datetime" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showDialog = false">{{ $t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="save">{{ $t('admin.save') }}</el-button>
+        <el-button @click="showDialog = false">{{ t('admin.cancel') }}</el-button>
+        <el-button type="primary" @click="save">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -159,7 +159,7 @@ definePageMeta({
   layout: 'admin',
 })
 
-const { t } = useI18n()
+const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
 
