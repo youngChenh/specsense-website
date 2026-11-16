@@ -12,8 +12,9 @@ spring:
     multipart:
       enabled: true
       file-size-threshold: 512KB
-      max-file-size: 50MB
-      max-request-size: 100MB
+      max-file-size: 100MB
+      # Allow multipart form overhead in addition to a 100 MB file.
+      max-request-size: 110MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://43.159.58.248/youthful_db?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&connectTimeout=30000&socketTimeout=60000
