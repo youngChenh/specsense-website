@@ -84,7 +84,7 @@
       </el-form>
       <template #footer>
         <el-button @click="showDialog = false">取消</el-button>
-        <el-button type="primary" @click="save">确定</el-button>
+        <el-button type="primary" :loading="saving" @click="save">确定</el-button>
       </template>
     </el-dialog>
 
@@ -108,6 +108,7 @@
 </template>
 
 <script setup>
+import { adminRequest } from '~/utils/adminRequest'
 import { Loading } from '@element-plus/icons-vue'
 
 definePageMeta({
@@ -117,6 +118,7 @@ definePageMeta({
 const { getImageUrl } = useImageUrl()
 const config = useRuntimeConfig()
 const headers = ref({})
+const saving = ref(false)
 
 const data = ref([])
 const loading = ref(false)
@@ -151,7 +153,7 @@ onMounted(() => {
 const fetchData = async () => {
   loading.value = true
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/banners`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/banners`, { headers: headers.value })
     data.value = response.data || []
   } catch (error) {
     ElMessage.error('获取数据失败')
@@ -189,24 +191,28 @@ const edit = (row) => {
 }
 
 const save = async () => {
+  if (saving.value) return
+  saving.value = true
   try {
     const method = isEdit.value ? 'PUT' : 'POST'
     const url = isEdit.value
       ? `${config.public.apiBase}/api/admin/banners/${form.id}`
       : `${config.public.apiBase}/api/admin/banners`
 
-    await $fetch(url, { method, headers: headers.value, body: form })
+    await adminRequest(url, { method, headers: headers.value, body: form })
     ElMessage.success('保存成功')
     showDialog.value = false
-    fetchData()
+    await fetchData()
   } catch (error) {
-    ElMessage.error('保存失败')
+    ElMessage.error('保存失败: ' + (error.data?.message || error.message || ''))
+  } finally {
+    saving.value = false
   }
 }
 
 const remove = async (id) => {
   try {
-    await $fetch(`${config.public.apiBase}/api/admin/banners/${id}`, { method: 'DELETE', headers: headers.value })
+    await adminRequest(`${config.public.apiBase}/api/admin/banners/${id}`, { method: 'DELETE', headers: headers.value })
     ElMessage.success('删除成功')
     fetchData()
   } catch (error) {

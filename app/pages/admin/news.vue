@@ -59,7 +59,7 @@
         <el-table-column :label="t('admin.actions')" width="150">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="edit(row)">编辑</el-button>
-            <el-button size="small" text type="danger" @click="remove(row.id)">删除</el-button>
+            <el-button size="small" text type="danger" :loading="deletingId === row.id" :disabled="deletingId !== null" @click="remove(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -145,13 +145,14 @@
       </el-form>
       <template #footer>
         <el-button @click="showDialog = false">{{ t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="save">{{ t('admin.save') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="save">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
+import { adminRequest } from '~/utils/adminRequest'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 
@@ -164,6 +165,8 @@ import { useAdminI18n } from '~/composables/useAdminI18n'
 const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
+const saving = ref(false)
+const deletingId = ref(null)
 
 // 两个编辑器的 quill 实例
 const enQuillRef = ref(null)
@@ -281,7 +284,7 @@ const form = reactive({
 
 const fetchData = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/news`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/news`, { headers: headers.value })
     data.value = response.data || []
   } catch (error) {
     ElMessage.error(t('admin.fetchFailed'))
@@ -301,29 +304,43 @@ const edit = (row) => {
 }
 
 const save = async () => {
+  if (saving.value) return
+  saving.value = true
   try {
     const method = isEdit.value ? 'PUT' : 'POST'
     const url = isEdit.value
       ? `${config.public.apiBase}/api/admin/news/${form.id}`
       : `${config.public.apiBase}/api/admin/news`
 
-    await $fetch(url, { method, headers: headers.value, body: form })
+    await adminRequest(url, { method, headers: headers.value, body: form })
     ElMessage.success(t('admin.saveSuccess'))
     showDialog.value = false
-    fetchData()
+    await fetchData()
   } catch (error) {
-    ElMessage.error(t('admin.saveFailed'))
+    ElMessage.error(t('admin.saveFailed') + ': ' + (error.data?.message || error.message || ''))
+  } finally {
+    saving.value = false
   }
 }
 
 const remove = async (id) => {
+  if (deletingId.value !== null) return
+  deletingId.value = id
   try {
-    await $fetch(`${config.public.apiBase}/api/admin/news/${id}`, { method: 'DELETE', headers: headers.value })
+    await ElMessageBox.confirm(t('admin.confirmDelete'), t('admin.delete'), {
+      confirmButtonText: t('admin.yes'),
+      cancelButtonText: t('admin.cancel'),
+      type: 'warning',
+    })
+    await adminRequest(`${config.public.apiBase}/api/admin/news/${id}`, { method: 'DELETE', headers: headers.value })
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {
+    if (error === 'cancel' || error === 'close') return
     const errorMsg = error.data?.message || error._data?.message || error.message || ''
     ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
+  } finally {
+    deletingId.value = null
   }
 }
 

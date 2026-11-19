@@ -52,7 +52,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="name" :label="t('admin.nameEn')" />
-        <el-table-column prop="fileSize" :label="t('admin.fileSize')" width="80" />
+        <el-table-column prop="fileSize" :label="t('admin.fileSize')" width="120">
+          <template #default="{ row }">
+            {{ row.fileSize || '未知' }}
+          </template>
+        </el-table-column>
         <el-table-column :label="t('admin.downloadFile')" width="120">
           <template #default="{ row }">
             <el-button v-if="row.fileUrl" size="small" text type="primary" @click="downloadFile(row.fileUrl, row.originalFilename)">
@@ -63,7 +67,7 @@
         <el-table-column :label="t('admin.actions')" width="150">
           <template #default="{ row }">
             <el-button size="small" text type="primary" @click="edit(row)">编辑</el-button>
-            <el-button size="small" text type="danger" @click="remove(row.id)">删除</el-button>
+            <el-button size="small" text type="danger" :loading="deletingId === row.id" :disabled="deletingId !== null" @click="remove(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -97,6 +101,8 @@
               :action="`${config.public.apiBase}/api/admin/upload`"
               :headers="headers"
               :show-file-list="false"
+              :disabled="uploading"
+              :before-upload="beforeFileUpload"
               :on-success="handleFileUploadSuccess"
               :on-error="handleFileUploadError"
               :on-progress="handleFileUploadProgress"
@@ -106,26 +112,29 @@
             </el-upload>
             <el-input v-model="form.fileUrl" :placeholder="t('admin.fileUrlPlaceholder')" class="flex-1" />
           </div>
+          <div class="mt-2 text-sm text-gray-500">单个文件最大 100 MB</div>
           <div v-if="uploading" class="mt-2">
             <el-progress :percentage="uploadPercentage" :stroke-width="8" />
+            <div v-if="uploadPercentage === 100" class="text-sm text-gray-500">文件已发送，正在等待服务器处理，请稍候…</div>
           </div>
           <div v-if="form.fileUrl" class="mt-2 text-sm text-gray-500">
             {{ t('admin.currentFile') }}: {{ form.fileUrl }}
           </div>
         </el-form-item>
         <el-form-item :label="t('admin.fileSize')">
-          <el-input v-model="form.fileSize" placeholder="e.g. 2.5MB" />
+          <el-input v-model="form.fileSize" placeholder="上传后自动填写，例如 2.5 MB" />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showDialog = false">{{ t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="save">{{ t('admin.save') }}</el-button>
+        <el-button type="primary" :disabled="uploading" :loading="saving" @click="save">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
+import { adminRequest } from '~/utils/adminRequest'
 definePageMeta({
   layout: 'admin',
 })
@@ -135,6 +144,8 @@ import { useAdminI18n } from '~/composables/useAdminI18n'
 const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
+const saving = ref(false)
+const deletingId = ref(null)
 
 onMounted(() => {
   if (!import.meta.client) return
@@ -190,8 +201,9 @@ const form = reactive({
 
 const fetchData = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/downloads`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/downloads`, { headers: headers.value })
     data.value = response.data || []
+
   } catch (error) {
     ElMessage.error(t('admin.fetchFailed'))
   }
@@ -210,30 +222,56 @@ const edit = (row) => {
 }
 
 const save = async () => {
+  if (saving.value) return
+  if (uploading.value) return
+  saving.value = true
   try {
     const method = isEdit.value ? 'PUT' : 'POST'
     const url = isEdit.value
       ? `${config.public.apiBase}/api/admin/downloads/${form.id}`
       : `${config.public.apiBase}/api/admin/downloads`
 
-    await $fetch(url, { method, headers: headers.value, body: form })
+    await adminRequest(url, { method, headers: headers.value, body: form })
     ElMessage.success(t('admin.saveSuccess'))
     showDialog.value = false
-    fetchData()
+    await fetchData()
   } catch (error) {
-    ElMessage.error(t('admin.saveFailed'))
+    ElMessage.error(t('admin.saveFailed') + ': ' + (error.data?.message || error.message || ''))
+  } finally {
+    saving.value = false
   }
 }
 
 const remove = async (id) => {
+  if (deletingId.value !== null) return
+  deletingId.value = id
   try {
-    await $fetch(`${config.public.apiBase}/api/admin/downloads/${id}`, { method: 'DELETE', headers: headers.value })
+    await ElMessageBox.confirm(t('admin.confirmDelete'), t('admin.delete'), {
+      confirmButtonText: t('admin.yes'),
+      cancelButtonText: t('admin.cancel'),
+      type: 'warning',
+    })
+    await adminRequest(`${config.public.apiBase}/api/admin/downloads/${id}`, { method: 'DELETE', headers: headers.value })
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {
+    if (error === 'cancel' || error === 'close') return
     const errorMsg = error.data?.message || error._data?.message || error.message || ''
     ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
+  } finally {
+    deletingId.value = null
   }
+}
+
+const beforeFileUpload = (file) => {
+  if (uploading.value) return false
+  if (file.size > 100 * 1024 * 1024) {
+    ElMessage.error('单个文件不能超过 100 MB，请选择较小的文件')
+    return false
+  }
+  uploading.value = true
+  uploadPercentage.value = 0
+  return true
 }
 
 const handleFileUploadProgress = (event, uploadFile) => {
@@ -241,22 +279,38 @@ const handleFileUploadProgress = (event, uploadFile) => {
   uploadPercentage.value = Math.round(event.percent || 0)
 }
 
-const handleFileUploadSuccess = (response) => {
+function formatFileSize(bytes) {
+  if (!Number.isFinite(bytes) || bytes < 0) return ''
+  if (bytes < 1024) return `${bytes} B`
+  const units = ['KB', 'MB', 'GB', 'TB']
+  let size = bytes / 1024
+  let index = 0
+  while (size >= 1024 && index < units.length - 1) {
+    size /= 1024
+    index++
+  }
+  return `${Number(size.toFixed(2))} ${units[index]}`
+}
+
+const handleFileUploadSuccess = (response, uploadFile) => {
   uploading.value = false
   uploadPercentage.value = 0
   if (response.code === 200 && response.data) {
     form.fileUrl = response.data.url
     form.originalFilename = response.data.originalFilename
+    form.fileSize = formatFileSize(uploadFile?.size ?? uploadFile?.raw?.size)
     ElMessage.success(t('admin.uploadSuccess'))
   } else {
     ElMessage.error(t('admin.uploadFailed'))
   }
 }
 
-const handleFileUploadError = () => {
+const handleFileUploadError = (error) => {
   uploading.value = false
   uploadPercentage.value = 0
-  ElMessage.error(t('admin.uploadFailed'))
+  ElMessage.error(error?.status === 413
+    ? '服务器拒绝了文件大小，请确认后端和代理的上传限制配置已更新'
+    : t('admin.uploadFailed') + '，请检查网络或稍后重试')
 }
 
 const getFullDownloadUrl = (url, filename) => {

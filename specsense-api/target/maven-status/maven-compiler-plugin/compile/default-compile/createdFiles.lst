@@ -22,11 +22,13 @@ com\specsense\mapper\AdminUserMapper.class
 com\specsense\model\entity\Brand.class
 com\specsense\service\CategoryService.class
 com\specsense\controller\ContactController.class
+com\specsense\mapper\CrmOrderMapper.class
 com\specsense\model\entity\CrmFollowUp.class
 com\specsense\service\ProductService.class
 com\specsense\controller\ApplicationController.class
 com\specsense\controller\StaticFileController.class
 com\specsense\service\CacheService.class
+com\specsense\service\DownloadFileMetadata.class
 com\specsense\config\WebMvcConfig.class
 com\specsense\model\dto\ApplicationDTO.class
 com\specsense\mapper\CrmContactMapper.class
@@ -76,6 +78,7 @@ com\specsense\model\entity\Product.class
 com\specsense\controller\AdminBrandController.class
 com\specsense\crm\CrmAuth$AuthException.class
 com\specsense\service\NavigationMenuService.class
+com\specsense\model\entity\CrmOrder.class
 com\specsense\model\entity\CrmInquiry.class
 com\specsense\controller\ServiceController.class
 com\specsense\mapper\NewsMapper.class
@@ -99,6 +102,7 @@ com\specsense\model\dto\BrandCategoryDTO.class
 com\specsense\service\impl\AdminServiceImpl.class
 com\specsense\mapper\CategoryMapper.class
 com\specsense\controller\NavigationController.class
+com\specsense\mapper\CrmAfterSaleMapper.class
 com\specsense\model\entity\News.class
 com\specsense\mapper\BrandCategoryMapper.class
 com\specsense\SpecsenseApplication.class
@@ -106,6 +110,7 @@ com\specsense\model\dto\ExternalImageItem.class
 com\specsense\model\vo\LoginVO.class
 com\specsense\model\dto\ProductSearchResultDTO.class
 com\specsense\mapper\CompanyInfoMapper.class
+com\specsense\model\entity\CrmAfterSale.class
 com\specsense\service\CompanyInfoService.class
 com\specsense\model\entity\Application.class
 com\specsense\config\CrmSchemaInitializer.class

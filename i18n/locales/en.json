@@ -132,6 +132,10 @@
     }
   },
   "products": {
+    "searchLabel": "Search",
+    "emptyCategory": "No products found in this category.",
+    "emptySearch": "No products found matching \"{query}\".",
+    "loadFailed": "Failed to load products. Please try again.",
     "title": "Products",
     "subtitle": "Explore our comprehensive range of photoelectric instruments",
     "allProducts": "All Products",
@@ -178,7 +182,7 @@
     "inquiry": "Send Inquiry",
     "specifications": "Specifications",
     "download": "Download Datasheet",
-    "downloadPdf": "Download PDF",
+    "downloadPdf": "Download Datasheet",
     "featuredProducts": "Featured Products",
     "filterBy": "Filter by category",
     "notFound": "Product Not Found",
@@ -215,6 +219,10 @@
     }
   },
   "services": {
+    "empty": "No services available yet.",
+    "loadFailed": "Failed to load services. Please try again.",
+    "downloadsEmpty": "No files in this category.",
+    "downloadsFailed": "Failed to load downloads. Please try again.",
     "title": "Services & Support",
     "subtitle": "We provide comprehensive technical support and after-sales service",
     "technical": {
@@ -254,6 +262,8 @@
     }
   },
   "news": {
+    "empty": "No news in this category yet.",
+    "loadFailed": "Failed to load news. Please try again.",
     "title": "News",
     "subtitle": "Stay updated with the latest company news and industry trends",
     "company": "Company News",
@@ -331,6 +341,11 @@
     "news": "News"
   },
   "common": {
+    "retry": "Retry",
+    "loading": "Loading...",
+    "previous": "Previous",
+    "next": "Next",
+    "unknownSize": "Unknown",
     "learnMore": "Learn More",
     "viewAll": "View All",
     "contactNow": "Contact Now",

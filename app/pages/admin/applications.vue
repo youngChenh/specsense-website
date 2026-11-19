@@ -112,13 +112,14 @@
       </el-form>
       <template #footer>
         <el-button @click="showDialog = false">{{ t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="save">{{ t('admin.save') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="save">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
+import { adminRequest } from '~/utils/adminRequest'
 definePageMeta({
   layout: 'admin',
 })
@@ -128,6 +129,7 @@ import { useAdminI18n } from '~/composables/useAdminI18n'
 const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
+const saving = ref(false)
 
 onMounted(() => {
   if (!import.meta.client) return
@@ -184,7 +186,7 @@ const form = reactive({
 
 const fetchData = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/applications`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/applications`, { headers: headers.value })
     data.value = response.data || []
   } catch (error) {
     ElMessage.error(t('admin.fetchFailed'))
@@ -193,7 +195,7 @@ const fetchData = async () => {
 
 const fetchCategories = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/categories`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/categories`, { headers: headers.value })
     categories.value = response.data || []
   } catch (error) {
     console.error('Failed to fetch categories:', error)
@@ -226,6 +228,8 @@ const edit = (row) => {
 }
 
 const save = async () => {
+  if (saving.value) return
+  saving.value = true
   try {
     // Convert array to comma-separated string for backend
     const saveData = {
@@ -237,18 +241,20 @@ const save = async () => {
       ? `${config.public.apiBase}/api/admin/applications/${form.id}`
       : `${config.public.apiBase}/api/admin/applications`
 
-    await $fetch(url, { method, headers: headers.value, body: saveData })
+    await adminRequest(url, { method, headers: headers.value, body: saveData })
     ElMessage.success(t('admin.saveSuccess'))
     showDialog.value = false
-    fetchData()
+    await fetchData()
   } catch (error) {
-    ElMessage.error(t('admin.saveFailed'))
+    ElMessage.error(t('admin.saveFailed') + ': ' + (error.data?.message || error.message || ''))
+  } finally {
+    saving.value = false
   }
 }
 
 const remove = async (id) => {
   try {
-    await $fetch(`${config.public.apiBase}/api/admin/applications/${id}`, { method: 'DELETE', headers: headers.value })
+    await adminRequest(`${config.public.apiBase}/api/admin/applications/${id}`, { method: 'DELETE', headers: headers.value })
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {

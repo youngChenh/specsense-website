@@ -22,12 +22,29 @@
     </div>
 
     <el-card shadow="never" class="main-card">
+      <div class="mb-4 flex flex-wrap items-center gap-3">
+        <el-input
+          v-model="searchKeyword"
+          placeholder="搜索产品中文或英文名称"
+          aria-label="搜索产品名称"
+          clearable
+          class="!w-full sm:!w-80"
+        />
+        <div class="flex items-center">
+          <el-button :disabled="filteredTreeData.length === 0" @click="setAllExpanded(true)">全部展开</el-button>
+          <el-button :disabled="filteredTreeData.length === 0" @click="setAllExpanded(false)">全部收起</el-button>
+        </div>
+        <span class="text-sm text-gray-500" role="status">
+          {{ searchTerm ? '找到' : '共' }} {{ visibleProductCount }} 个产品
+        </span>
+      </div>
       <el-tree
-        v-if="treeData.length > 0"
-        :data="treeData"
+        v-if="filteredTreeData.length > 0"
+        :key="treeRevision"
+        :data="filteredTreeData"
         :props="treeProps"
         node-key="id"
-        default-expand-all
+        :default-expand-all="allExpanded"
         :expand-on-click-node="false"
         class="product-tree"
       >
@@ -78,7 +95,8 @@
         <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
         </svg>
-        <p class="text-gray-500">暂无产品，请添加您的第一个产品</p>
+        <p class="text-gray-500">{{ searchTerm ? '没有找到匹配的产品，请尝试其他名称' : '暂无产品，请添加您的第一个产品' }}</p>
+        <el-button v-if="searchTerm" class="mt-4" @click="searchKeyword = ''">清空搜索</el-button>
       </div>
     </el-card>
 
@@ -526,13 +544,14 @@
       </el-form>
       <template #footer>
         <el-button @click="showDialog = false">{{ t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="saveProduct">{{ t('admin.save') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="saveProduct">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
+import { adminRequest } from '~/utils/adminRequest'
 import { Plus, Delete, Rank } from '@element-plus/icons-vue'
 definePageMeta({
   layout: 'admin',
@@ -543,6 +562,7 @@ import { useAdminI18n } from '~/composables/useAdminI18n'
 const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
+const saving = ref(false)
 
 // Module Editor
 const showModuleDialog = ref(false)
@@ -868,6 +888,10 @@ onMounted(() => {
 
 const data = ref([])
 const flatCategories = ref([])
+const searchKeyword = ref('')
+const searchTerm = computed(() => searchKeyword.value.trim().toLowerCase())
+const allExpanded = ref(false)
+const treeRevision = ref(0)
 const showDialog = ref(false)
 const isEdit = ref(false)
 const uploading = ref(false)
@@ -950,9 +974,33 @@ const treeData = computed(() => {
   return result
 })
 
+const filteredTreeData = computed(() => {
+  if (!searchTerm.value) return treeData.value
+  return treeData.value.map(category => {
+    const products = category.products.filter(product =>
+      [product.nameEn, product.nameZh].some(name => (name || '').toLowerCase().includes(searchTerm.value))
+    )
+    return { ...category, products, productCount: products.length }
+  }).filter(category => category.products.length > 0)
+})
+
+const visibleProductCount = computed(() =>
+  filteredTreeData.value.reduce((total, category) => total + category.productCount, 0)
+)
+
+function setAllExpanded(expanded) {
+  allExpanded.value = expanded
+  // Remount so bulk actions also reset categories the user expanded/collapsed individually.
+  treeRevision.value++
+}
+
+watch(searchTerm, value => {
+  setAllExpanded(Boolean(value))
+})
+
 const fetchData = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/products`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/products`, { headers: headers.value })
     data.value = response.data || []
     await fetchCategories()
   } catch (error) {
@@ -962,7 +1010,7 @@ const fetchData = async () => {
 
 const fetchCategories = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/categories/tree`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/categories/tree`, { headers: headers.value })
     const tree = response.data || []
     // Flatten the tree for the select dropdown
     flatCategories.value = flattenCategories(tree)
@@ -1171,11 +1219,13 @@ const getFullImageUrl = (url) => {
 }
 
 const saveProduct = async () => {
+  if (saving.value) return
   if (!form.nameEn || !form.slug) {
     ElMessage.warning(t('admin.pleaseEnter') + ' nameEn and slug')
     return
   }
 
+  saving.value = true
   try {
     const method = isEdit.value ? 'PUT' : 'POST'
     const url = isEdit.value
@@ -1195,13 +1245,15 @@ const saveProduct = async () => {
       overviewModules: form.modules.length > 0 ? JSON.stringify(form.modules) : null,
     }
 
-    await $fetch(url, { method, headers: headers.value, body })
+    await adminRequest(url, { method, headers: headers.value, body })
     ElMessage.success(t('admin.saveSuccess'))
     showDialog.value = false
     await fetchData()
     await nextTick()
   } catch (error) {
     ElMessage.error(t('admin.saveFailed') + ': ' + (error.data?.message || error.message || ''))
+  } finally {
+    saving.value = false
   }
 }
 
@@ -1213,11 +1265,11 @@ const removeProduct = async (id) => {
       type: 'warning',
     })
 
-    await $fetch(`${config.public.apiBase}/api/admin/products/${id}`, { method: 'DELETE', headers: headers.value })
+    await adminRequest(`${config.public.apiBase}/api/admin/products/${id}`, { method: 'DELETE', headers: headers.value })
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {
-    if (error !== 'cancel') {
+    if (error !== 'cancel' && error !== 'close') {
       const errorMsg = error.data?.message || error._data?.message || error.message || ''
       ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
     }

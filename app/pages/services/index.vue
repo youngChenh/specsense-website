@@ -11,7 +11,13 @@
     <!-- Services Grid -->
     <section class="py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div v-if="servicesLoading" class="text-center py-12 text-gray-500" role="status">{{ $t('common.loading') }}</div>
+        <div v-else-if="servicesFailed" class="text-center py-12" role="alert">
+          <p class="text-red-600 mb-4">{{ $t('services.loadFailed') }}</p>
+          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg" @click="fetchServices">{{ $t('common.retry') }}</button>
+        </div>
+        <div v-else-if="services.length === 0" class="text-center py-12 text-gray-500">{{ $t('services.empty') }}</div>
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div
             v-for="service in services"
             :key="service.id"
@@ -66,8 +72,13 @@
           </button>
         </div>
 
+        <div v-if="isLoading" class="text-center py-12 text-gray-500" role="status">{{ $t('common.loading') }}</div>
+        <div v-else-if="downloadsFailed" class="text-center py-12" role="alert">
+          <p class="text-red-600 mb-4">{{ $t('services.downloadsFailed') }}</p>
+          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg" @click="fetchDownloads">{{ $t('common.retry') }}</button>
+        </div>
         <!-- Downloads Table -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div v-else class="bg-white rounded-xl shadow-md overflow-hidden">
           <!-- Table Header -->
           <div class="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-600">
             <div class="col-span-5">{{ $t('services.downloads.fileName') || 'File Name' }}</div>
@@ -108,7 +119,7 @@
                   </a>
                 </div>
                 <div class="flex items-center gap-4 text-sm text-gray-500 pl-13">
-                  <span>{{ file.fileSize }}</span>
+                  <span>{{ file.fileSize?.trim() || $t('common.unknownSize') }}</span>
                 </div>
               </div>
 
@@ -129,14 +140,14 @@
                   <p class="text-sm text-gray-600 line-clamp-1">{{ file.description }}</p>
                 </div>
                 <div class="col-span-2 text-center text-sm text-gray-500">
-                  {{ file.fileSize }}
+                  {{ file.fileSize?.trim() || $t('common.unknownSize') }}
                 </div>
                 <div class="col-span-1 flex justify-center">
                   <a
                     :href="getFullDownloadUrl(file.fileUrl, file.originalFilename)"
                     :download="file.originalFilename"
                     class="w-10 h-10 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-                    title="Download"
+                    :title="$t('common.download')"
                   >
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -152,19 +163,19 @@
             <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p class="text-gray-500">No files in this category.</p>
+            <p class="text-gray-500">{{ $t('services.downloadsEmpty') }}</p>
           </div>
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="mt-8 flex justify-center">
-          <nav class="flex items-center gap-2">
+        <div v-if="!isLoading && !downloadsFailed && totalPages > 1" class="mt-8 flex justify-center">
+          <nav class="flex flex-wrap justify-center items-center gap-2">
             <button
               class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50"
               :disabled="currentPage === 1"
               @click="goToPage(currentPage - 1)"
             >
-              Previous
+              {{ $t('common.previous') }}
             </button>
             <button
               v-for="page in totalPages"
@@ -180,7 +191,7 @@
               :disabled="currentPage === totalPages"
               @click="goToPage(currentPage + 1)"
             >
-              Next
+              {{ $t('common.next') }}
             </button>
           </nav>
         </div>
@@ -210,6 +221,9 @@ const locale = useContentLocale()
 
 const activeCategory = ref('all')
 const services = ref<any[]>([])
+const servicesLoading = ref(true)
+const servicesFailed = ref(false)
+let servicesRequest = 0
 
 const downloadCategories = [
   { key: 'all', label: 'services.downloads.all' },
@@ -220,34 +234,54 @@ const downloadCategories = [
 ]
 
 const downloads = ref<any[]>([])
-const isLoading = ref(false)
+const isLoading = ref(true)
+const downloadsFailed = ref(false)
+let downloadsRequest = 0
 const currentPage = ref(1)
 const pageSize = ref(10)
 
 const fetchServices = async () => {
+  const request = ++servicesRequest
+  servicesLoading.value = true
+  servicesFailed.value = false
   try {
-    const response = await fetch(`${config.public.apiBase}/api/services?locale=${locale.value}`)
-    const result = await response.json()
-    if (result.code === 200 && result.data) {
-      services.value = result.data
+    const result = await $fetch<any>(`${config.public.apiBase}/api/services`, {
+      query: { locale: locale.value }, timeout: 15000, retry: 0,
+    })
+    if (request !== servicesRequest) return
+    if (result?.code !== 200 || !Array.isArray(result.data)) {
+      throw new Error('Failed to load services')
     }
+    services.value = result.data
   } catch (error) {
-    console.error('Failed to fetch services:', error)
+    if (request !== servicesRequest) return
+    services.value = []
+    servicesFailed.value = true
+  } finally {
+    if (request === servicesRequest) servicesLoading.value = false
   }
 }
 
 const fetchDownloads = async () => {
+  const request = ++downloadsRequest
   isLoading.value = true
+  downloadsFailed.value = false
   try {
-    const response = await fetch(`${config.public.apiBase}/api/downloads?locale=${locale.value}`)
-    const result = await response.json()
-    if (result.code === 200 && result.data) {
-      downloads.value = result.data
+    const result = await $fetch<any>(`${config.public.apiBase}/api/downloads`, {
+      query: { locale: locale.value }, timeout: 15000, retry: 0,
+    })
+    if (request !== downloadsRequest) return
+    if (result?.code !== 200 || !Array.isArray(result.data)) {
+      throw new Error('Failed to load downloads')
     }
+    downloads.value = result.data
+    currentPage.value = Math.min(currentPage.value, Math.max(1, totalPages.value))
   } catch (error) {
-    console.error('Failed to fetch downloads:', error)
+    if (request !== downloadsRequest) return
+    downloads.value = []
+    downloadsFailed.value = true
   } finally {
-    isLoading.value = false
+    if (request === downloadsRequest) isLoading.value = false
   }
 }
 
@@ -293,7 +327,13 @@ onMounted(() => {
 })
 
 watch(locale, () => {
+  currentPage.value = 1
   fetchServices()
   fetchDownloads()
+})
+
+onBeforeUnmount(() => {
+  servicesRequest++
+  downloadsRequest++
 })
 </script>

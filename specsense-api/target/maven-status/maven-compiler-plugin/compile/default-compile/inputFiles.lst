@@ -34,6 +34,7 @@ D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\sp
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\AdminCrudController.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\Application.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\ProductController.java
+D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\mapper\CrmAfterSaleMapper.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\dto\ApplicationDTO.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\CompanyInfoService.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\impl\BrandServiceImpl.java
@@ -55,9 +56,11 @@ D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\sp
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\impl\BrandCategoryServiceImpl.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\NewsController.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\CrmUserController.java
+D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\mapper\CrmOrderMapper.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\impl\CompanyInfoServiceImpl.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\impl\ServiceServiceImpl.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\Category.java
+D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\DownloadFileMetadata.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\Download.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\mapper\BrandMapper.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\dto\CrmImportRow.java
@@ -68,6 +71,7 @@ D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\sp
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\SpecsenseApplication.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\mapper\DownloadMapper.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\mapper\ApplicationMapper.java
+D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\CrmAfterSale.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\mapper\CompanyInfoMapper.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\BrandCategory.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\NavigationMenuService.java
@@ -96,6 +100,7 @@ D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\sp
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\News.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\service\BrandService.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\dto\CategoryDTO.java
+D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\CrmOrder.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\DownloadController.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\model\entity\Product.java
 D:\Work\ForeignTrade - 副本\specsense-website\specsense-api\src\main\java\com\specsense\controller\FileController.java

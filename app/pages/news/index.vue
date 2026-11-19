@@ -25,7 +25,7 @@
         </div>
 
         <!-- Loading State -->
-        <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" role="status" :aria-label="$t('common.loading')">
           <div v-for="i in 6" :key="i" class="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
             <div class="h-48 bg-gray-200"></div>
             <div class="p-6">
@@ -35,6 +35,11 @@
               <div class="h-4 bg-gray-200 rounded w-2/3"></div>
             </div>
           </div>
+        </div>
+
+        <div v-else-if="loadFailed" class="text-center py-20" role="alert">
+          <p class="text-red-600 mb-4">{{ $t('news.loadFailed') }}</p>
+          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg" @click="fetchNews">{{ $t('common.retry') }}</button>
         </div>
 
         <!-- News List -->
@@ -78,19 +83,19 @@
         </div>
 
         <!-- Empty State -->
-        <div v-if="!loading && filteredNews.length === 0" class="text-center py-20">
-          <p class="text-gray-500 text-lg">No news in this category yet.</p>
+        <div v-if="!loading && !loadFailed && filteredNews.length === 0" class="text-center py-20">
+          <p class="text-gray-500 text-lg">{{ $t('news.empty') }}</p>
         </div>
 
         <!-- Pagination -->
-        <div v-if="!loading && filteredNews.length > 0" class="mt-12 flex justify-center">
-          <nav class="flex items-center gap-2">
+        <div v-if="!loading && !loadFailed && filteredNews.length > 0 && totalPages > 1" class="mt-12 flex justify-center">
+          <nav class="flex flex-wrap justify-center items-center gap-2">
             <button
               class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50"
               :disabled="currentPage === 1"
               @click="currentPage--"
             >
-              Previous
+              {{ $t('common.previous') }}
             </button>
             <button
               v-for="page in totalPages"
@@ -106,7 +111,7 @@
               :disabled="currentPage === totalPages"
               @click="currentPage++"
             >
-              Next
+              {{ $t('common.next') }}
             </button>
           </nav>
         </div>
@@ -131,9 +136,7 @@
 
 <script setup lang="ts">
 const localePath = useLocalePath()
-const route = useRoute()
 const config = useRuntimeConfig()
-const { t } = useI18n()
 const locale = useContentLocale()
 const { getImageUrl } = useImageUrl()
 
@@ -142,6 +145,8 @@ const currentPage = ref(1)
 const pageSize = ref(9)
 const totalNews = ref(0)
 const loading = ref(true)
+const loadFailed = ref(false)
+let newsRequest = 0
 const news = ref<any[]>([])
 
 const tabs = [
@@ -169,7 +174,9 @@ const filteredNews = computed(() => {
 const totalPages = computed(() => Math.ceil(totalNews.value / pageSize.value))
 
 async function fetchNews() {
+  const request = ++newsRequest
   loading.value = true
+  loadFailed.value = false
   try {
     const params: Record<string, any> = {
       page: currentPage.value,
@@ -181,39 +188,32 @@ async function fetchNews() {
     }
 
     const url = `${config.public.apiBase}/api/news`
-    const response = await fetch(url + '?' + new URLSearchParams(params))
-    const result = await response.json()
+    const result = await $fetch<any>(url, { query: params, timeout: 15000, retry: 0 })
+    if (request !== newsRequest) return
 
     // Handle API response: { code, message, data: { data: [], total, page, pageSize } }
-    if (result.code === 200 && result.data) {
-      news.value = result.data.data || []
+    if (result?.code === 200 && Array.isArray(result.data?.data)) {
+      news.value = result.data.data
       totalNews.value = result.data.total || 0
     } else {
-      news.value = []
-      totalNews.value = 0
+      throw new Error('Failed to load news')
     }
   } catch (error) {
-    console.error('Failed to fetch news:', error)
+    if (request !== newsRequest) return
+    loadFailed.value = true
     news.value = []
     totalNews.value = 0
   } finally {
-    loading.value = false
+    if (request === newsRequest) loading.value = false
   }
 }
 
-watch(activeTab, () => {
+watch([activeTab, locale], () => {
   currentPage.value = 1
-  fetchNews()
-})
+}, { flush: 'sync' })
 
-watch(currentPage, () => {
-  fetchNews()
-})
-
-// Refetch when route changes (e.g., navigating from another page)
-watch(() => route.path, () => {
-  fetchNews()
-})
+watch([activeTab, currentPage, locale], fetchNews)
+onBeforeUnmount(() => { newsRequest++ })
 
 onMounted(() => {
   fetchNews()

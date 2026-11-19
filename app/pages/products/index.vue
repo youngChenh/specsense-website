@@ -19,7 +19,7 @@
         />
 
         <!-- Products Grid -->
-        <div class="flex-1">
+        <div class="min-w-0 flex-1">
           <!-- Loading State -->
           <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             <div v-for="i in 6" :key="i" class="bg-white rounded-lg shadow-sm p-4 animate-pulse">
@@ -33,14 +33,14 @@
           <div v-else-if="error" class="text-center py-20 bg-white rounded-lg">
             <p class="text-red-500 text-lg mb-4">{{ error }}</p>
             <button @click="() => fetchProducts()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-              Retry
+              {{ $t('common.retry') }}
             </button>
           </div>
 
           <!-- Active Filter Indicator -->
           <div v-else-if="searchQuery || selectedCategory !== 'all'" class="mb-4 flex items-center justify-between bg-blue-50 rounded-lg px-4 py-2">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-sm text-gray-600">{{ searchQuery ? '搜索' : $t('products.filterBy') }}:</span>
+              <span class="text-sm text-gray-600">{{ searchQuery ? $t('products.searchLabel') : $t('products.filterBy') }}:</span>
               <span v-if="searchQuery" class="text-sm font-medium text-blue-600">"{{ searchQuery }}"</span>
               <span v-if="searchQuery && selectedCategory !== 'all'" class="text-gray-400 text-sm">·</span>
               <span v-if="selectedCategory !== 'all'" class="text-sm font-medium text-blue-600">{{ getCategoryName(selectedCategory) }}</span>
@@ -69,13 +69,13 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
             <p class="text-gray-500 text-lg">
-              {{ searchQuery ? `没有找到与 "${searchQuery}" 匹配的产品` : 'No products found in this category.' }}
+              {{ searchQuery ? $t('products.emptySearch', { query: searchQuery }) : $t('products.emptyCategory') }}
             </p>
           </div>
 
           <!-- Pagination -->
           <div v-if="!loading && !error && totalProducts > pageSize" class="mt-12 flex justify-center">
-            <nav class="flex items-center gap-2">
+            <nav class="flex flex-wrap items-center justify-center gap-2">
               <NuxtLink
                 class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-50"
                 :class="{ 'opacity-50 pointer-events-none': currentPage === 1 }"
@@ -83,7 +83,7 @@
                 :tabindex="currentPage === 1 ? -1 : undefined"
                 :to="pageLink(Math.max(1, currentPage - 1))"
               >
-                Previous
+                {{ $t('common.previous') }}
               </NuxtLink>
               <NuxtLink
                 v-for="page in totalPages"
@@ -102,7 +102,7 @@
                 :tabindex="currentPage === totalPages ? -1 : undefined"
                 :to="pageLink(Math.min(totalPages, currentPage + 1))"
               >
-                Next
+                {{ $t('common.next') }}
               </NuxtLink>
             </nav>
           </div>
@@ -167,7 +167,7 @@ const { data: productPage, status, error: productError, refresh: fetchProducts }
 const products = computed<any[]>(() => productPage.value?.data || [])
 const totalProducts = computed(() => productPage.value?.total || 0)
 const loading = computed(() => status.value === 'pending')
-const error = computed(() => productError.value ? 'Failed to load products. Please try again.' : null)
+const error = computed(() => productError.value ? t('products.loadFailed') : null)
 if (import.meta.server && productError.value) {
   const event = useRequestEvent()
   if (event) setResponseStatus(event, 503)

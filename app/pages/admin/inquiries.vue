@@ -83,6 +83,7 @@
 </template>
 
 <script setup>
+import { adminRequest } from '~/utils/adminRequest'
 import { useCrmApi } from '~/composables/useCrm'
 
 definePageMeta({
@@ -157,7 +158,7 @@ function resetSearch() {
 
 const fetchData = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/inquiries`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/inquiries`, { headers: headers.value })
     data.value = response.data || []
   } catch (error) {
     ElMessage.error(t('admin.fetchFailed'))
@@ -166,7 +167,7 @@ const fetchData = async () => {
 
 const remove = async (id) => {
   try {
-    await $fetch(`${config.public.apiBase}/api/admin/inquiries/${id}`, { method: 'DELETE', headers: headers.value })
+    await adminRequest(`${config.public.apiBase}/api/admin/inquiries/${id}`, { method: 'DELETE', headers: headers.value })
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {

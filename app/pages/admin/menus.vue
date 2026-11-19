@@ -135,13 +135,14 @@
       </el-form>
       <template #footer>
         <el-button @click="showDialog = false">取消</el-button>
-        <el-button type="primary" @click="saveMenu">保存</el-button>
+        <el-button type="primary" :loading="saving" @click="saveMenu">保存</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
+import { adminRequest } from '~/utils/adminRequest'
 definePageMeta({
   layout: 'admin',
 })
@@ -151,6 +152,7 @@ import { useAdminI18n } from '~/composables/useAdminI18n'
 const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
+const saving = ref(false)
 
 onMounted(() => {
   if (!import.meta.client) return
@@ -233,7 +235,7 @@ function buildTree(menus) {
 
 const fetchMenus = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/menus`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/menus`, { headers: headers.value })
     const allMenus = response.data || []
     headerMenus.value = allMenus.filter(m => m.position === 'header')
     footerMenus.value = allMenus.filter(m => m.position === 'footer')
@@ -287,23 +289,27 @@ const editMenu = (row) => {
 }
 
 const saveMenu = async () => {
+  if (saving.value) return
   if (!form.key || !form.labelEn || !form.labelZh) {
     ElMessage.warning('请填写完整信息')
     return
   }
 
+  saving.value = true
   try {
     const method = isEdit.value ? 'PUT' : 'POST'
     const url = isEdit.value
       ? `${config.public.apiBase}/api/admin/menus/${form.id}`
       : `${config.public.apiBase}/api/admin/menus`
 
-    await $fetch(url, { method, headers: headers.value, body: form })
+    await adminRequest(url, { method, headers: headers.value, body: form })
     ElMessage.success('保存成功')
     showDialog.value = false
-    fetchMenus()
+    await fetchMenus()
   } catch (error) {
     ElMessage.error('保存失败: ' + (error.data?.message || error.message || ''))
+  } finally {
+    saving.value = false
   }
 }
 
@@ -315,11 +321,11 @@ const deleteMenu = async (id) => {
       type: 'warning',
     })
 
-    await $fetch(`${config.public.apiBase}/api/admin/menus/${id}`, { method: 'DELETE', headers: headers.value })
+    await adminRequest(`${config.public.apiBase}/api/admin/menus/${id}`, { method: 'DELETE', headers: headers.value })
     ElMessage.success('删除成功')
     fetchMenus()
   } catch (error) {
-    if (error !== 'cancel') {
+    if (error !== 'cancel' && error !== 'close') {
       const errorMsg = error.data?.message || error._data?.message || error.message || ''
       ElMessage.error('删除失败' + (errorMsg ? ': ' + errorMsg : ''))
     }

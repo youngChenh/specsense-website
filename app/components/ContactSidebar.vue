@@ -254,23 +254,27 @@ async function loadCompanyInfo() {
 }
 
 function toggleContact() {
+  const open = !showContact.value
   closeAll()
-  showContact.value = !showContact.value
+  showContact.value = open
 }
 
 function toggleWhatsApp() {
+  const open = !showWhatsApp.value
   closeAll()
-  showWhatsApp.value = !showWhatsApp.value
+  showWhatsApp.value = open
 }
 
 function toggleWeChat() {
+  const open = !showWeChat.value
   closeAll()
-  showWeChat.value = !showWeChat.value
+  showWeChat.value = open
 }
 
 function toggleEmail() {
+  const open = !showEmail.value
   closeAll()
-  showEmail.value = !showEmail.value
+  showEmail.value = open
 }
 
 function closeAll() {
@@ -288,7 +292,7 @@ watch(locale, () => {
   loadCompanyInfo()
 })
 
-watch(wechatLightboxOpen, (open) => {
+watch(() => wechatLightboxOpen.value || whatsappLightboxOpen.value, (open) => {
   if (open) {
     document.addEventListener('keydown', handleLightboxKeydown)
   } else {
@@ -296,18 +300,14 @@ watch(wechatLightboxOpen, (open) => {
   }
 })
 
-watch(whatsappLightboxOpen, (open) => {
-  if (open) {
-    document.addEventListener('keydown', handleLightboxKeydown)
-  } else {
-    document.removeEventListener('keydown', handleLightboxKeydown)
-  }
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', handleLightboxKeydown)
 })
 
 function handleLightboxKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
-    wechatLightboxOpen = false
-    whatsappLightboxOpen = false
+    wechatLightboxOpen.value = false
+    whatsappLightboxOpen.value = false
   }
 }
 </script>

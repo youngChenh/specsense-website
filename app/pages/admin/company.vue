@@ -79,7 +79,7 @@
           <el-input v-model="form.statsJson" type="textarea" rows="2" placeholder='{"key": "value"}' />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="save" class="save-btn">{{ t('admin.save') }}</el-button>
+          <el-button type="primary" :loading="saving" @click="save" class="save-btn">{{ t('admin.save') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -87,6 +87,7 @@
 </template>
 
 <script setup>
+import { adminRequest } from '~/utils/adminRequest'
 definePageMeta({
   layout: 'admin',
 })
@@ -96,6 +97,7 @@ import { useAdminI18n } from '~/composables/useAdminI18n'
 const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
+const saving = ref(false)
 
 onMounted(() => {
   if (!import.meta.client) return
@@ -129,7 +131,7 @@ const uploadPercentage = ref(0)
 
 const fetchData = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/company-info`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/company-info`, { headers: headers.value })
     if (response.data) {
       Object.assign(form, response.data)
     }
@@ -139,15 +141,19 @@ const fetchData = async () => {
 }
 
 const save = async () => {
+  if (saving.value) return
+  saving.value = true
   try {
-    await $fetch(`${config.public.apiBase}/api/admin/company-info`, {
+    await adminRequest(`${config.public.apiBase}/api/admin/company-info`, {
       method: 'PUT',
       headers: headers.value,
       body: { id: 1, ...form },
     })
     ElMessage.success(t('admin.saveSuccess'))
   } catch (error) {
-    ElMessage.error(t('admin.saveFailed'))
+    ElMessage.error(t('admin.saveFailed') + ': ' + (error.data?.message || error.message || ''))
+  } finally {
+    saving.value = false
   }
 }
 

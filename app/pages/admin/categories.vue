@@ -93,6 +93,7 @@
 </template>
 
 <script setup>
+import { adminRequest } from '~/utils/adminRequest'
 definePageMeta({
   layout: 'admin',
 })
@@ -135,7 +136,7 @@ const treeProps = {
 
 const fetchData = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/categories/tree`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/categories/tree`, { headers: headers.value })
     if (response.code !== 200) throw new Error(response.message)
     treeData.value = response.data || []
     return await fetchFlatCategories()
@@ -147,7 +148,7 @@ const fetchData = async () => {
 
 const fetchFlatCategories = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/categories`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/categories`, { headers: headers.value })
     if (response.code !== 200) throw new Error(response.message)
     flatCategories.value = response.data || []
     return true
@@ -221,7 +222,7 @@ const save = async () => {
       ? `${config.public.apiBase}/api/admin/categories/${form.id}`
       : `${config.public.apiBase}/api/admin/categories`
 
-    const response = await $fetch(url, { method, headers: headers.value, body: { ...form } })
+    const response = await adminRequest(url, { method, headers: headers.value, body: { ...form } })
     if (response.code !== 200) throw new Error(response.message || t('admin.saveFailed'))
 
     clearNuxtData(key => key.startsWith('product-categories:') || key.startsWith('["products",') || key.startsWith('product:'))
@@ -244,11 +245,11 @@ const remove = async (id) => {
       type: 'warning',
     })
 
-    await $fetch(`${config.public.apiBase}/api/admin/categories/${id}`, { method: 'DELETE', headers: headers.value })
+    await adminRequest(`${config.public.apiBase}/api/admin/categories/${id}`, { method: 'DELETE', headers: headers.value })
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {
-    if (error !== 'cancel') {
+    if (error !== 'cancel' && error !== 'close') {
       const errorMsg = error.data?.message || error._data?.message || error.message || ''
       ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
     }

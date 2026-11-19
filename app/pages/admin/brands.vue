@@ -143,7 +143,7 @@
       </el-form>
       <template #footer>
         <el-button @click="showCategoryDialog = false">{{ t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="saveCategory">{{ t('admin.save') }}</el-button>
+        <el-button type="primary" :loading="savingCategory" @click="saveCategory">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
 
@@ -209,13 +209,14 @@
       </el-form>
       <template #footer>
         <el-button @click="showBrandDialog = false">{{ t('admin.cancel') }}</el-button>
-        <el-button type="primary" @click="saveBrand">{{ t('admin.save') }}</el-button>
+        <el-button type="primary" :loading="savingBrand" @click="saveBrand">{{ t('admin.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
+import { adminRequest } from '~/utils/adminRequest'
 definePageMeta({
   layout: 'admin',
 })
@@ -225,6 +226,8 @@ import { useAdminI18n } from '~/composables/useAdminI18n'
 const { t } = useAdminI18n()
 const config = useRuntimeConfig()
 const headers = ref({})
+const savingCategory = ref(false)
+const savingBrand = ref(false)
 
 onMounted(() => {
   if (!import.meta.client) return
@@ -327,7 +330,7 @@ const treeData = computed(() => {
 
 const fetchData = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/brands`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/brands`, { headers: headers.value })
     data.value = response.data || []
     await fetchCategories()
   } catch (error) {
@@ -337,7 +340,7 @@ const fetchData = async () => {
 
 const fetchCategories = async () => {
   try {
-    const response = await $fetch(`${config.public.apiBase}/api/admin/brand-categories`, { headers: headers.value })
+    const response = await adminRequest(`${config.public.apiBase}/api/admin/brand-categories`, { headers: headers.value })
     categories.value = response.data || []
   } catch (error) {
     console.error(t('admin.fetchFailed'))
@@ -370,23 +373,27 @@ const editCategory = (row) => {
 }
 
 const saveCategory = async () => {
+  if (savingCategory.value) return
   if (!categoryForm.nameEn || !categoryForm.key) {
     ElMessage.warning(t('admin.pleaseEnter') + ' nameEn and key')
     return
   }
 
+  savingCategory.value = true
   try {
     const method = isEditCategory.value ? 'PUT' : 'POST'
     const url = isEditCategory.value
       ? `${config.public.apiBase}/api/admin/brand-categories/${categoryForm.id}`
       : `${config.public.apiBase}/api/admin/brand-categories`
 
-    await $fetch(url, { method, headers: headers.value, body: categoryForm })
+    await adminRequest(url, { method, headers: headers.value, body: categoryForm })
     ElMessage.success(t('admin.saveSuccess'))
     showCategoryDialog.value = false
-    fetchCategories()
+    await fetchCategories()
   } catch (error) {
     ElMessage.error(t('admin.saveFailed') + ': ' + (error.data?.message || error.message || ''))
+  } finally {
+    savingCategory.value = false
   }
 }
 
@@ -399,18 +406,14 @@ const removeCategory = async (id) => {
     })
 
     const catId = String(id).startsWith('cat_') ? id.replace('cat_', '') : id
-    const response = await fetch(`${config.public.apiBase}/api/admin/brand-categories/${catId}`, {
+    await adminRequest(`${config.public.apiBase}/api/admin/brand-categories/${catId}`, {
       method: 'DELETE',
       headers: headers.value
     })
-    const data = await response.json()
-    if (!response.ok) {
-      throw new Error(data.message || 'Delete failed')
-    }
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {
-    if (error !== 'cancel') {
+    if (error !== 'cancel' && error !== 'close') {
       const errorMsg = error.message || ''
       ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
     }
@@ -499,23 +502,27 @@ const getFullImageUrl = (url) => {
 }
 
 const saveBrand = async () => {
+  if (savingBrand.value) return
   if (!brandForm.nameEn || !brandForm.slug) {
     ElMessage.warning(t('admin.pleaseEnter') + ' nameEn and slug')
     return
   }
 
+  savingBrand.value = true
   try {
     const method = isEditBrand.value ? 'PUT' : 'POST'
     const url = isEditBrand.value
       ? `${config.public.apiBase}/api/admin/brands/${brandForm.id}`
       : `${config.public.apiBase}/api/admin/brands`
 
-    await $fetch(url, { method, headers: headers.value, body: brandForm })
+    await adminRequest(url, { method, headers: headers.value, body: brandForm })
     ElMessage.success(t('admin.saveSuccess'))
     showBrandDialog.value = false
-    fetchData()
+    await fetchData()
   } catch (error) {
     ElMessage.error(t('admin.saveFailed') + ': ' + (error.data?.message || error.message || ''))
+  } finally {
+    savingBrand.value = false
   }
 }
 
@@ -527,18 +534,14 @@ const removeBrand = async (id) => {
       type: 'warning',
     })
 
-    const response = await fetch(`${config.public.apiBase}/api/admin/brands/${id}`, {
+    await adminRequest(`${config.public.apiBase}/api/admin/brands/${id}`, {
       method: 'DELETE',
       headers: headers.value
     })
-    const data = await response.json()
-    if (!response.ok) {
-      throw new Error(data.message || 'Delete failed')
-    }
     ElMessage.success(t('admin.deleteSuccess'))
     fetchData()
   } catch (error) {
-    if (error !== 'cancel') {
+    if (error !== 'cancel' && error !== 'close') {
       const errorMsg = error.message || ''
       ElMessage.error(t('admin.deleteFailed') + (errorMsg ? ': ' + errorMsg : ''))
     }
